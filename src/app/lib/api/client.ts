@@ -16,7 +16,7 @@ export class ApiClient {
     public static getInstance(baseURL?: string, debug: boolean = false): ApiClient {
         if (!ApiClient.instance) {
             ApiClient.instance = new ApiClient(
-                baseURL || 'http://35.177.78.241:9000',
+                baseURL || process.env.NEXT_PUBLIC_API_BASE_URL || '',
                 debug
             );
         }
