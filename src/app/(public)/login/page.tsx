@@ -3,20 +3,23 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
     Alert,
     Box,
     Button,
-    CircularProgress,
     Container,
     IconButton,
     InputAdornment,
     Paper,
     TextField,
-    Typography
+    Typography,
+    useTheme
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import {AuthService} from "@/app/lib/api/auth";
+import { Visibility, VisibilityOff, ArrowLeft } from '@mui/icons-material';
+import { AuthService } from "@/app/lib/api/auth";
+import { PageLoader } from '@/app/lib/components/common/pageLoader';
 
 interface LoginFormData {
     email: string;
@@ -34,7 +37,33 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const theme = useTheme();
     const authService = AuthService.getInstance();
+
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.6,
+                ease: "easeOut"
+            }
+        }
+    };
+
+    const formVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                delay: 0.2,
+                duration: 0.6,
+                ease: "easeOut"
+            }
+        }
+    };
 
     const onSubmit = async (data: LoginFormData) => {
         setLoading(true);
@@ -45,7 +74,7 @@ const LoginPage = () => {
                 email: data.email,
                 password: data.password
             });
-            router.push('/dashboard'); // Redirect after successful login
+            router.push('/');
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -57,37 +86,72 @@ const LoginPage = () => {
         }
     };
 
+    if (loading) {
+        return <PageLoader message="Signing you in..." />;
+    }
+
     return (
         <Container component="main" maxWidth="sm">
             <Box
+                component={motion.div}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
                 sx={{
-                    marginTop: 8,
+                    minHeight: '100vh',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    minHeight: '100vh',
-                    pt: 4
+                    justifyContent: 'center',
+                    py: 8
                 }}
             >
-                <Paper
-                    elevation={2}
-                    sx={{
-                        p: 4,
-                        width: '100%',
-                        borderRadius: '10px',
-                        border: '1px solid #e0e0e0'
-                    }}
-                >
-                    <Typography
-                        component="h1"
-                        variant="h5"
+                {/* Back to Home Link */}
+                <Link href="/public" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
+                    <Button
+                        startIcon={<ArrowLeft />}
                         sx={{
-                            mb: 3,
-                            fontWeight: 600
+                            color: 'text.secondary',
+                            '&:hover': {
+                                backgroundColor: 'transparent',
+                                color: 'primary.main'
+                            }
                         }}
                     >
-                        Sign in to andChange
-                    </Typography>
+                        Back to Home
+                    </Button>
+                </Link>
+
+                <Paper
+                    component={motion.div}
+                    variants={formVariants}
+                    elevation={0}
+                    sx={{
+                        p: { xs: 3, sm: 6 },
+                        width: '100%',
+                        borderRadius: '16px',
+                        border: `1px solid ${theme.palette.divider}`,
+                        backdropFilter: 'blur(10px)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                    }}
+                >
+                    <Box sx={{ mb: 4, textAlign: 'center' }}>
+                        <Typography
+                            variant="h4"
+                            sx={{
+                                mb: 1,
+                                fontWeight: 700,
+                                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                                backgroundClip: 'text',
+                                WebkitBackgroundClip: 'text',
+                                color: 'transparent'
+                            }}
+                        >
+                            Welcome Back
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Sign in to access your dashboard
+                        </Typography>
+                    </Box>
 
                     <form onSubmit={handleSubmit(onSubmit)} noValidate>
                         <TextField
@@ -107,6 +171,11 @@ const LoginPage = () => {
                             })}
                             error={!!errors.email}
                             helperText={errors.email?.message}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '12px'
+                                }
+                            }}
                         />
 
                         <TextField
@@ -139,12 +208,20 @@ const LoginPage = () => {
                                     </InputAdornment>
                                 ),
                             }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '12px'
+                                }
+                            }}
                         />
 
                         {error && (
                             <Alert
                                 severity="error"
-                                sx={{ mt: 2 }}
+                                sx={{
+                                    mt: 2,
+                                    borderRadius: '12px'
+                                }}
                                 onClose={() => setError(null)}
                             >
                                 {error}
@@ -159,18 +236,34 @@ const LoginPage = () => {
                                 mt: 3,
                                 mb: 2,
                                 py: 1.5,
-                                borderRadius: '8px',
+                                borderRadius: '12px',
                                 textTransform: 'none',
-                                fontSize: '1rem'
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                boxShadow: 'none',
+                                '&:hover': {
+                                    boxShadow: 'none'
+                                }
                             }}
-                            disabled={loading}
                         >
-                            {loading ? (
-                                <CircularProgress size={24} color="inherit" />
-                            ) : (
-                                'Sign in'
-                            )}
+                            Sign In
                         </Button>
+
+                        <Box sx={{ mt: 3, textAlign: 'center' }}>
+                            <Typography variant="body2" color="text.secondary">
+                                Don't have an account?{' '}
+                                <Link
+                                    href="/register"
+                                    style={{
+                                        color: theme.palette.primary.main,
+                                        textDecoration: 'none',
+                                        fontWeight: 500
+                                    }}
+                                >
+                                    Create one
+                                </Link>
+                            </Typography>
+                        </Box>
                     </form>
                 </Paper>
             </Box>
