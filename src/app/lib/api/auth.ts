@@ -23,9 +23,9 @@ export class AuthService {
 
     async login(credentials: LoginCredentials): Promise<AuthTokens> {
         try {
-            const authCode = await this.getAuthorizationCode(credentials);
+            //const authCode = await this.getAuthorizationCode(credentials);
 
-            const tokens = await this.exchangeCodeForTokens(authCode);
+            const tokens = await this.authenticateUser(credentials);
 
             this.storeTokens(tokens);
 
@@ -36,26 +36,66 @@ export class AuthService {
     }
 
     private async getAuthorizationCode(credentials: LoginCredentials): Promise<string> {
-        const params = new URLSearchParams({
-            response_type: 'code',
-            client_id: this.authConfig.clientId,
-            scope: this.authConfig.scope,
-            redirect_uri: window.location.origin,
-            username: credentials.email,
-            password: credentials.password
-        });
-
         try {
-            const response = await axios.post(this.authConfig.authUrl, params.toString(), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+            const response = await axios.post(
+                this.authConfig.tokenUrl,
+                new URLSearchParams({
+                    grant_type: 'password',
+                    client_id: this.authConfig.clientId,
+                    client_secret: this.authConfig.clientSecret,
+                    username: credentials.email,
+                    password: credentials.password,
+                    scope: this.authConfig.scope
+                }).toString(),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
                 }
-            });
+            );
 
-            return response.data.code || new URLSearchParams(window.location.search).get('code') || '';
+            console.log(response.data);
+
+            // The response should directly contain the tokens
+            return '';
         } catch (error) {
             throw this.handleAuthError(error);
         }
+    }
+
+    private async authenticateUser(credentials: LoginCredentials): Promise<AuthTokens> {
+        try {
+            const response = await axios.post(
+                `${this.authConfig.authUrl.replace('/oauth2/authorize', '/login')}`,
+                {
+                    AuthParameters: {
+                        USERNAME: credentials.email,
+                        PASSWORD: credentials.password
+                    },
+                    AuthFlow: 'USER_PASSWORD_AUTH',
+                    ClientId: this.authConfig.clientId
+                },
+                {
+                    headers: {
+                        'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+                        'Content-Type': 'application/x-amz-json-1.1'
+                    }
+                }
+            );
+
+            return {
+                accessToken: response.data.AuthenticationResult.AccessToken,
+                idToken: response.data.AuthenticationResult.IdToken,
+                refreshToken: response.data.AuthenticationResult.RefreshToken
+            };
+        } catch (error) {
+            throw this.handleAuthError(error);
+        }
+    }
+
+// Add a separate method to handle the authorization callback
+    public getCodeFromCallback(): string {
+        return new URLSearchParams(window.location.search).get('code') || '';
     }
 
     private async exchangeCodeForTokens(code: string): Promise<AuthTokens> {
