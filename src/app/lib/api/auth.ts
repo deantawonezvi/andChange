@@ -2,9 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import {AuthConfig, AuthTokens, LoginCredentials} from "@/app/lib/api/types";
 import { getAuthConfig } from './config';
-
-export const TOKEN_COOKIE_NAME = 'andChange_auth_token';
-export const REFRESH_TOKEN_COOKIE_NAME = 'andChange_refresh_token';
+import {REFRESH_TOKEN_COOKIE_NAME, TOKEN_COOKIE_NAME} from '../constants';
 
 export class AuthService {
     private static instance: AuthService;
@@ -93,7 +91,6 @@ export class AuthService {
         }
     }
 
-// Add a separate method to handle the authorization callback
     public getCodeFromCallback(): string {
         return new URLSearchParams(window.location.search).get('code') || '';
     }
