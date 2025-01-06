@@ -106,7 +106,7 @@ const LoginPage = () => {
                 }}
             >
                 {/* Back to Home Link */}
-                <Link href="/public" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
+                <Link href="/" style={{ textDecoration: 'none', marginBottom: '2rem' }}>
                     <Button
                         startIcon={<ArrowLeft />}
                         sx={{
@@ -251,7 +251,7 @@ const LoginPage = () => {
 
                         <Box sx={{ mt: 3, textAlign: 'center' }}>
                             <Typography variant="body2" color="text.secondary">
-                                Don't have an account?{' '}
+                                Don&#39;t have an account?{' '}
                                 <Link
                                     href="/register"
                                     style={{
