@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import {Box, Button, Container, Typography} from '@mui/material';
-import {motion} from 'framer-motion';
-import {AlertTriangle, Home, RefreshCw} from 'lucide-react';
+import { Box, Button, Container, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Error({
@@ -13,7 +13,7 @@ export default function Error({
     reset: () => void;
 }) {
     const containerVariants = {
-        hidden: {opacity: 0, y: 20},
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -26,7 +26,7 @@ export default function Error({
     };
 
     const itemVariants = {
-        hidden: {opacity: 0, y: 20},
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -35,7 +35,6 @@ export default function Error({
             }
         }
     };
-
 
     return (
         <Container maxWidth="md">
@@ -64,11 +63,11 @@ export default function Error({
                             mb: 2,
                         }}
                     >
-                        <AlertTriangle size={40} color="error"/>
+                        <AlertTriangle size={40} color="#dc3545"/>
                         <Typography
                             variant="h1"
                             sx={{
-                                fontSize: {xs: '4rem', md: '6rem'},
+                                fontSize: { xs: '4rem', md: '6rem' },
                                 fontWeight: 700,
                                 color: 'error.main',
                             }}
@@ -110,33 +109,35 @@ export default function Error({
                     sx={{
                         display: 'flex',
                         gap: 2,
-                        flexDirection: {xs: 'column', sm: 'row'},
+                        flexDirection: { xs: 'column', sm: 'row' },
                     }}
                 >
                     <Button
                         variant="contained"
                         color="error"
-                        onClick={reset}
-                        startIcon={<RefreshCw size={20}/>}
+                        onClick={() => reset()}
+                        startIcon={<RefreshCw size={20} />}
                         sx={{
                             borderRadius: 2,
                             px: 4,
                             py: 1.5,
                             fontSize: '1rem',
+                            textTransform: 'none',
                         }}
                     >
                         Try Again
                     </Button>
-                    <Link href="/dashboard" passHref>
+                    <Link href="/dashboard" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
                             color="error"
-                            startIcon={<Home size={20}/>}
+                            startIcon={<Home size={20} />}
                             sx={{
                                 borderRadius: 2,
                                 px: 4,
                                 py: 1.5,
                                 fontSize: '1rem',
+                                textTransform: 'none',
                             }}
                         >
                             Go to Home

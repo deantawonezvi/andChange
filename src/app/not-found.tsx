@@ -1,13 +1,13 @@
 'use client';
 import React from 'react';
-import {Box, Button, Container, Typography, useTheme} from '@mui/material';
-import {motion} from 'framer-motion';
-import {Home, Search} from 'lucide-react';
+import { Box, Button, Container, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
+import { Home, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NotFound() {
     const containerVariants = {
-        hidden: {opacity: 0, y: 20},
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -20,7 +20,7 @@ export default function NotFound() {
     };
 
     const itemVariants = {
-        hidden: {opacity: 0, y: 20},
+        hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
@@ -51,10 +51,13 @@ export default function NotFound() {
                     <Typography
                         variant="h1"
                         sx={{
-                            fontSize: {xs: '4rem', md: '6rem'},
+                            fontSize: { xs: '4rem', md: '6rem' },
                             fontWeight: 700,
-                            color: 'primary.main',
                             mb: 2,
+                            background: 'linear-gradient(45deg, #1a1f2c, #e85d45)',
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            color: 'transparent'
                         }}
                     >
                         404
@@ -93,15 +96,15 @@ export default function NotFound() {
                     sx={{
                         display: 'flex',
                         gap: 2,
-                        flexDirection: {xs: 'column', sm: 'row'},
+                        flexDirection: { xs: 'column', sm: 'row' },
                     }}
                 >
-                    <Link href="/" passHref>
+                    <Link href="/" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="contained"
-                            startIcon={<Home size={20}/>}
+                            startIcon={<Home size={20} />}
                             sx={{
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 px: 4,
                                 py: 1.5,
                                 fontSize: '1rem',
@@ -110,12 +113,12 @@ export default function NotFound() {
                             Go to Home
                         </Button>
                     </Link>
-                    <Link href="/dashboard" passHref>
+                    <Link href="/dashboard" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
-                            startIcon={<Search size={20}/>}
+                            startIcon={<Search size={20} />}
                             sx={{
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 px: 4,
                                 py: 1.5,
                                 fontSize: '1rem',
