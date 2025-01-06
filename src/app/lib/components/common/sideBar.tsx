@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {ReactNode, useState} from 'react';
 import {
     AppBar,
     Box,
@@ -25,11 +25,19 @@ import {
     Calendar as CalendarIcon,
 } from 'lucide-react';
 
-export interface MenuItem {
+export interface SubMenuItem {
     text: string;
-    icon: React.ReactNode;
     path: string;
 }
+
+export interface MenuItem {
+    text: string;
+    icon: ReactNode;
+    path: string;
+    subItems?: SubMenuItem[];
+}
+
+export type MenuItems = MenuItem[];
 
 const drawerWidth = 300;
 
@@ -42,7 +50,6 @@ export const menuItems: MenuItem[] = [
 
 const Sidebar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
     const pathname = usePathname();
 
     const handleDrawerToggle = () => {

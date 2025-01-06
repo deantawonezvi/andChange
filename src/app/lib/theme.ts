@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material";
-import { Work_Sans } from 'next/font/google';
+import { Noto_Sans } from 'next/font/google';
 
-const workSans = Work_Sans({
+const workSans = Noto_Sans({
     weight: ['300', '400', '500', '700'],
     subsets: ['latin'],
     display: 'swap',
