@@ -7,6 +7,52 @@ const workSans = Noto_Sans({
     display: 'swap',
 });
 
+declare module '@mui/material/styles' {
+    interface Theme {
+        andChangeComponents: {
+            gradientText: {
+                background: string;
+                backgroundClip: string;
+                WebkitBackgroundClip: string;
+                color: string;
+            };
+            backdropCard: {
+                background: string;
+                backdropFilter: string;
+                borderRadius: string;
+                border: string;
+            };
+        };
+        customShadows: {
+            card: string;
+            button: string;
+            hover: string;
+        };
+    }
+
+    interface ThemeOptions {
+        andChangeComponents?: {
+            gradientText?: {
+                background: string;
+                backgroundClip: string;
+                WebkitBackgroundClip: string;
+                color: string;
+            };
+            backdropCard?: {
+                background: string;
+                backdropFilter: string;
+                borderRadius: string;
+                border: string;
+            };
+        };
+        customShadows?: {
+            card: string;
+            button: string;
+            hover: string;
+        };
+    }
+}
+
 export const theme = createTheme({
     palette: {
         primary: {
@@ -37,20 +83,63 @@ export const theme = createTheme({
     typography: {
         fontFamily: workSans.style.fontFamily,
         h1: {
-            fontSize: '2rem',
-            fontWeight: 600,
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            '@media (min-width:600px)': {
+                fontSize: '3.5rem',
+            },
         },
         h2: {
+            fontSize: '2rem',
+            fontWeight: 600,
+            '@media (min-width:600px)': {
+                fontSize: '2.5rem',
+            },
+        },
+        h3: {
             fontSize: '1.75rem',
             fontWeight: 600,
+        },
+        h4: {
+            fontSize: '1.5rem',
+            fontWeight: 600,
+        },
+        h5: {
+            fontSize: '1.25rem',
+            fontWeight: 500,
+        },
+        h6: {
+            fontSize: '1rem',
+            fontWeight: 500,
         },
         button: {
             textTransform: 'none',
             fontWeight: 500,
+            fontSize: '1rem',
         },
     },
     shape: {
-        borderRadius: 8,
+        borderRadius: 12,
+    },
+    // andChange specific components and styles
+    andChangeComponents: {
+        gradientText: {
+            background: 'linear-gradient(45deg, #1a1f2c, #e85d45)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent',
+        },
+        backdropCard: {
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+        },
+    },
+    customShadows: {
+        card: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        button: 'none',
+        hover: '0 8px 25px rgba(0, 0, 0, 0.15)',
     },
     components: {
         MuiButton: {
@@ -58,11 +147,21 @@ export const theme = createTheme({
                 root: {
                     borderRadius: '6px',
                     padding: '8px 16px',
-                },
-                contained: {
                     boxShadow: 'none',
                     '&:hover': {
                         boxShadow: 'none',
+                    },
+                },
+                contained: {
+                    '&:hover': {
+                        transform: 'translateY(-1px)',
+                        transition: 'transform 0.2s ease-in-out',
+                    },
+                },
+                outlined: {
+                    borderWidth: '1.5px',
+                    '&:hover': {
+                        borderWidth: '1.5px',
                     },
                 },
             },
@@ -71,8 +170,47 @@ export const theme = createTheme({
             styleOverrides: {
                 root: {
                     '& .MuiOutlinedInput-root': {
-                        borderRadius: '6px',
+                        borderRadius: '12px',
+                        transition: 'border-color 0.2s ease-in-out',
+                        '&:hover': {
+                            borderColor: 'rgba(0, 0, 0, 0.3)',
+                        },
                     },
+                },
+            },
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '16px',
+                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                    '&:hover': {
+                        transform: 'translateY(-4px)',
+                    },
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '16px',
+                },
+                elevation1: {
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                },
+            },
+        },
+        MuiAlert: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    borderRadius: '16px',
                 },
             },
         },

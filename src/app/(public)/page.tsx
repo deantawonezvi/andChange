@@ -107,7 +107,7 @@ const LandingPage = () => {
                     px: 4,
                     py: 1.5,
                     fontSize: '1.1rem',
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none'
                   }}
               >
@@ -124,7 +124,7 @@ const LandingPage = () => {
                     px: 4,
                     py: 1.5,
                     fontSize: '1.1rem',
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none'
                   }}
               >
