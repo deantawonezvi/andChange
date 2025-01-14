@@ -11,11 +11,11 @@ import {
     ListItemText,
     Toolbar,
     Typography,
+    useTheme,
 } from '@mui/material';
 import {Menu as MenuIcon} from '@mui/icons-material';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import Image from 'next/image';
 import {BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid,} from 'lucide-react';
 
 export interface SubMenuItem {
@@ -36,7 +36,7 @@ const drawerWidth = 300;
 
 export const menuItems: MenuItem[] = [
     { text: 'Projects', icon: <FolderKanban />, path: '/projects' },
-    { text: 'Best Practices', icon: <BookOpen />, path: '/best-practices' },
+    { text: 'Best Practises', icon: <BookOpen />, path: '/best-practises' },
     { text: 'Portfolio', icon: <LayoutGrid />, path: '/portfolio' },
     { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
 ];
@@ -44,6 +44,7 @@ export const menuItems: MenuItem[] = [
 const Sidebar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
+    const theme = useTheme();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -56,7 +57,20 @@ const Sidebar: React.FC = () => {
     const drawer = (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Toolbar>
-                <Image src="/next.svg" alt="Logo" width={40} height={40} />
+                <Typography
+                    variant="h1"
+                    sx={{
+                        fontSize: { xs: '1rem', md: '1.4rem' },
+                        fontWeight: 500,
+                        mb: 2,
+                        background: `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.main})`,
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        color: 'transparent'
+                    }}
+                >
+                    andChange
+                </Typography>
             </Toolbar>
             <List sx={{ flexGrow: 1 }}>
                 {menuItems.map((item) => (
