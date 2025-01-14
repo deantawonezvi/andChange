@@ -10,6 +10,7 @@ import {useRouter} from "next/navigation";
 import {useAuth} from "@/app/lib/hooks/useAuth";
 import PageHeader from "@/app/lib/components/common/pageHeader";
 import { PageLoader } from '../lib/components/common/pageLoader';
+import AuthLoader from "@/app/lib/components/common/authLoader";
 
 interface AuthenticatedLayoutProps {
     children: React.ReactNode;
@@ -37,11 +38,11 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({children}) => 
     }, [isAuthenticated, isLoading, router]);
 
     if (isLoading) {
-        return <PageLoader/>
+        return <AuthLoader action="login" message="Verifying your session..." />;
     }
 
     if (!isAuthenticated) {
-        return null;
+        return <AuthLoader action="login" message="Redirecting to login..." />;
     }
 
     return (

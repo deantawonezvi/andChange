@@ -1,22 +1,32 @@
-import React, {ReactNode, useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     AppBar,
+    Avatar,
     Box,
     CssBaseline,
+    Divider,
     Drawer,
     IconButton,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
+    Menu,
+    MenuItem,
     Toolbar,
     Typography,
     useTheme,
 } from '@mui/material';
-import {Menu as MenuIcon} from '@mui/icons-material';
+import { Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-import {BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid,} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid, LogOut, Settings, User } from 'lucide-react';
+import { AuthService } from "@/app/lib/api/auth";
+import { useRouter } from 'next/navigation';
+interface CognitoAttribute {
+    Name?: string;
+    Value?: string;
+}
 
 export interface SubMenuItem {
     text: string;
@@ -25,12 +35,20 @@ export interface SubMenuItem {
 
 export interface MenuItem {
     text: string;
-    icon: ReactNode;
+    icon: React.ReactNode;
     path: string;
     subItems?: SubMenuItem[];
 }
 
 export type MenuItems = MenuItem[];
+
+interface UserAttributes {
+    email?: string;
+    name?: string;
+    given_name?: string;
+    family_name?: string;
+    [key: string]: string | undefined;
+}
 
 const drawerWidth = 300;
 
@@ -43,15 +61,61 @@ export const menuItems: MenuItem[] = [
 
 const Sidebar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [userAttributes, setUserAttributes] = useState<UserAttributes>({});
     const pathname = usePathname();
     const theme = useTheme();
+    const router = useRouter();
+    const authService = AuthService.getInstance();
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await authService.getCurrentUser();
+                if (userData?.UserAttributes) {
+                    const attributes: UserAttributes = {};
+                    userData.UserAttributes.forEach((attr: CognitoAttribute) => {
+                        if (attr.Name) {
+                            attributes[attr.Name] = attr.Value || undefined;
+                        }
+                    });
+                    setUserAttributes(attributes);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
-    const isActive = (path: string) => {
-        return pathname === path;
+    const handleProfileClick = (event: React.MouseEvent<HTMLDivElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+            router.push('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
+
+    const isActive = (path: string) => pathname === path;
+
+    const getUserInitials = () => {
+        const firstName = userAttributes.given_name || '';
+        const lastName = userAttributes.family_name || '';
+        return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     };
 
     const drawer = (
@@ -89,6 +153,77 @@ const Sidebar: React.FC = () => {
                     </ListItem>
                 ))}
             </List>
+
+            <Divider sx={{ bgcolor: 'rgba(255, 255, 255, 0.12)', my: 2 }} />
+
+            <Box sx={{ p: 2 }}>
+                <Box
+                    onClick={handleProfileClick}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 1,
+                        borderRadius: 1,
+                        cursor: 'pointer',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        },
+                    }}
+                >
+                    <Avatar
+                        sx={{
+                            bgcolor: theme.palette.secondary.main,
+                            color: 'white',
+                            width: 40,
+                            height: 40,
+                        }}
+                    >
+                        {getUserInitials()}
+                    </Avatar>
+                    <Box sx={{ ml: 2, flexGrow: 1 }}>
+                        <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500 }}>
+                            {userAttributes.given_name} {userAttributes.family_name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                            {userAttributes.email}
+                        </Typography>
+                    </Box>
+                </Box>
+            </Box>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+            >
+                <MenuItem onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <User size={20} />
+                    </ListItemIcon>
+                    Profile
+                </MenuItem>
+                <MenuItem onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <Settings size={20} />
+                    </ListItemIcon>
+                    Settings
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    <ListItemIcon>
+                        <LogOut size={20} color={theme.palette.error.main} />
+                    </ListItemIcon>
+                    Logout
+                </MenuItem>
+            </Menu>
         </Box>
     );
 

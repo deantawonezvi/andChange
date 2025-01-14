@@ -1,9 +1,8 @@
 'use client';
-
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
+import React, {useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {motion} from 'framer-motion';
 import Link from 'next/link';
 import {
     Alert,
@@ -17,9 +16,9 @@ import {
     Typography,
     useTheme
 } from '@mui/material';
-import { Visibility, VisibilityOff, ArrowLeft } from '@mui/icons-material';
-import { AuthService } from "@/app/lib/api/auth";
-import { PageLoader } from '@/app/lib/components/common/pageLoader';
+import {ArrowLeft, Visibility, VisibilityOff} from '@mui/icons-material';
+import {AuthService} from "@/app/lib/api/auth";
+import AuthLoader from "@/app/lib/components/common/authLoader";
 
 interface LoginFormData {
     email: string;
@@ -30,6 +29,7 @@ const LoginPage = () => {
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors }
     } = useForm<LoginFormData>();
 
@@ -39,6 +39,25 @@ const LoginPage = () => {
     const router = useRouter();
     const theme = useTheme();
     const authService = AuthService.getInstance();
+
+    useEffect(() => {
+        if (process.env.NODE_ENV === 'development') {
+            const devEmail = process.env.NEXT_PUBLIC_DEV_EMAIL;
+            const devPassword = process.env.NEXT_PUBLIC_DEV_PASSWORD;
+
+            if (devEmail) {
+                setValue('email', devEmail);
+            }
+
+            if (devPassword) {
+                setValue('password', devPassword);
+            }
+
+            if (devEmail && devPassword && process.env.NEXT_PUBLIC_DEV_AUTO_LOGIN === 'true') {
+                handleSubmit(onSubmit)();
+            }
+        }
+    }, [setValue]);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -88,7 +107,7 @@ const LoginPage = () => {
     };
 
     if (loading) {
-        return <PageLoader message="Signing you in..." />;
+        return <AuthLoader action="login" message="Signing you in..." />
     }
 
     return (
