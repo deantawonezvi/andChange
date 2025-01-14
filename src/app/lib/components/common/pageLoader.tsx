@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    Box,
-    Paper,
-    Skeleton,
-    useTheme,
-    Typography,
-} from '@mui/material';
+import {Box, Paper, Skeleton, Typography,} from '@mui/material';
 
 interface LoaderProps {
     message?: string;
@@ -47,8 +41,7 @@ export const PageLoader: React.FC<LoaderProps> = ({
                         },
                     }}
                 >
-                    <img src="" alt='logo'
-                         style={{objectFit: 'contain', width: '75px'}}/>
+
                 </Box>
             )}
 
@@ -180,8 +173,7 @@ export const SectionLoader: React.FC<LoaderProps & {
             {showLogo && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
                     <Box sx={{ position: 'relative', width: 60, height: 60 }}>
-                        <img src="" alt='logo'
-                             style={{objectFit: 'contain', width: '75px'}}/>
+
                     </Box>
                 </Box>
             )}

@@ -2,8 +2,8 @@
 const PortfolioPage = () => {
     return (
         <div>
-            <h1>Portfolio</h1>
-            <p>Welcome to the Portfolio page!</p>
+            <h1>Calendar</h1>
+            <p>Welcome to the Calendar page!</p>
         </div>
     );
 };

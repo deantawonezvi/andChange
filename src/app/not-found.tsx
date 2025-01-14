@@ -113,7 +113,7 @@ export default function NotFound() {
                             Go to Home
                         </Button>
                     </Link>
-                    <Link href="/dashboard" passHref style={{ textDecoration: 'none' }}>
+                    <Link href="/projects" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
                             startIcon={<Search size={20} />}
@@ -124,7 +124,7 @@ export default function NotFound() {
                                 fontSize: '1rem',
                             }}
                         >
-                            Go to Dashboard
+                            Go to Projects
                         </Button>
                     </Link>
                 </Box>

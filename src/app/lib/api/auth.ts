@@ -1,15 +1,29 @@
-import axios from 'axios';
+import {
+    CognitoIdentityProviderClient,
+    InitiateAuthCommand,
+    ForgotPasswordCommand,
+    ConfirmForgotPasswordCommand,
+    ChangePasswordCommand,
+    GetUserCommand,
+    GlobalSignOutCommand,
+    InitiateAuthCommandInput,
+    AuthFlowType
+} from "@aws-sdk/client-cognito-identity-provider";
 import Cookies from 'js-cookie';
-import {AuthConfig, AuthTokens, LoginCredentials} from "@/app/lib/api/types";
-import { getAuthConfig } from './config';
-import {REFRESH_TOKEN_COOKIE_NAME, TOKEN_COOKIE_NAME} from '../constants';
+import { AuthTokens, LoginCredentials } from "@/app/lib/api/types";
+import crypto from 'crypto';
+
+export const TOKEN_COOKIE_NAME = 'andChange_auth_token';
+export const REFRESH_TOKEN_COOKIE_NAME = 'andChange_refresh_token';
 
 export class AuthService {
     private static instance: AuthService;
-    private authConfig: AuthConfig;
+    private cognitoClient: CognitoIdentityProviderClient;
 
     private constructor() {
-        this.authConfig = getAuthConfig();
+        this.cognitoClient = new CognitoIdentityProviderClient({
+            region: 'eu-west-2'
+        });
     }
 
     public static getInstance(): AuthService {
@@ -19,105 +33,75 @@ export class AuthService {
         return AuthService.instance;
     }
 
+    private calculateSecretHash(username: string): string {
+        const clientId = process.env.NEXT_PUBLIC_CLIENT_ID!;
+        const clientSecret = process.env.NEXT_PUBLIC_CLIENT_SECRET!;
+
+        const message = username + clientId;
+        const hmac = crypto.createHmac('SHA256', clientSecret);
+        hmac.update(message);
+        return hmac.digest('base64');
+    }
+
     async login(credentials: LoginCredentials): Promise<AuthTokens> {
         try {
-            //const authCode = await this.getAuthorizationCode(credentials);
+            const params: InitiateAuthCommandInput = {
+                AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
+                ClientId: process.env.NEXT_PUBLIC_CLIENT_ID,
+                AuthParameters: {
+                    USERNAME: credentials.email,
+                    PASSWORD: credentials.password,
+                    SECRET_HASH: this.calculateSecretHash(credentials.email)
+                }
+            };
 
-            const tokens = await this.authenticateUser(credentials);
+            const command = new InitiateAuthCommand(params);
+            const response = await this.cognitoClient.send(command);
+
+            if (!response.AuthenticationResult) {
+                throw new Error('No authentication result received');
+            }
+
+            const tokens: AuthTokens = {
+                accessToken: response.AuthenticationResult.AccessToken!,
+                idToken: response.AuthenticationResult.IdToken!,
+                refreshToken: response.AuthenticationResult.RefreshToken || ''
+            };
 
             this.storeTokens(tokens);
-
             return tokens;
         } catch (error) {
             throw this.handleAuthError(error);
         }
     }
 
-    private async getAuthorizationCode(credentials: LoginCredentials): Promise<string> {
-        try {
-            const response = await axios.post(
-                this.authConfig.tokenUrl,
-                new URLSearchParams({
-                    grant_type: 'password',
-                    client_id: this.authConfig.clientId,
-                    client_secret: this.authConfig.clientSecret,
-                    username: credentials.email,
-                    password: credentials.password,
-                    scope: this.authConfig.scope
-                }).toString(),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                }
-            );
-
-            console.log(response.data);
-
-            // The response should directly contain the tokens
-            return '';
-        } catch (error) {
-            throw this.handleAuthError(error);
-        }
-    }
-
-    private async authenticateUser(credentials: LoginCredentials): Promise<AuthTokens> {
-        try {
-            const response = await axios.post(
-                `${this.authConfig.authUrl.replace('/oauth2/authorize', '/login')}`,
-                {
-                    AuthParameters: {
-                        USERNAME: credentials.email,
-                        PASSWORD: credentials.password
-                    },
-                    AuthFlow: 'USER_PASSWORD_AUTH',
-                    ClientId: this.authConfig.clientId
-                },
-                {
-                    headers: {
-                        'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
-                        'Content-Type': 'application/x-amz-json-1.1'
-                    }
-                }
-            );
-
-            return {
-                accessToken: response.data.AuthenticationResult.AccessToken,
-                idToken: response.data.AuthenticationResult.IdToken,
-                refreshToken: response.data.AuthenticationResult.RefreshToken
-            };
-        } catch (error) {
-            throw this.handleAuthError(error);
-        }
-    }
-
-    public getCodeFromCallback(): string {
-        return new URLSearchParams(window.location.search).get('code') || '';
-    }
-
-    private async exchangeCodeForTokens(code: string): Promise<AuthTokens> {
-        const params = new URLSearchParams({
-            grant_type: 'authorization_code',
-            client_id: this.authConfig.clientId,
-            client_secret: this.authConfig.clientSecret,
-            code,
-            redirect_uri: window.location.origin
-        });
+    async isAuthenticated(): Promise<boolean> {
+        const token = Cookies.get(TOKEN_COOKIE_NAME);
+        if (!token) return false;
 
         try {
-            const response = await axios.post(this.authConfig.tokenUrl, params.toString(), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
+            const command = new GetUserCommand({
+                AccessToken: token
             });
+            await this.cognitoClient.send(command);
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
-            return {
-                accessToken: response.data.access_token,
-                idToken: response.data.id_token,
-                refreshToken: response.data.refresh_token
-            };
-        } catch (error) {
-            throw this.handleAuthError(error);
+    async getCurrentUser() {
+        const token = Cookies.get(TOKEN_COOKIE_NAME);
+        if (!token) return null;
+
+        try {
+            const command = new GetUserCommand({
+                AccessToken: token
+            });
+            const response = await this.cognitoClient.send(command);
+            return response;
+        } catch {
+            return null;
         }
     }
 
@@ -129,33 +113,38 @@ export class AuthService {
         };
 
         Cookies.set(TOKEN_COOKIE_NAME, tokens.idToken, secureCookieOptions);
-        Cookies.set(REFRESH_TOKEN_COOKIE_NAME, tokens.refreshToken, secureCookieOptions);
+        if (tokens.refreshToken) {
+            Cookies.set(REFRESH_TOKEN_COOKIE_NAME, tokens.refreshToken, secureCookieOptions);
+        }
     }
 
-    async refreshTokens(): Promise<AuthTokens> {
+    async refreshSession(): Promise<AuthTokens> {
         const refreshToken = Cookies.get(REFRESH_TOKEN_COOKIE_NAME);
         if (!refreshToken) {
             throw new Error('No refresh token available');
         }
 
-        const params = new URLSearchParams({
-            grant_type: 'refresh_token',
-            client_id: this.authConfig.clientId,
-            client_secret: this.authConfig.clientSecret,
-            refresh_token: refreshToken
-        });
-
         try {
-            const response = await axios.post(this.authConfig.tokenUrl, params.toString(), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+            const params: InitiateAuthCommandInput = {
+                AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
+                ClientId: process.env.NEXT_PUBLIC_CLIENT_ID,
+                AuthParameters: {
+                    REFRESH_TOKEN: refreshToken,
+                    SECRET_HASH: this.calculateSecretHash(refreshToken)
                 }
-            });
+            };
+
+            const command = new InitiateAuthCommand(params);
+            const response = await this.cognitoClient.send(command);
+
+            if (!response.AuthenticationResult) {
+                throw new Error('No authentication result received');
+            }
 
             const tokens: AuthTokens = {
-                accessToken: response.data.access_token,
-                idToken: response.data.id_token,
-                refreshToken: response.data.refresh_token || refreshToken
+                accessToken: response.AuthenticationResult.AccessToken!,
+                idToken: response.AuthenticationResult.IdToken!,
+                refreshToken: response.AuthenticationResult.RefreshToken || refreshToken
             };
 
             this.storeTokens(tokens);
@@ -165,20 +154,84 @@ export class AuthService {
         }
     }
 
-    logout(): void {
+    async logout(): Promise<void> {
+        const token = Cookies.get(TOKEN_COOKIE_NAME);
+        if (token) {
+            try {
+                const command = new GlobalSignOutCommand({
+                    AccessToken: token
+                });
+                await this.cognitoClient.send(command);
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        }
+
         Cookies.remove(TOKEN_COOKIE_NAME, { path: '/' });
         Cookies.remove(REFRESH_TOKEN_COOKIE_NAME, { path: '/' });
     }
 
     private handleAuthError(error: unknown): Error {
-        if (axios.isAxiosError(error)) {
-            const message = error.response?.data?.message || error.message;
-            const status = error.response?.status;
-            return new Error(`Authentication failed: ${message} (${status})`);
-        }
         if (error instanceof Error) {
-            return error;
+            switch (error.name) {
+                case 'UserNotFoundException':
+                    return new Error('User not found');
+                case 'NotAuthorizedException':
+                    return new Error('Incorrect username or password');
+                case 'UserNotConfirmedException':
+                    return new Error('Please verify your email address');
+                case 'PasswordResetRequiredException':
+                    return new Error('Password reset required');
+                default:
+                    return new Error(error.message);
+            }
         }
         return new Error('An unknown authentication error occurred');
+    }
+
+    async forgotPassword(username: string): Promise<void> {
+        try {
+            const command = new ForgotPasswordCommand({
+                ClientId: process.env.NEXT_PUBLIC_CLIENT_ID,
+                Username: username,
+                SecretHash: this.calculateSecretHash(username)
+            });
+            await this.cognitoClient.send(command);
+        } catch (error) {
+            throw this.handleAuthError(error);
+        }
+    }
+
+    async resetPassword(username: string, code: string, newPassword: string): Promise<void> {
+        try {
+            const command = new ConfirmForgotPasswordCommand({
+                ClientId: process.env.NEXT_PUBLIC_CLIENT_ID,
+                Username: username,
+                ConfirmationCode: code,
+                Password: newPassword,
+                SecretHash: this.calculateSecretHash(username)
+            });
+            await this.cognitoClient.send(command);
+        } catch (error) {
+            throw this.handleAuthError(error);
+        }
+    }
+
+    async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+        const token = Cookies.get(TOKEN_COOKIE_NAME);
+        if (!token) {
+            throw new Error('Not authenticated');
+        }
+
+        try {
+            const command = new ChangePasswordCommand({
+                AccessToken: token,
+                PreviousPassword: oldPassword,
+                ProposedPassword: newPassword
+            });
+            await this.cognitoClient.send(command);
+        } catch (error) {
+            throw this.handleAuthError(error);
+        }
     }
 }

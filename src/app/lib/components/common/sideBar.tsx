@@ -9,21 +9,14 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Theme,
     Toolbar,
     Typography,
-    useMediaQuery,
 } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
+import {Menu as MenuIcon} from '@mui/icons-material';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import Image from 'next/image';
-import {
-    FolderKanban,
-    BookOpen,
-    LayoutGrid,
-    Calendar as CalendarIcon,
-} from 'lucide-react';
+import {BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid,} from 'lucide-react';
 
 export interface SubMenuItem {
     text: string;
@@ -72,9 +65,9 @@ const Sidebar: React.FC = () => {
                         component={Link}
                         href={item.path}
                         sx={{
-                            borderLeft: isActive(item.path) ? '4px solid #d3eb7b' : '',
-                            borderRight: isActive(item.path) ? '4px solid #d3eb7b' : '',
-                            backgroundColor: isActive(item.path) ? 'rgba(211, 235, 123, 0.1)' : 'transparent',
+                            borderLeft: isActive(item.path) ? '4px solid #e85d45' : '',
+                            borderRight: isActive(item.path) ? '4px solid #e85d45' : '',
+                            backgroundColor: isActive(item.path) ? 'rgba(235,168,123,0.1)' : 'transparent',
                         }}
                     >
                         <ListItemIcon sx={{ color: 'white' }}>{item.icon}</ListItemIcon>

@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.726.1",
     "@emotion/cache": "^11.13.5",
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
     "@mui/material": "^6.1.10",
     "@mui/material-nextjs": "^6.1.9",
     "@tanstack/react-query": "^5.62.2",
+    "aws-amplify": "^6.12.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
     "export-to-csv": "^1.4.0",

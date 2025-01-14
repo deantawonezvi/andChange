@@ -74,8 +74,9 @@ const LoginPage = () => {
                 email: data.email,
                 password: data.password
             });
-            router.push('/');
+            router.push('/projects');
         } catch (err) {
+            console.log(err);
             if (err instanceof Error) {
                 setError(err.message);
             } else {

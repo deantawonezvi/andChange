@@ -118,10 +118,7 @@ export const theme = createTheme({
             fontSize: '1rem',
         },
     },
-    shape: {
-        borderRadius: 12,
-    },
-    // andChange specific components and styles
+
     andChangeComponents: {
         gradientText: {
             background: 'linear-gradient(45deg, #1a1f2c, #e85d45)',
@@ -192,9 +189,7 @@ export const theme = createTheme({
         },
         MuiPaper: {
             styleOverrides: {
-                root: {
-                    borderRadius: '16px',
-                },
+
                 elevation1: {
                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
                 },
