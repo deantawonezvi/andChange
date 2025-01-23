@@ -48,22 +48,6 @@ export class ApiClient {
             async (error: AxiosError) => {
                 if (debug) this.logError(error);
 
-                if (error.response?.status === 401) {
-                    try {
-                        const tokens = await this.authService.refreshTokens();
-                        // Retry the original request with new token
-                        const originalRequest = error.config;
-                        if (originalRequest) {
-                            originalRequest.headers['Authorization'] = `Bearer ${tokens.idToken}`;
-                            return instance(originalRequest);
-                        }
-                    } catch (refreshError) {
-                        // If refresh fails, logout and redirect to login
-                        this.authService.logout();
-                        window.location.href = '/login';
-                        return Promise.reject(this.handleApiError(refreshError));
-                    }
-                }
 
                 return Promise.reject(this.handleApiError(error));
             }
@@ -73,7 +57,7 @@ export class ApiClient {
     }
 
 
-    private handleApiError(error: any): ApiError {
+    private handleApiError(error:any): ApiError {
         if (axios.isAxiosError(error)) {
             return {
                 message: error.response?.data?.message || error.message,

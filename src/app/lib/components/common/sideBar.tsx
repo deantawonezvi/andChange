@@ -54,7 +54,7 @@ const drawerWidth = 300;
 
 export const menuItems: MenuItem[] = [
     { text: 'Projects', icon: <FolderKanban />, path: '/projects' },
-    { text: 'Best Practises', icon: <BookOpen />, path: '/best-practises' },
+    { text: 'Organisations', icon: <BookOpen />, path: '/organisations' },
     { text: 'Portfolio', icon: <LayoutGrid />, path: '/portfolio' },
     { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
 ];
