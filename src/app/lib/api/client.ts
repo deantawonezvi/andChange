@@ -1,115 +1,68 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import {AuthService, TOKEN_COOKIE_NAME} from './auth';
-import { ApiError } from './types';
-import Cookies from "js-cookie";
+import { TOKEN_COOKIE_NAME } from '@/app/lib/constants';
+import Cookies from 'js-cookie';
 
-export class ApiClient {
-    private static instance: ApiClient;
-    private axiosInstance: AxiosInstance;
-    private authService: AuthService;
-
-    private constructor(baseURL: string, debug: boolean = false) {
-        this.authService = AuthService.getInstance();
-        this.axiosInstance = this.createAxiosInstance(baseURL, debug);
-    }
-
-    public static getInstance(baseURL?: string, debug: boolean = false): ApiClient {
-        if (!ApiClient.instance) {
-            ApiClient.instance = new ApiClient(
-                baseURL || process.env.NEXT_PUBLIC_API_BASE_URL || '',
-                debug
-            );
+const createAxiosClient = (baseURL?: string, enableDebug: boolean = false): AxiosInstance => {
+    const axiosClient: AxiosInstance = axios.create({
+        baseURL: process.env.NODE_ENV === 'development'
+            ? ''
+            : (baseURL || process.env.NEXT_PUBLIC_API_BASE_URL),
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/hal+json'
         }
-        return ApiClient.instance;
-    }
+    });
 
-    private createAxiosInstance(baseURL: string, debug: boolean): AxiosInstance {
-        const instance = axios.create({ baseURL });
+    axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+        const token = Cookies.get(TOKEN_COOKIE_NAME);
+        if (token) {
+            config.headers.set('Authorization', `Bearer ${token}`);
+        }
 
-        // Request interceptor
-        instance.interceptors.request.use(
-            async (config: InternalAxiosRequestConfig) => {
-                const token = Cookies.get(TOKEN_COOKIE_NAME);
-                if (token) {
-                    config.headers.set('Authorization', `Bearer ${token}`);
-                }
-                if (debug) this.logRequest(config);
-                return config;
-            },
-            (error) => Promise.reject(this.handleApiError(error))
-        );
+        if (enableDebug) {
+            console.log('Request Config:', {
+                url: config.url,
+                method: config.method,
+                headers: config.headers,
+                data: config.data
+            });
+        }
 
-        // Response interceptor
-        instance.interceptors.response.use(
-            (response: AxiosResponse) => {
-                if (debug) this.logResponse(response);
-                return response;
-            },
-            async (error: AxiosError) => {
-                if (debug) this.logError(error);
+        return config;
+    }, (error) => {
+        return Promise.reject(error);
+    });
 
-
-                return Promise.reject(this.handleApiError(error));
+    axiosClient.interceptors.response.use(
+        (response: AxiosResponse) => {
+            if (enableDebug) {
+                console.log('Response:', {
+                    status: response.status,
+                    headers: response.headers,
+                    data: response.data
+                });
             }
-        );
+            return response;
+        },
+        async (error: AxiosError) => {
+            if (enableDebug) {
+                console.error('API Error:', {
+                    status: error.response?.status,
+                    statusText: error.response?.statusText,
+                    data: error.response?.data,
+                    headers: error.response?.headers
+                });
+            }
 
-        return instance;
-    }
+            if (error.response?.status === 401) {
+                return Promise.reject(new Error('Session expired. Please log in again.'));
+            }
 
-
-    private handleApiError(error:any): ApiError {
-        if (axios.isAxiosError(error)) {
-            return {
-                message: error.response?.data?.message || error.message,
-                code: error.code,
-                status: error.response?.status
-            };
+            return Promise.reject(error);
         }
-        return { message: error.message || 'An unknown error occurred' };
-    }
+    );
 
-    private logRequest(config: InternalAxiosRequestConfig): void {
-        console.log('%cAPI Request:', 'color: blue; font-weight: bold;', {
-            method: config.method?.toUpperCase(),
-            url: config.url,
-            headers: config.headers,
-            data: config.data
-        });
-    }
+    return axiosClient;
+};
 
-    private logResponse(response: AxiosResponse): void {
-        console.log('%cAPI Response:', 'color: green; font-weight: bold;', {
-            status: response.status,
-            data: response.data
-        });
-    }
-
-    private logError(error: AxiosError): void {
-        console.log('%cAPI Error:', 'color: red; font-weight: bold;', {
-            message: error.message,
-            status: error.response?.status,
-            data: error.response?.data
-        });
-    }
-
-    // Public API methods
-    async get<T>(url: string): Promise<T> {
-        const response = await this.axiosInstance.get<T>(url);
-        return response.data;
-    }
-
-    async post<T, D = unknown>(url: string, data: D): Promise<T> {
-        const response = await this.axiosInstance.post<T>(url, data);
-        return response.data;
-    }
-
-    async put<T, D = unknown>(url: string, data: D): Promise<T> {
-        const response = await this.axiosInstance.put<T>(url, data);
-        return response.data;
-    }
-
-    async delete<T>(url: string): Promise<T> {
-        const response = await this.axiosInstance.delete<T>(url);
-        return response.data;
-    }
-}
+export default createAxiosClient;

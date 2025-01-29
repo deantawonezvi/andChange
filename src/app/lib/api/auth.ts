@@ -1,16 +1,16 @@
 import {
-    CognitoIdentityProviderClient,
-    InitiateAuthCommand,
-    ForgotPasswordCommand,
-    ConfirmForgotPasswordCommand,
+    AuthFlowType,
     ChangePasswordCommand,
+    CognitoIdentityProviderClient,
+    ConfirmForgotPasswordCommand,
+    ForgotPasswordCommand,
     GetUserCommand,
     GlobalSignOutCommand,
-    InitiateAuthCommandInput,
-    AuthFlowType
+    InitiateAuthCommand,
+    InitiateAuthCommandInput
 } from "@aws-sdk/client-cognito-identity-provider";
 import Cookies from 'js-cookie';
-import { AuthTokens, LoginCredentials } from "@/app/lib/api/types";
+import {AuthTokens, LoginCredentials} from "@/app/lib/api/types";
 import crypto from 'crypto';
 
 export const TOKEN_COOKIE_NAME = 'andChange_auth_token';
@@ -98,8 +98,7 @@ export class AuthService {
             const command = new GetUserCommand({
                 AccessToken: token
             });
-            const response = await this.cognitoClient.send(command);
-            return response;
+            return await this.cognitoClient.send(command);
         } catch {
             return null;
         }
@@ -112,7 +111,7 @@ export class AuthService {
             path: '/'
         };
 
-        Cookies.set(TOKEN_COOKIE_NAME, tokens.idToken, secureCookieOptions);
+        Cookies.set(TOKEN_COOKIE_NAME, tokens.accessToken, secureCookieOptions);
         if (tokens.refreshToken) {
             Cookies.set(REFRESH_TOKEN_COOKIE_NAME, tokens.refreshToken, secureCookieOptions);
         }

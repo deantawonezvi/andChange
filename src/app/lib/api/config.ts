@@ -1,11 +1,15 @@
-import {AuthConfig} from "@/app/lib/api/types";
+export const API_CONFIG = {
+    BASE_URL: 'http://35.177.78.241:9000/api',
+    ENDPOINTS: {
+        PROJECTS: '/v1/structure/projects',
+        ORGANIZATIONS: '/v1/structure/organizations',
+        MODEL: '/v1/model',
+        ACTION_PLAN: '/v1/action-plan'
+    }
+} as const;
 
-export const getAuthConfig = (): AuthConfig => {
-    return {
-        authUrl: process.env.NEXT_PUBLIC_AUTH_URL,
-        tokenUrl: process.env.NEXT_PUBLIC_TOKEN_URL,
-        clientId: process.env.NEXT_PUBLIC_CLIENT_ID,
-        clientSecret: process.env.NEXT_PUBLIC_CLIENT_SECRET,
-        scope: process.env.NEXT_PUBLIC_AUTH_SCOPE
-    };
-};
+export const AUTH_CONFIG = {
+    TOKEN_COOKIE_NAME: 'andChange_auth_token',
+    REFRESH_TOKEN_COOKIE_NAME: 'andChange_refresh_token',
+    TOKEN_EXPIRY_DAYS: 7
+} as const;

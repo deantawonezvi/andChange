@@ -1,7 +1,7 @@
-import React, {useMemo} from 'react';
-import {MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState} from 'material-react-table';
-import {Box, Paper, Typography, useMediaQuery} from '@mui/material';
-import {useTheme} from '@mui/material/styles';
+import React, { useMemo } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState } from 'material-react-table';
+import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 
 interface DataTableProps<T extends Record<string, unknown>> {
@@ -52,7 +52,7 @@ const DataTable = <T extends Record<string, unknown>>({
                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
                 borderRadius: '12px',
                 backgroundColor: theme.palette.background.default,
-                border:'2px solid #1e3a34'
+                border: '2px solid #1e3a34'
             }}
         >
             {(title || subtitle || enableDownload) && (

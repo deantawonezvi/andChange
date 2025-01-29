@@ -1,15 +1,29 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    /* config options here */
-    env: {
-        NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
-        NEXT_PUBLIC_TOKEN_URL: process.env.NEXT_PUBLIC_TOKEN_URL,
-        NEXT_PUBLIC_CLIENT_ID: process.env.NEXT_PUBLIC_CLIENT_ID,
-        NEXT_PUBLIC_CLIENT_SECRET: process.env.NEXT_PUBLIC_CLIENT_SECRET,
-        NEXT_PUBLIC_AUTH_SCOPE: process.env.NEXT_PUBLIC_AUTH_SCOPE,
-        NEXT_PUBLIC_BASE_API_URL: process.env.NEXT_PUBLIC_BASE_API_URL,
+    async rewrites() {
+        return [
+            {
+                source: '/api/:path*',
+                destination: 'http://35.177.78.241:9000/api/:path*',
+                basePath: false
+            }
+        ];
     },
+    async headers() {
+        return [
+            {
+                source: "/api/:path*",
+                headers: [
+                    { key: "Access-Control-Allow-Credentials", value: "true" },
+                    { key: "Access-Control-Allow-Origin", value: "*" },
+                    { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
+                    { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" },
+                    { key: "Access-Control-Max-Age", value: "86400" }
+                ]
+            }
+        ];
+    }
 };
 
 export default nextConfig;

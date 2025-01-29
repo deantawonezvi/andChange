@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     AppBar,
-    Avatar,
     Box,
     CssBaseline,
     Divider,
@@ -23,10 +22,6 @@ import { usePathname } from 'next/navigation';
 import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid, LogOut, Settings, User } from 'lucide-react';
 import { AuthService } from "@/app/lib/api/auth";
 import { useRouter } from 'next/navigation';
-interface CognitoAttribute {
-    Name?: string;
-    Value?: string;
-}
 
 export interface SubMenuItem {
     text: string;
@@ -42,13 +37,6 @@ export interface MenuItem {
 
 export type MenuItems = MenuItem[];
 
-interface UserAttributes {
-    email?: string;
-    name?: string;
-    given_name?: string;
-    family_name?: string;
-    [key: string]: string | undefined;
-}
 
 const drawerWidth = 300;
 
@@ -62,40 +50,16 @@ export const menuItems: MenuItem[] = [
 const Sidebar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [userAttributes, setUserAttributes] = useState<UserAttributes>({});
     const pathname = usePathname();
     const theme = useTheme();
     const router = useRouter();
     const authService = AuthService.getInstance();
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const userData = await authService.getCurrentUser();
-                if (userData?.UserAttributes) {
-                    const attributes: UserAttributes = {};
-                    userData.UserAttributes.forEach((attr: CognitoAttribute) => {
-                        if (attr.Name) {
-                            attributes[attr.Name] = attr.Value || undefined;
-                        }
-                    });
-                    setUserAttributes(attributes);
-                }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
-
-        fetchUserData();
-    }, []);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
-    const handleProfileClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
 
     const handleMenuClose = () => {
         setAnchorEl(null);
@@ -112,11 +76,6 @@ const Sidebar: React.FC = () => {
 
     const isActive = (path: string) => pathname === path;
 
-    const getUserInitials = () => {
-        const firstName = userAttributes.given_name || '';
-        const lastName = userAttributes.family_name || '';
-        return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-    };
 
     const drawer = (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -156,40 +115,6 @@ const Sidebar: React.FC = () => {
 
             <Divider sx={{ bgcolor: 'rgba(255, 255, 255, 0.12)', my: 2 }} />
 
-            <Box sx={{ p: 2 }}>
-                <Box
-                    onClick={handleProfileClick}
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        p: 1,
-                        borderRadius: 1,
-                        cursor: 'pointer',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        },
-                    }}
-                >
-                    <Avatar
-                        sx={{
-                            bgcolor: theme.palette.secondary.main,
-                            color: 'white',
-                            width: 40,
-                            height: 40,
-                        }}
-                    >
-                        {getUserInitials()}
-                    </Avatar>
-                    <Box sx={{ ml: 2, flexGrow: 1 }}>
-                        <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500 }}>
-                            {userAttributes.given_name} {userAttributes.family_name}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                            {userAttributes.email}
-                        </Typography>
-                    </Box>
-                </Box>
-            </Box>
 
             <Menu
                 anchorEl={anchorEl}

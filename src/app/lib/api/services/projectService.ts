@@ -1,4 +1,5 @@
-import { ApiClient } from '@/app/lib/api/client';
+import { AxiosInstance } from 'axios';
+import createAxiosClient from '@/app/lib/api/client';
 
 export interface SProjectDTO {
     id?: number;
@@ -13,10 +14,12 @@ export interface CreateProjectRequestDTO {
 
 export class ProjectService {
     private static instance: ProjectService;
-    private apiClient: ApiClient;
+    private client: AxiosInstance;
 
     private constructor() {
-        this.apiClient = ApiClient.getInstance();
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+        this.client = createAxiosClient(baseURL, process.env.NODE_ENV === 'development');
     }
 
     public static getInstance(): ProjectService {
@@ -31,7 +34,8 @@ export class ProjectService {
      */
     async getAllProjects(): Promise<SProjectDTO[]> {
         try {
-            return await this.apiClient.get<SProjectDTO[]>('/api/v1/structure/projects');
+            const response = await this.client.get<SProjectDTO[]>('/api/v1/structure/projects');
+            return response.data;
         } catch (error) {
             console.error('Error fetching projects:', error);
             throw error;
@@ -43,9 +47,10 @@ export class ProjectService {
      */
     async getProjectsByOrganization(organizationId: number): Promise<SProjectDTO[]> {
         try {
-            return await this.apiClient.get<SProjectDTO[]>(
+            const response = await this.client.get<SProjectDTO[]>(
                 `/api/v1/structure/projects-by-organization?organizationId=${organizationId}`
             );
+            return response.data;
         } catch (error) {
             console.error('Error fetching projects by organization:', error);
             throw error;
@@ -57,9 +62,10 @@ export class ProjectService {
      */
     async getProjectById(projectId: number): Promise<SProjectDTO> {
         try {
-            return await this.apiClient.get<SProjectDTO>(
+            const response = await this.client.get<SProjectDTO>(
                 `/api/v1/structure/project/${projectId}`
             );
+            return response.data;
         } catch (error) {
             console.error('Error fetching project:', error);
             throw error;
@@ -71,10 +77,11 @@ export class ProjectService {
      */
     async createProject(project: CreateProjectRequestDTO): Promise<SProjectDTO> {
         try {
-            return await this.apiClient.post<SProjectDTO, CreateProjectRequestDTO>(
+            const response = await this.client.post<SProjectDTO>(
                 '/api/v1/structure/project',
                 project
             );
+            return response.data;
         } catch (error) {
             console.error('Error creating project:', error);
             throw error;
@@ -86,10 +93,11 @@ export class ProjectService {
      */
     async updateProject(project: SProjectDTO): Promise<SProjectDTO> {
         try {
-            return await this.apiClient.put<SProjectDTO, SProjectDTO>(
+            const response = await this.client.put<SProjectDTO>(
                 '/api/v1/structure/project',
                 project
             );
+            return response.data;
         } catch (error) {
             console.error('Error updating project:', error);
             throw error;
