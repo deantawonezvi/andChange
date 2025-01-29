@@ -1,9 +1,11 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
+import { useQuery } from '@tanstack/react-query';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SProjectDTO } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import { OrganizationService } from '@/app/lib/api/services/organisationService';
 
 interface ProjectTableProps {
     data: SProjectDTO[];
@@ -15,9 +17,17 @@ interface ProjectTableData extends Record<string, unknown> {
     id: number;
     projectName: string;
     organizationId: number;
+    organizationName: string;
 }
 
-const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading, error }) => {
+const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoadingProjects, error }) => {
+    const organizationService = OrganizationService.getInstance();
+
+    const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
+        queryKey: ['organizations'],
+        queryFn: () => organizationService.getAllOrganizations(),
+    });
+
     const columns: MRT_ColumnDef<ProjectTableData>[] = [
         {
             accessorKey: 'id',
@@ -30,13 +40,13 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading, error }) 
             size: 200,
         },
         {
-            accessorKey: 'organizationId',
-            header: 'Organization ID',
-            size: 150,
+            accessorKey: 'organizationName',
+            header: 'Organization',
+            size: 200,
         },
     ];
 
-    if (isLoading) {
+    if (isLoadingProjects || isLoadingOrgs) {
         return <SectionLoader message="Loading projects..." />;
     }
 
@@ -44,11 +54,15 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading, error }) 
         return <div>Error: {error}</div>;
     }
 
-    const transformedData: ProjectTableData[] = data.map(project => ({
-        id: project.id ?? 0,
-        projectName: project.projectName,
-        organizationId: project.organizationId,
-    }));
+    const transformedData: ProjectTableData[] = data.map(project => {
+        const organization = organizations?.find(org => org.id === project.organizationId);
+        return {
+            id: project.id ?? 0,
+            projectName: project.projectName,
+            organizationId: project.organizationId,
+            organizationName: organization?.organizationName ?? 'Unknown Organization'
+        };
+    });
 
     return (
         <Box sx={{ width: '100%' }}>
