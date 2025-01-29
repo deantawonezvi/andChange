@@ -46,6 +46,21 @@ export class OrganizationService {
     }
 
     /**
+     * Get all organizations accessible to the current user
+     */
+    async getAccessibleOrganizations(): Promise<SOrganizationDTO[]> {
+        try {
+            const response = await this.client.get<number[]>('/api/v1/auth/organizations');
+            const orgIds = response.data;
+            const organizationPromises = orgIds.map(id => this.getOrganizationById(id));
+            return await Promise.all(organizationPromises);
+        } catch (error) {
+            console.error('Error fetching accessible organizations:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Get organization by ID
      */
     async getOrganizationById(organizationId: number): Promise<SOrganizationDTO> {

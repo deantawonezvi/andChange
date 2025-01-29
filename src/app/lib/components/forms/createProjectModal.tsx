@@ -1,6 +1,6 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Controller, useForm } from 'react-hook-form';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Button,
     Dialog,
@@ -9,32 +9,52 @@ import {
     DialogActions,
     TextField,
     Alert,
+    Select,
+    InputLabel,
+    MenuItem,
+    FormHelperText,
+    FormControl,
 } from '@mui/material';
 import { ProjectService, CreateProjectRequestDTO } from '@/app/lib/api/services/projectService';
+import { OrganizationService } from "@/app/lib/api/services/organisationService";
 
 interface CreateProjectModalProps {
     open: boolean;
     onClose: () => void;
-    organizationId?: number;
+}
+
+interface FormInputs extends CreateProjectRequestDTO {
+    projectName: string;
+    organizationId: number;
 }
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                                                    open,
                                                                    onClose,
-                                                                   organizationId = 1,
                                                                }) => {
     const {
-        register,
+        control,
         handleSubmit,
         formState: { errors },
         reset
-    } = useForm<CreateProjectRequestDTO>();
+    } = useForm<FormInputs>({
+        defaultValues: {
+            projectName: '',
+            organizationId: 0
+        }
+    });
 
     const queryClient = useQueryClient();
     const projectService = ProjectService.getInstance();
+    const organizationService = OrganizationService.getInstance();
+
+    const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
+        queryKey: ['accessible-organizations'],
+        queryFn: () => organizationService.getAccessibleOrganizations(),
+    });
 
     const createProjectMutation = useMutation({
-        mutationFn: (data: CreateProjectRequestDTO) => projectService.createProject(data),
+        mutationFn: (data: FormInputs) => projectService.createProject(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
             reset();
@@ -42,16 +62,18 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         }
     });
 
-    const onSubmit = (data: CreateProjectRequestDTO) => {
-        createProjectMutation.mutate({
-            ...data,
-            organizationId
-        });
+    const handleClose = () => {
+        reset();
+        onClose();
     };
 
+    if (isLoadingOrgs) {
+        return null;
+    }
+
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <form onSubmit={handleSubmit(onSubmit)}>
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+            <form onSubmit={handleSubmit((data) => createProjectMutation.mutate(data))}>
                 <DialogTitle>Create New Project</DialogTitle>
                 <DialogContent>
                     {createProjectMutation.isError && (
@@ -62,25 +84,65 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         </Alert>
                     )}
 
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Project Name"
-                        fullWidth
-                        variant="outlined"
-                        {...register('projectName', {
+                    <Controller
+                        name="projectName"
+                        control={control}
+                        rules={{
                             required: 'Project name is required',
                             minLength: { value: 3, message: 'Minimum length is 3 characters' }
-                        })}
-                        error={!!errors.projectName}
-                        helperText={errors.projectName?.message}
-                        sx={{ mt: 2 }}
+                        }}
+                        render={({ field }) => (
+                            <TextField
+                                {...field}
+                                autoFocus
+                                margin="dense"
+                                label="Project Name"
+                                fullWidth
+                                variant="outlined"
+                                error={!!errors.projectName}
+                                helperText={errors.projectName?.message}
+                                sx={{ mt: 2 }}
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        name="organizationId"
+                        control={control}
+                        rules={{ required: 'Please select an organization' }}
+                        render={({ field }) => (
+                            <FormControl
+                                fullWidth
+                                error={!!errors.organizationId}
+                                sx={{ mt: 2, mb: 2 }}
+                            >
+                                <InputLabel>Organization</InputLabel>
+                                <Select
+                                    {...field}
+                                    label="Organization"
+                                >
+                                    {organizations?.map((org) => (
+                                        <MenuItem
+                                            key={org.id}
+                                            value={org.id}
+                                        >
+                                            {org.organizationName} - {org.industry}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                {errors.organizationId && (
+                                    <FormHelperText>
+                                        {errors.organizationId.message}
+                                    </FormHelperText>
+                                )}
+                            </FormControl>
+                        )}
                     />
                 </DialogContent>
 
                 <DialogActions sx={{ p: 2 }}>
                     <Button
-                        onClick={onClose}
+                        onClick={handleClose}
                         disabled={createProjectMutation.isPending}
                     >
                         Cancel
