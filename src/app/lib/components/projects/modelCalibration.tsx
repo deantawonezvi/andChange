@@ -16,6 +16,7 @@ import {
     MessageSquare,
     Globe
 } from 'lucide-react';
+import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationalAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -126,22 +127,6 @@ export default function ModelCalibration() {
                 </Tabs>
             </Paper>
 
-            {/* Description Card */}
-            <Paper
-                elevation={0}
-                sx={{
-                    p: 2,
-                    mb: 3,
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
-                    borderRadius: 1
-                }}
-            >
-                <Typography variant="body1">
-                    {tabs[activeTab].description}
-                </Typography>
-            </Paper>
-
             {/* Tab Panels */}
             <Paper
                 elevation={0}
@@ -152,8 +137,9 @@ export default function ModelCalibration() {
                 }}
             >
                 <TabPanel value={activeTab} index={0}>
-                    <Typography variant="h6">Organizational Information</Typography>
-                    <Typography>Form for organization details will be implemented here.</Typography>
+                    <Typography variant="h4">Organizational Information</Typography>
+                    <br/>
+                    <OrganizationalAssessmentForm/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={1}>
