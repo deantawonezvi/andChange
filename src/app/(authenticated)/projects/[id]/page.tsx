@@ -15,6 +15,7 @@ import {
 import { BarChart3, Settings, PlayCircle, LineChart } from 'lucide-react';
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import ModelCalibration from "@/app/lib/components/projects/modelCalibration";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -132,8 +133,9 @@ export default function ProjectPage() {
             </TabPanel>
 
             <TabPanel value={activeTab} index={1}>
-                <Typography variant="h6">Model Calibration</Typography>
-                <Typography>Model configuration and calibration settings will be available here.</Typography>
+                <Typography variant="h4">Model Calibration</Typography>
+                <br/>
+                <ModelCalibration/>
             </TabPanel>
 
             <TabPanel value={activeTab} index={2}>
