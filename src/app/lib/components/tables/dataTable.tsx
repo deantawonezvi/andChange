@@ -1,10 +1,16 @@
+// src/app/lib/components/tables/dataTable.tsx
 import React, { useMemo } from 'react';
-import { MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState } from 'material-react-table';
+import {
+    MaterialReactTable,
+    type MRT_ColumnDef,
+    MRT_PaginationState,
+    MRT_TableOptions
+} from 'material-react-table';
 import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-
-interface DataTableProps<T extends Record<string, unknown>> {
+interface DataTableProps<T extends Record<string, unknown>> extends
+    Pick<MRT_TableOptions<T>, 'muiTableBodyRowProps'> {
     data: T[];
     columns: MRT_ColumnDef<T>[];
     title?: string;
@@ -20,17 +26,18 @@ interface DataTableProps<T extends Record<string, unknown>> {
 }
 
 const DataTable = <T extends Record<string, unknown>>({
-                                                      data,
-                                                      columns,
-                                                      title,
-                                                      subtitle,
-                                                      enablePagination = false,
-                                                      manualPagination = false,
-                                                      rowCount,
-                                                      onPaginationChange,
-                                                      state,
-                                                      enableDownload = false,
-                                                  }: DataTableProps<T>) => {
+                                                          data,
+                                                          columns,
+                                                          title,
+                                                          subtitle,
+                                                          enablePagination = false,
+                                                          manualPagination = false,
+                                                          rowCount,
+                                                          onPaginationChange,
+                                                          state,
+                                                          enableDownload = false,
+                                                          muiTableBodyRowProps,
+                                                      }: DataTableProps<T>) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
@@ -88,6 +95,7 @@ const DataTable = <T extends Record<string, unknown>>({
                 muiTablePaperProps={{
                     elevation: 0,
                 }}
+                muiTableBodyRowProps={muiTableBodyRowProps}
                 muiTableBodyProps={{
                     sx: (theme) => ({
                         '& tr:nth-of-type(odd)': {

@@ -1,7 +1,9 @@
+// src/app/lib/components/tables/projectsTable.tsx
 import React from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SProjectDTO } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
@@ -21,6 +23,7 @@ interface ProjectTableData extends Record<string, unknown> {
 }
 
 const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoadingProjects, error }) => {
+    const router = useRouter();
     const organizationService = OrganizationService.getInstance();
 
     const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
@@ -72,6 +75,15 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoading
                 title="Projects"
                 subtitle="Overview of all projects"
                 enablePagination={true}
+                muiTableBodyRowProps={({ row }) => ({
+                    onClick: () => router.push(`/projects/${row.original.id}`),
+                    sx: {
+                        cursor: 'pointer',
+                        '&:hover': {
+                            backgroundColor: 'action.hover',
+                        },
+                    },
+                })}
             />
         </Box>
     );
