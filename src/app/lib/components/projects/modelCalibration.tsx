@@ -17,6 +17,7 @@ import {
     Globe
 } from 'lucide-react';
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationalAssessment";
+import ProjectInformationForm from "@/app/lib/components/forms/projectInformation";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -143,8 +144,9 @@ export default function ModelCalibration() {
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={1}>
-                    <Typography variant="h6">Project Information</Typography>
-                    <Typography>Project details form will be implemented here.</Typography>
+                    <Typography variant="h4">Project Information</Typography>
+                    <br/>
+                    <ProjectInformationForm/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={2}>
