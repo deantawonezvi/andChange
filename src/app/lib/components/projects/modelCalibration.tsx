@@ -1,4 +1,3 @@
-// src/app/lib/components/calibration/ModelCalibration.tsx
 import React, { useState } from 'react';
 import {
     Box,
@@ -19,6 +18,7 @@ import {
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationalAssessment";
 import ProjectInformationForm from "@/app/lib/components/forms/projectInformation";
 import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment";
+import ImpactedGroupsTable from "@/app/lib/components/tables/impactedGroupsTable";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -157,8 +157,9 @@ export default function ModelCalibration() {
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={3}>
-                    <Typography variant="h6">Impacted Groups</Typography>
-                    <Typography>Impacted groups management interface will be implemented here.</Typography>
+                    <Typography variant="h4">Impacted Groups</Typography>
+                    <br/>
+                    <ImpactedGroupsTable/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={4}>
