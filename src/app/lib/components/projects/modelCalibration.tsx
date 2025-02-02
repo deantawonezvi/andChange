@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationalAssessment";
 import ProjectInformationForm from "@/app/lib/components/forms/projectInformation";
+import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -150,8 +151,9 @@ export default function ModelCalibration() {
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={2}>
-                    <Typography variant="h6">Timeline</Typography>
-                    <Typography>Timeline configuration will be implemented here.</Typography>
+                    <Typography variant="h4">Timeline</Typography>
+                    <br/>
+                    <TimelineAssessment/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={3}>
