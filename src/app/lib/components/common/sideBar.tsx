@@ -1,3 +1,4 @@
+// src/app/lib/components/common/sideBar.tsx
 import React, { useState } from 'react';
 import {
     AppBar,
@@ -37,7 +38,6 @@ export interface MenuItem {
 
 export type MenuItems = MenuItem[];
 
-
 const drawerWidth = 300;
 
 export const menuItems: MenuItem[] = [
@@ -55,11 +55,9 @@ const Sidebar: React.FC = () => {
     const router = useRouter();
     const authService = AuthService.getInstance();
 
-
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
-
 
     const handleMenuClose = () => {
         setAnchorEl(null);
@@ -74,8 +72,12 @@ const Sidebar: React.FC = () => {
         }
     };
 
-    const isActive = (path: string) => pathname === path;
-
+    const isActive = (path: string) => {
+        if (path === '/projects') {
+            return pathname === path || pathname.startsWith(`${path}/`);
+        }
+        return pathname === path;
+    };
 
     const drawer = (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -114,7 +116,6 @@ const Sidebar: React.FC = () => {
             </List>
 
             <Divider sx={{ bgcolor: 'rgba(255, 255, 255, 0.12)', my: 2 }} />
-
 
             <Menu
                 anchorEl={anchorEl}
