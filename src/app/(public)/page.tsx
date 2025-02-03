@@ -126,68 +126,6 @@ const LandingPage = () => {
             </Link>
           </Box>
 
-          {/* Feature Cards */}
-          <Box
-              component={motion.div}
-              variants={itemVariants}
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  md: 'repeat(3, 1fr)'
-                },
-                gap: 3,
-                width: '100%',
-                mt: 8
-              }}
-          >
-            {[
-              {
-                title: 'Project Management',
-                description: 'Track and manage change initiatives across your organization'
-              },
-              {
-                title: 'Team Collaboration',
-                description: 'Work together seamlessly with built-in collaboration tools'
-              },
-              {
-                title: 'Progress Analytics',
-                description: 'Monitor and analyze change adoption with real-time metrics'
-              }
-            ].map((feature, index) => (
-                <Paper
-                    key={index}
-                    elevation={0}
-                    sx={{
-                      p: 4,
-                      borderRadius: 2,
-                      border: `1px solid ${theme.palette.divider}`,
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                      }
-                    }}
-                >
-                  <Typography
-                      variant="h6"
-                      sx={{
-                        mb: 1,
-                        fontWeight: 600
-                      }}
-                  >
-                    {feature.title}
-                  </Typography>
-                  <Typography
-                      variant="body1"
-                      color="text.secondary"
-                  >
-                    {feature.description}
-                  </Typography>
-                </Paper>
-            ))}
-          </Box>
-
         </Box>
       </Container>
   );
