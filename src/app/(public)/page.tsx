@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import {Box, Button, Container, Paper, Typography, useTheme} from '@mui/material';
+import {Box, Button, Container, Typography, useTheme} from '@mui/material';
 import {motion} from 'framer-motion';
 import Link from 'next/link';
 import {ArrowRight, LogIn, UserPlus} from 'lucide-react';
