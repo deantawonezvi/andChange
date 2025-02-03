@@ -1,5 +1,5 @@
 // src/app/lib/components/common/sideBar.tsx
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     AppBar,
     Box,
@@ -17,12 +17,11 @@ import {
     Typography,
     useTheme,
 } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
+import {Menu as MenuIcon} from '@mui/icons-material';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid, LogOut, Settings, User } from 'lucide-react';
-import { AuthService } from "@/app/lib/api/auth";
-import { useRouter } from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
+import {BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid, LogOut, Settings, User} from 'lucide-react';
+import {AuthService} from "@/app/lib/api/auth";
 
 export interface SubMenuItem {
     text: string;

@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     Box,
     Button,
-    Paper,
-    Typography,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
+    DialogContent,
+    DialogTitle,
     IconButton,
+    Paper,
+    TextField,
     Tooltip,
+    Typography,
 } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Plus, Info } from 'lucide-react';
+import {DataGrid, GridColDef} from '@mui/x-data-grid';
+import {Info, Plus} from 'lucide-react';
 
 interface ImpactedGroup {
     id: number;

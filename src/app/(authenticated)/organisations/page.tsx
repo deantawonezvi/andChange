@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
-import { Box } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
+import {Box} from '@mui/material';
+import {useQuery} from '@tanstack/react-query';
 import {OrganizationService} from "@/app/lib/api/services/organisationService";
 import OrganizationsTable from "@/app/lib/components/tables/organisationsTable";
 

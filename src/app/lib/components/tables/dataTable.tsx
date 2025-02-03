@@ -1,13 +1,8 @@
 // src/app/lib/components/tables/dataTable.tsx
-import React, { useMemo } from 'react';
-import {
-    MaterialReactTable,
-    type MRT_ColumnDef,
-    MRT_PaginationState,
-    MRT_TableOptions
-} from 'material-react-table';
-import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import React, {useMemo} from 'react';
+import {MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState, MRT_TableOptions} from 'material-react-table';
+import {Box, Paper, Typography, useMediaQuery} from '@mui/material';
+import {useTheme} from '@mui/material/styles';
 
 interface DataTableProps<T extends Record<string, unknown>> extends
     Pick<MRT_TableOptions<T>, 'muiTableBodyRowProps'> {

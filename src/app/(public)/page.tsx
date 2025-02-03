@@ -1,17 +1,10 @@
 'use client';
 
 import React from 'react';
-import {
-  Box,
-  Button,
-  Container,
-  Typography,
-  Paper,
-  useTheme
-} from '@mui/material';
-import { motion } from 'framer-motion';
+import {Box, Button, Container, Paper, Typography, useTheme} from '@mui/material';
+import {motion} from 'framer-motion';
 import Link from 'next/link';
-import { LogIn, UserPlus, ArrowRight } from 'lucide-react';
+import {ArrowRight, LogIn, UserPlus} from 'lucide-react';
 
 const LandingPage = () => {
   const theme = useTheme();

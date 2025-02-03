@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import { Box, Button, Container, Typography } from '@mui/material';
-import { motion } from 'framer-motion';
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import {Box, Button, Container, Typography} from '@mui/material';
+import {motion} from 'framer-motion';
+import {AlertTriangle, Home, RefreshCw} from 'lucide-react';
 import Link from 'next/link';
 
 export default function Error({

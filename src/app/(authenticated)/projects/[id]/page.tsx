@@ -1,20 +1,13 @@
 // src/app/(authenticated)/projects/[id]/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import {
-    Box,
-    Tab,
-    Tabs,
-    Typography,
-    Paper,
-    Breadcrumbs,
-} from '@mui/material';
-import { BarChart3, Settings, PlayCircle, LineChart } from 'lucide-react';
-import { ProjectService } from '@/app/lib/api/services/projectService';
-import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import React, {useState} from 'react';
+import {useParams, useRouter} from 'next/navigation';
+import {useQuery} from '@tanstack/react-query';
+import {Box, Breadcrumbs, Paper, Tab, Tabs, Typography,} from '@mui/material';
+import {BarChart3, LineChart, PlayCircle, Settings} from 'lucide-react';
+import {ProjectService} from '@/app/lib/api/services/projectService';
+import {SectionLoader} from '@/app/lib/components/common/pageLoader';
 import ModelCalibration from "@/app/lib/components/projects/modelCalibration";
 
 interface TabPanelProps {

@@ -1,9 +1,9 @@
 'use client'
-import React, { useState } from 'react';
-import { Box, Button } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
-import { ProjectService } from '@/app/lib/api/services/projectService';
+import React, {useState} from 'react';
+import {Box, Button} from '@mui/material';
+import {useQuery} from '@tanstack/react-query';
+import {Plus} from 'lucide-react';
+import {ProjectService} from '@/app/lib/api/services/projectService';
 import ProjectsTable from "@/app/lib/components/tables/projectsTable";
 import CreateProjectModal from "@/app/lib/components/forms/createProjectModal";
 

@@ -1,22 +1,22 @@
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {Controller, useForm} from 'react-hook-form';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {
+    Alert,
     Button,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
-    Alert,
-    Select,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormHelperText,
     InputLabel,
     MenuItem,
-    FormHelperText,
-    FormControl,
+    Select,
+    TextField,
 } from '@mui/material';
-import { ProjectService, CreateProjectRequestDTO } from '@/app/lib/api/services/projectService';
-import { OrganizationService } from "@/app/lib/api/services/organisationService";
+import {CreateProjectRequestDTO, ProjectService} from '@/app/lib/api/services/projectService';
+import {OrganizationService} from "@/app/lib/api/services/organisationService";
 
 interface CreateProjectModalProps {
     open: boolean;

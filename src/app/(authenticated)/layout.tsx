@@ -9,7 +9,6 @@ import theme from "@/app/lib/theme";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/app/lib/hooks/useAuth";
 import PageHeader from "@/app/lib/components/common/pageHeader";
-import { PageLoader } from '../lib/components/common/pageLoader';
 import AuthLoader from "@/app/lib/components/common/authLoader";
 
 interface AuthenticatedLayoutProps {

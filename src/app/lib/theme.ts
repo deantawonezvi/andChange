@@ -1,5 +1,5 @@
-import { createTheme } from "@mui/material";
-import { Noto_Sans } from 'next/font/google';
+import {createTheme} from "@mui/material";
+import {Noto_Sans} from 'next/font/google';
 
 const workSans = Noto_Sans({
     weight: ['300', '400', '500', '700'],
