@@ -10,6 +10,7 @@ import {useRouter} from "next/navigation";
 import {useAuth} from "@/app/lib/hooks/useAuth";
 import PageHeader from "@/app/lib/components/common/pageHeader";
 import AuthLoader from "@/app/lib/components/common/authLoader";
+import { Toast } from "@/app/lib/components/common/toast";
 
 interface AuthenticatedLayoutProps {
     children: React.ReactNode;
@@ -57,6 +58,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({children}) => 
                                         <PageHeader menuItems={menuItems} />
                                         {children}
                                     </Box>
+                                    <Toast />
                                 </Box>
                     </QueryClientProvider>
                 </Suspense>

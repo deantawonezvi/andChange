@@ -8,9 +8,15 @@ import {
     MenuItem,
     Button,
     IconButton,
-    FormControl,
+    FormControl, CircularProgress, Snackbar, Alert,
 } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
+import CalendarService from "@/app/lib/api/services/calendarService";
+import { ProjectService } from "@/app/lib/api/services/projectService";
+import { ImpactedGroupService } from "@/app/lib/api/services/impactedGroupService";
+import { useQuery } from "@tanstack/react-query";
+import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { useToast } from "@/app/lib/hooks/useToast";
 
 // Helper to generate calendar data
 const generateCalendarDays = (year: number, month: number) => {
@@ -57,45 +63,139 @@ const months = [
 
 interface Event {
     date: string;
-    type: 'crm-implementation' | 'project-culture' | 'digital-assistant';
+    type: string;
+    title: string;
+    groupName: string;
 }
 
-interface Activity {
-    title: string;
-    time: string;
+interface ErrorState {
+    message: string;
+    open: boolean;
 }
+
 
 const CalendarPage = () => {
-    const [selectedProject, setSelectedProject] = useState('All');
-    const [selectedGroup, setSelectedGroup] = useState('All');
+    const [selectedProject, setSelectedProject] = useState<string>('all');
+    const [selectedGroup, setSelectedGroup] = useState<string>('all');
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [error, setError] = useState<ErrorState>({ message: '', open: false });
+    const { showToast } = useToast();
 
-    // Demo events data
-    const events: Event[] = [
-        { date: '2024-01-01', type: 'project-culture' },
-        { date: '2024-01-03', type: 'project-culture' },
-        { date: '2024-01-03', type: 'digital-assistant' },
-        { date: '2024-01-07', type: 'crm-implementation' },
-        { date: '2024-01-09', type: 'digital-assistant' },
-        { date: '2024-01-16', type: 'crm-implementation' },
-        { date: '2024-01-20', type: 'digital-assistant' },
-        { date: '2024-01-24', type: 'project-culture' },
-        { date: '2024-01-24', type: 'crm-implementation' },
-        { date: '2024-01-28', type: 'digital-assistant' }
-    ];
+    const calendarService = CalendarService.getInstance();
+    const projectService = ProjectService.getInstance();
+    const impactedGroupService = ImpactedGroupService.getInstance();
 
-    // Demo calendar activities
-    const activities: Activity[] = [
-        { title: 'Adoption Assessment', time: '09:00' },
-        { title: 'Impact Assessment', time: '11:00' },
-        { title: 'Project Assessment', time: '14:30' }
-    ];
+    const handleCloseError = () => {
+        setError({ ...error, open: false });
+    };
 
-    const renderEventDot = (type: Event['type']) => {
+
+    const { data: projects, isLoading: isLoadingProjects, error: projectsError } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => projectService.getAllProjects(),
+    });
+
+    const { data: impactedGroups, isLoading: isLoadingGroups, error: groupsError } = useQuery({
+        queryKey: ['impactedGroups', selectedProject],
+        queryFn: () => {
+            const projectId = parseInt(selectedProject);
+            if (projectId && !isNaN(projectId)) {
+                return impactedGroupService.getImpactedGroupsByProject(projectId);
+            }
+            return [];
+        },
+        enabled: selectedProject !== 'all'
+    });
+
+    const { data: calendarData, isLoading: isLoadingCalendar, error: calendarError } = useQuery({
+        queryKey: ['calendar', selectedProject, selectedGroup, currentDate],
+        queryFn: async () => {
+            const projectId = parseInt(selectedProject);
+            if (isNaN(projectId) || selectedProject === 'all') {
+                return { calendarSummary: {} };
+            }
+
+            const startDate = format(startOfMonth(currentDate), 'yyyy-MM-dd');
+            const endDate = format(endOfMonth(currentDate), 'yyyy-MM-dd');
+
+
+            const params: { startDate: string; endDate: string; impactedGroupIds?: number[] } = {
+                startDate,
+                endDate
+            };
+
+            if (selectedGroup !== 'all') {
+                params.impactedGroupIds = [parseInt(selectedGroup)];
+            }
+
+            return calendarService.getCalendarSummary(projectId, params);
+        },
+        enabled: selectedProject !== 'all'
+    });
+
+    React.useEffect(() => {
+        if (projectsError) {
+            showToast('Failed to load projects: ' + projectsError.message, 'error');
+        } else if (groupsError) {
+            showToast('Failed to load impacted groups: ' + groupsError.message, 'error');
+        } else if (calendarError) {
+            showToast('Failed to load calendar data: ' + calendarError.message, 'error');
+        }
+    }, [projectsError, groupsError, calendarError, showToast]);
+
+    const events = React.useMemo(() => {
+        if (!calendarData) return [];
+
+
+        const transformedEvents: Event[] = [];
+        Object.entries(calendarData.calendarSummary).forEach(([date, summaries]) => {
+            summaries.forEach(summary => {
+                transformedEvents.push({
+                    date,
+                    type: summary.actionSummaryDTO.actionCore.externalActionIdentifier,
+                    title: summary.actionSummaryDTO.actionCore.actionName,
+                    groupName: summary.impactedGroupDTO.anagraphicDataDTO.entityName
+                });
+            });
+        });
+
+        return transformedEvents;
+    }, [calendarData]);
+
+    if (isLoadingProjects || isLoadingCalendar || isLoadingGroups) {
+        return (
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh'
+            }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+
+    const getActivitiesForSelectedDate = (events: Event[], selectedDate: Date) => {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        return events
+            .filter(event => event.date === dateStr)
+            .map(event => ({
+                title: event.title,
+                time: '09:00', // Note: Add time if it's available in the API response
+                groupName: event.groupName
+            }));
+    };
+
+    const renderEventDot = (type: string) => {
+
         const colors = {
-            'crm-implementation': '#ff4444',
-            'project-culture': '#4CAF50',
-            'digital-assistant': '#2196F3'
+            'CRM': '#ff4444',
+            'CULTURE': '#4CAF50',
+            'DIGITAL': '#2196F3',
+            'default': '#757575'
         };
+
 
         return (
             <Box
@@ -105,14 +205,21 @@ const CalendarPage = () => {
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    backgroundColor: colors[type],
+                    backgroundColor: colors[type as keyof typeof colors] || colors.default,
                     mx: 0.5
                 }}
             />
         );
     };
 
-    const days = generateCalendarDays(2024, 0); // January 2024
+    const days = generateCalendarDays(
+        currentDate.getFullYear(),
+        currentDate.getMonth()
+    );
+
+    const handleMonthClick = (monthIndex: number) => {
+        setCurrentDate(new Date(currentDate.getFullYear(), monthIndex));
+    };
 
     return (
         <Box sx={{ p: 4 }}>
@@ -128,10 +235,12 @@ const CalendarPage = () => {
                             value={selectedProject}
                             onChange={(e) => setSelectedProject(e.target.value)}
                         >
-                            <MenuItem value="All">All Projects</MenuItem>
-                            <MenuItem value="CRM">CRM Implementation</MenuItem>
-                            <MenuItem value="Culture">Project Culture</MenuItem>
-                            <MenuItem value="Digital">Digital Assistant</MenuItem>
+                            <MenuItem value="all">All Projects</MenuItem>
+                            {projects?.map(project => (
+                                <MenuItem key={project.id} value={project.id?.toString()}>
+                                    {project.projectName}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 
@@ -139,18 +248,25 @@ const CalendarPage = () => {
                         <Select
                             value={selectedGroup}
                             onChange={(e) => setSelectedGroup(e.target.value)}
+                            disabled={!impactedGroups?.length}
                         >
-                            <MenuItem value="All">All Groups</MenuItem>
-                            <MenuItem value="Group1">Group 1</MenuItem>
-                            <MenuItem value="Group2">Group 2</MenuItem>
+                            <MenuItem value="all">All Groups</MenuItem>
+                            {impactedGroups?.map(group => (
+                                <MenuItem
+                                    key={group.id}
+                                    value={group.id?.toString()}
+                                >
+                                    {group.anagraphicDataDTO.entityName}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 
                     <Button
                         variant="contained"
                         onClick={() => {
-                            setSelectedProject('All');
-                            setSelectedGroup('All');
+                            setSelectedProject('all');
+                            setSelectedGroup('all');
                         }}
                         sx={{
                             bgcolor: 'black',
@@ -164,20 +280,23 @@ const CalendarPage = () => {
 
             {/* Year */}
             <Paper sx={{ bgcolor: 'black', color: 'white', p: 2, mb: 4 }}>
-                <Typography variant="h4" align="center">2024</Typography>
+                <Typography variant="h4" align="center">
+                    {currentDate.getFullYear()}
+                </Typography>
             </Paper>
 
+
             {/* Month Navigation */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 4, color: 'grey.500', overflow: 'auto' }}>
+            <Box sx={{ display: 'flex', gap: 2, mb: 4, color: 'grey.500' }}>
                 {months.map((month, index) => (
                     <Typography
                         key={month}
                         variant="h6"
+                        onClick={() => handleMonthClick(index)}
                         sx={{
                             cursor: 'pointer',
-                            color: index === 0 ? 'black' : 'inherit',
-                            borderBottom: index === 0 ? '2px solid red' : 'none',
-                            whiteSpace: 'nowrap'
+                            color: index === currentDate.getMonth() ? 'black' : 'inherit',
+                            borderBottom: index === currentDate.getMonth() ? '2px solid red' : 'none'
                         }}
                     >
                         {month}
@@ -244,8 +363,9 @@ const CalendarPage = () => {
                 </Paper>
 
                 {/* Activities */}
+                {/* Activities Sidebar */}
                 <Box sx={{ flex: 1 }}>
-                    {activities.map((activity, index) => (
+                    {getActivitiesForSelectedDate(events, currentDate).map((activity, index) => (
                         <Paper
                             key={index}
                             sx={{
@@ -258,6 +378,9 @@ const CalendarPage = () => {
                         >
                             <Box>
                                 <Typography variant="h6">{activity.title}</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {activity.groupName}
+                                </Typography>
                                 <Typography variant="body1">{activity.time}</Typography>
                             </Box>
                             <IconButton>
@@ -265,32 +388,29 @@ const CalendarPage = () => {
                             </IconButton>
                         </Paper>
                     ))}
+                    {getActivitiesForSelectedDate(events, currentDate).length === 0 && (
+                        <Typography color="text.secondary" align="center">
+                            No activities for this date
+                        </Typography>
+                    )}
                 </Box>
             </Box>
 
-            {/* Legend */}
-            <Box sx={{ mt: 4 }}>
-                <Typography
-                    variant="body2"
-                    sx={{ color: 'grey.500', mb: 2 }}
+            <Snackbar
+                open={error.open}
+                autoHideDuration={6000}
+                onClose={handleCloseError}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={handleCloseError}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: '100%' }}
                 >
-                    LEGEND
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {renderEventDot('crm-implementation')}
-                        <Typography>CRM Implementation</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {renderEventDot('project-culture')}
-                        <Typography>Project Culture</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {renderEventDot('digital-assistant')}
-                        <Typography>Digital Assistant</Typography>
-                    </Box>
-                </Box>
-            </Box>
+                    {error.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

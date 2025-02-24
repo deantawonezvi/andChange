@@ -45,14 +45,6 @@ const createAxiosClient = (baseURL?: string, enableDebug: boolean = false): Axio
             return response;
         },
         async (error: AxiosError) => {
-            if (enableDebug) {
-                console.error('API Error:', {
-                    status: error.response?.status,
-                    statusText: error.response?.statusText,
-                    data: error.response?.data,
-                    headers: error.response?.headers
-                });
-            }
 
             if (error.response?.status === 401) {
                 return Promise.reject(new Error('Session expired. Please log in again.'));

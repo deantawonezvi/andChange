@@ -15,7 +15,6 @@ export interface ImpactedGroupActionSummaryDTO {
         projectId: number;
         anagraphicDataDTO: {
             entityName: string;
-            // Add other fields as needed
         };
     };
     actionSummaryDTO: {
@@ -44,14 +43,15 @@ export class CalendarService {
         return CalendarService.instance;
     }
 
-    async getCalendarSummary(params: {
+    async getCalendarSummary(projectId: number, params: {
         startDate?: string;
         endDate?: string;
-        projectIds?: number[];
         impactedGroupIds?: number[];
     }): Promise<CalendarSummaryResponseDTO> {
         try {
             const queryParams = new URLSearchParams();
+
+            queryParams.append('project-id', projectId.toString());
 
             if (params.startDate) {
                 queryParams.append('start-date', params.startDate);
@@ -59,11 +59,7 @@ export class CalendarService {
             if (params.endDate) {
                 queryParams.append('end-date', params.endDate);
             }
-            if (params.projectIds?.length) {
-                params.projectIds.forEach(id => {
-                    queryParams.append('project-ids', id.toString());
-                });
-            }
+
             if (params.impactedGroupIds?.length) {
                 params.impactedGroupIds.forEach(id => {
                     queryParams.append('impacted-group-ids', id.toString());
@@ -75,7 +71,7 @@ export class CalendarService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching calendar summary:', error);
+            console.log('Error fetching calendar summary:', error);
             throw error;
         }
     }
