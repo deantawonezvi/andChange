@@ -16,6 +16,21 @@ export interface CMBudgetVsRiskResponse {
     projectROI: number;
 }
 
+export interface ActivityCollisionHeatmapResponse {
+    peakNumberOfActionsForIndividuals: number;
+    numberOfActionsPerIndividual: {
+        [key: string]: {
+            actionCount: number;
+            eindividualDTO: {
+                id: number;
+                firstName: string;
+                lastName: string;
+                organizationId: number;
+            }
+        }
+    }
+}
+
 export class PortfolioService {
     private static instance: PortfolioService;
     private client: AxiosInstance;
@@ -58,6 +73,47 @@ export class PortfolioService {
             return response.data;
         } catch (error) {
             console.log('Error fetching CM budget vs risk data:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get activity collision heatmap data for all individuals in selected projects within a given time range
+     * @param params Required parameters for the heatmap data
+     */
+    async getActivityCollisionHeatmap(params: {
+        projectIds?: number[];
+        individualIds?: number[];
+        startDate: string;  // Required
+        endDate: string;    // Required
+    }): Promise<ActivityCollisionHeatmapResponse> {
+        try {
+            const queryParams = new URLSearchParams();
+
+            // Add project IDs if provided
+            if (params.projectIds && params.projectIds.length > 0) {
+                params.projectIds.forEach(id => {
+                    queryParams.append('projectIds', id.toString());
+                });
+            }
+
+            // Add individual IDs if provided
+            if (params.individualIds && params.individualIds.length > 0) {
+                params.individualIds.forEach(id => {
+                    queryParams.append('individualIds', id.toString());
+                });
+            }
+
+            // Add required date parameters
+            queryParams.append('startDate', params.startDate);
+            queryParams.append('endDate', params.endDate);
+
+            const response = await this.client.get<ActivityCollisionHeatmapResponse>(
+                `/api/v1/portfolio/activity-collision-heatmap?${queryParams.toString()}`
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error fetching activity collision heatmap data:', error);
             throw error;
         }
     }

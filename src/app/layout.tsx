@@ -20,6 +20,18 @@ export default function RootLayout({
       <head>
         <title>{(metadata.title as string) ?? " "}</title>
         <meta name="description" content={(metadata.description as string) ?? " "}/>
+          <script
+              type="text/javascript"
+              dangerouslySetInnerHTML={{
+                  __html: `
+              (function(k,s) {
+                s=document.createElement('script');s.module=true;s.async=true;
+                s.src="https://cdn.feedbucket.app/assets/feedbucket.js";
+                s.dataset.feedbucket=k;document.head.appendChild(s);
+              })('o2hjs0xFC3HDwDzqWf3b')
+            `
+              }}
+          />
       </head>
       <body>
       <AppRouterCacheProvider>
