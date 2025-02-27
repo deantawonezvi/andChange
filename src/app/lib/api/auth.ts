@@ -162,7 +162,7 @@ export class AuthService {
                 });
                 await this.cognitoClient.send(command);
             } catch (error) {
-                console.error('Error during logout:', error);
+                console.log('Error during logout:', error);
             }
         }
 

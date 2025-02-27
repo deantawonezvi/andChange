@@ -70,7 +70,7 @@ export class ModelService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching model variables:', error);
+            console.log('Error fetching model variables:', error);
             throw error;
         }
     }
@@ -83,7 +83,7 @@ export class ModelService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating anagraphic data:', error);
+            console.log('Error updating anagraphic data:', error);
             throw error;
         }
     }
@@ -96,7 +96,7 @@ export class ModelService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating timeline assessment:', error);
+            console.log('Error updating timeline assessment:', error);
             throw error;
         }
     }

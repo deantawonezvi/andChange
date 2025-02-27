@@ -40,7 +40,7 @@ export class OrganizationService {
             const response = await this.client.get<SOrganizationDTO[]>('/api/v1/structure/organizations');
             return response.data;
         } catch (error) {
-            console.error('Error fetching organizations:', error);
+            console.log('Error fetching organizations:', error);
             throw error;
         }
     }
@@ -55,7 +55,7 @@ export class OrganizationService {
             const organizationPromises = orgIds.map(id => this.getOrganizationById(id));
             return await Promise.all(organizationPromises);
         } catch (error) {
-            console.error('Error fetching accessible organizations:', error);
+            console.log('Error fetching accessible organizations:', error);
             throw error;
         }
     }
@@ -70,7 +70,7 @@ export class OrganizationService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching organization:', error);
+            console.log('Error fetching organization:', error);
             throw error;
         }
     }
@@ -86,7 +86,7 @@ export class OrganizationService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error creating organization:', error);
+            console.log('Error creating organization:', error);
             throw error;
         }
     }
@@ -102,7 +102,7 @@ export class OrganizationService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating organization:', error);
+            console.log('Error updating organization:', error);
             throw error;
         }
     }

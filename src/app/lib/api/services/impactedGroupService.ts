@@ -66,7 +66,7 @@ export class ImpactedGroupService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching impacted groups:', error);
+            console.log('Error fetching impacted groups:', error);
             throw error;
         }
     }
@@ -81,7 +81,7 @@ export class ImpactedGroupService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching impacted group:', error);
+            console.log('Error fetching impacted group:', error);
             throw error;
         }
     }
@@ -97,7 +97,7 @@ export class ImpactedGroupService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error creating impacted group:', error);
+            console.log('Error creating impacted group:', error);
             throw error;
         }
     }
@@ -122,7 +122,7 @@ export class ImpactedGroupService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating ABSUP ratings:', error);
+            console.log('Error updating ABSUP ratings:', error);
             throw error;
         }
     }

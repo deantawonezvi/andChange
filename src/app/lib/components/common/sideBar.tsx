@@ -67,7 +67,7 @@ const Sidebar: React.FC = () => {
             await authService.logout();
             router.push('/login');
         } catch (error) {
-            console.error('Error logging out:', error);
+            console.log('Error logging out:', error);
         }
     };
 

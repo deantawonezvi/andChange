@@ -1,5 +1,3 @@
-// src/app/lib/api/services/calendarService.ts
-
 import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 

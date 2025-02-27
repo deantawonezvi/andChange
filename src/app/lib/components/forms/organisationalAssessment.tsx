@@ -51,7 +51,7 @@ const AdequacyRating: React.FC<AdequacyRatingProps> = ({ value, onChange, error 
 );
 
 const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({ label, tooltip, control, fieldName, ratingFieldName, required, multiline, errors, children }) => (
-    <Paper elevation={1} sx={{ p: 3, mb: 2, display: 'flex', alignItems: 'center', gap: 3 }}>
+    <Paper elevation={0} sx={{ gap: 3 }}>
         <Box sx={{ flex: 1 }}>
             <Controller
                 name={fieldName}
@@ -122,7 +122,7 @@ const OrganizationalAssessmentForm: React.FC = () => {
     if (error) return <Alert severity="error">Error loading organization data</Alert>;
 
     return (
-        <Box sx={{ maxWidth: 'lg', mx: 'auto', p: 3 }}>
+        <Box sx={{ mx: 'auto', p: 3 }}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {mutation.isSuccess && <Alert severity="success">Organization information updated successfully</Alert>}

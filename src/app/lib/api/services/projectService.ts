@@ -37,7 +37,7 @@ export class ProjectService {
             const response = await this.client.get<SProjectDTO[]>('/api/v1/structure/projects');
             return response.data;
         } catch (error) {
-            console.error('Error fetching projects:', error);
+            console.log('Error fetching projects:', error);
             throw error;
         }
     }
@@ -52,7 +52,7 @@ export class ProjectService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching projects by organization:', error);
+            console.log('Error fetching projects by organization:', error);
             throw error;
         }
     }
@@ -67,7 +67,7 @@ export class ProjectService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error fetching project:', error);
+            console.log('Error fetching project:', error);
             throw error;
         }
     }
@@ -83,7 +83,7 @@ export class ProjectService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error creating project:', error);
+            console.log('Error creating project:', error);
             throw error;
         }
     }
@@ -99,7 +99,7 @@ export class ProjectService {
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating project:', error);
+            console.log('Error updating project:', error);
             throw error;
         }
     }
