@@ -19,6 +19,7 @@ import { Info } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { PortfolioService } from '@/app/lib/api/services/portfolioService';
 import { useToast } from '@/app/lib/hooks/useToast';
+import { SectionLoader } from "@/app/lib/components/common/pageLoader";
 
 const PortfolioPage = () => {
     const { showToast } = useToast();
@@ -106,11 +107,7 @@ const PortfolioPage = () => {
 
 
     if (isLoading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '500px' }}>
-                <CircularProgress />
-            </Box>
-        );
+        return <SectionLoader message="Loading portfolio..." />;
     }
 
     return (
