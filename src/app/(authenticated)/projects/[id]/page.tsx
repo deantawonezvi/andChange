@@ -1,13 +1,12 @@
-// src/app/(authenticated)/projects/[id]/page.tsx
 'use client';
 
-import React, {useState} from 'react';
-import {useParams, useRouter} from 'next/navigation';
-import {useQuery} from '@tanstack/react-query';
-import {Box, Breadcrumbs, Paper, Tab, Tabs, Typography,} from '@mui/material';
-import {BarChart3, LineChart, PlayCircle, Settings} from 'lucide-react';
-import {ProjectService} from '@/app/lib/api/services/projectService';
-import {SectionLoader} from '@/app/lib/components/common/pageLoader';
+import React, { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
+import { BarChart3, LineChart, PlayCircle, Settings } from 'lucide-react';
+import { ProjectService } from '@/app/lib/api/services/projectService';
+import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ModelCalibration from "@/app/lib/components/projects/modelCalibration";
 
 interface TabPanelProps {
@@ -46,7 +45,6 @@ const tabs = [
 export default function ProjectPage() {
     const [activeTab, setActiveTab] = useState(0);
     const params = useParams();
-    const router = useRouter();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
 
     const projectService = ProjectService.getInstance();
@@ -66,22 +64,6 @@ export default function ProjectPage() {
 
     return (
         <Box sx={{ width: '100%' }}>
-            {/* Breadcrumbs */}
-            <Breadcrumbs sx={{ mb: 3 }}>
-                <Typography
-                    sx={{
-                        cursor: 'pointer',
-                        '&:hover': {
-                            textDecoration: 'underline'
-                        }
-                    }}
-                    color="primary"
-                    onClick={() => router.push('/projects')}
-                >
-                    Projects
-                </Typography>
-                <Typography color="text.primary">{project?.projectName}</Typography>
-            </Breadcrumbs>
 
             {/* Project Title */}
             <Typography variant="h4" component="h1" gutterBottom>

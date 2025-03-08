@@ -1,23 +1,15 @@
-// src/app/lib/components/tables/dataTable.tsx
-import React, { useMemo } from 'react';
-import { MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState, MRT_TableOptions } from 'material-react-table';
+import React from 'react';
+import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-interface DataTableProps<T extends Record<string, unknown>> extends
-    Pick<MRT_TableOptions<T>, 'muiTableBodyRowProps'> {
+interface DataTableProps<T extends Record<string, unknown>> {
     data: T[];
     columns: MRT_ColumnDef<T>[];
     title?: string;
     subtitle?: string;
     enablePagination?: boolean;
-    manualPagination?: boolean;
-    rowCount?: number;
-    onPaginationChange?: (updater: ((prevState: MRT_PaginationState) => MRT_PaginationState) | MRT_PaginationState) => void;
-    state?: {
-        pagination?: MRT_PaginationState;
-    };
-    enableDownload?: boolean;
+    muiTableBodyRowProps?: any;
 }
 
 const DataTable = <T extends Record<string, unknown>>({
@@ -26,18 +18,13 @@ const DataTable = <T extends Record<string, unknown>>({
                                                           title,
                                                           subtitle,
                                                           enablePagination = false,
-                                                          manualPagination = false,
-                                                          rowCount,
-                                                          onPaginationChange,
-                                                          state,
-                                                          enableDownload = false,
                                                           muiTableBodyRowProps,
                                                       }: DataTableProps<T>) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
-    const responsiveColumns = useMemo(
+    const responsiveColumns = React.useMemo(
         () =>
             columns.map((column) => ({
                 ...column,
@@ -57,7 +44,7 @@ const DataTable = <T extends Record<string, unknown>>({
                 border: '2px solid #1e3a34'
             }}
         >
-            {(title || subtitle || enableDownload) && (
+            {(title || subtitle) && (
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                         {title && (
@@ -83,16 +70,6 @@ const DataTable = <T extends Record<string, unknown>>({
                 enableDensityToggle={false}
                 enableHiding={false}
                 enablePagination={enablePagination}
-                manualPagination={manualPagination}
-                rowCount={rowCount || data.length}
-                onPaginationChange={onPaginationChange}
-                state={{
-                    ...state,
-                    pagination: state?.pagination || {
-                        pageIndex: 0,
-                        pageSize: 10,
-                    }
-                }}
                 muiTablePaperProps={{
                     elevation: 0,
                     sx: {
