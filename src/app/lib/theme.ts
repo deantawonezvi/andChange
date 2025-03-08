@@ -1,5 +1,6 @@
-import {createTheme} from "@mui/material";
-import {Noto_Sans} from 'next/font/google';
+// src/app/lib/theme.ts - Extended with table theming options
+import { createTheme } from "@mui/material";
+import { Noto_Sans } from 'next/font/google';
 
 const workSans = Noto_Sans({
     weight: ['300', '400', '500', '700'],
@@ -7,6 +8,7 @@ const workSans = Noto_Sans({
     display: 'swap',
 });
 
+// Extend the theme declaration to include table specific styling
 declare module '@mui/material/styles' {
     interface Theme {
         andChangeComponents: {
@@ -22,11 +24,38 @@ declare module '@mui/material/styles' {
                 borderRadius: string;
                 border: string;
             };
+            // Add table specific styling
+            table: {
+                header: {
+                    background: string;
+                    textColor: string;
+                    borderColor: string;
+                    fontSize: string;
+                };
+                row: {
+                    hoverColor: string;
+                    selectedColor: string;
+                    stripeColor: string;
+                };
+                statusColors: {
+                    success: string;
+                    warning: string;
+                    error: string;
+                    info: string;
+                    default: string;
+                };
+                cellPadding: string;
+                borderRadius: string;
+                shadow: string;
+            };
         };
         customShadows: {
             card: string;
             button: string;
             hover: string;
+            // Add table specific shadows
+            tableRow: string;
+            tableHeader: string;
         };
     }
 
@@ -44,11 +73,38 @@ declare module '@mui/material/styles' {
                 borderRadius: string;
                 border: string;
             };
+            // Add table specific styling options
+            table?: {
+                header?: {
+                    background: string;
+                    textColor: string;
+                    borderColor: string;
+                    fontSize: string;
+                };
+                row?: {
+                    hoverColor: string;
+                    selectedColor: string;
+                    stripeColor: string;
+                };
+                statusColors?: {
+                    success: string;
+                    warning: string;
+                    error: string;
+                    info: string;
+                    default: string;
+                };
+                cellPadding?: string;
+                borderRadius?: string;
+                shadow?: string;
+            };
         };
         customShadows?: {
             card: string;
             button: string;
             hover: string;
+            // Add table specific shadow options
+            tableRow?: string;
+            tableHeader?: string;
         };
     }
 }
@@ -78,6 +134,12 @@ export const theme = createTheme({
         },
         success: {
             main: '#28a745',
+        },
+        warning: {
+            main: '#ffc107',
+        },
+        info: {
+            main: '#17a2b8',
         },
     },
     typography: {
@@ -132,11 +194,38 @@ export const theme = createTheme({
             borderRadius: '16px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
         },
+        // Add table styling
+        table: {
+            header: {
+                background: '#f5f7fa',
+                textColor: '#1a1f2c',
+                borderColor: '#e85d45',
+                fontSize: '0.875rem',
+            },
+            row: {
+                hoverColor: 'rgba(232, 93, 69, 0.08)',
+                selectedColor: 'rgba(232, 93, 69, 0.16)',
+                stripeColor: 'rgba(0, 0, 0, 0.02)',
+            },
+            statusColors: {
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545',
+                info: '#17a2b8',
+                default: '#6c757d',
+            },
+            cellPadding: '12px 16px',
+            borderRadius: '12px',
+            shadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        },
     },
     customShadows: {
         card: '0 4px 20px rgba(0, 0, 0, 0.1)',
         button: 'none',
         hover: '0 8px 25px rgba(0, 0, 0, 0.15)',
+        // Add table shadows
+        tableRow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+        tableHeader: '0 3px 10px rgba(0, 0, 0, 0.08)',
     },
     components: {
         MuiButton: {
@@ -189,7 +278,6 @@ export const theme = createTheme({
         },
         MuiPaper: {
             styleOverrides: {
-
                 elevation1: {
                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
                 },
@@ -206,6 +294,68 @@ export const theme = createTheme({
             styleOverrides: {
                 paper: {
                     borderRadius: '16px',
+                },
+            },
+        },
+        // Add table component styling
+        MuiTableContainer: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                },
+            },
+        },
+        MuiTableHead: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: '#f5f7fa',
+                    '& .MuiTableCell-head': {
+                        fontWeight: 600,
+                    },
+                },
+            },
+        },
+        MuiTableRow: {
+            styleOverrides: {
+                root: {
+                    transition: 'background-color 0.2s, transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                        backgroundColor: 'rgba(232, 93, 69, 0.08)',
+                    },
+                    '&.Mui-selected': {
+                        backgroundColor: 'rgba(232, 93, 69, 0.16)',
+                        '&:hover': {
+                            backgroundColor: 'rgba(232, 93, 69, 0.24)',
+                        },
+                    },
+                },
+            },
+        },
+        MuiTableCell: {
+            styleOverrides: {
+                root: {
+                    padding: '12px 16px',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+                },
+                head: {
+                    color: '#1a1f2c',
+                    fontWeight: 600,
+                    borderBottom: '2px solid #e85d45',
+                },
+            },
+        },
+        MuiTablePagination: {
+            styleOverrides: {
+                root: {
+                    '& .MuiToolbar-root': {
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                    },
+                    '& .MuiTablePagination-select': {
+                        paddingLeft: 8,
+                        paddingRight: 24,
+                    },
                 },
             },
         },

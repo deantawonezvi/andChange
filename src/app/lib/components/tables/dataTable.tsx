@@ -1,5 +1,5 @@
 // src/app/lib/components/tables/dataTable.tsx
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState, MRT_TableOptions } from 'material-react-table';
 import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -36,12 +36,6 @@ const DataTable = <T extends Record<string, unknown>>({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-
-    // Default pagination state
-    const [pagination, setPagination] = useState<MRT_PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    });
 
     const responsiveColumns = useMemo(
         () =>
@@ -91,11 +85,13 @@ const DataTable = <T extends Record<string, unknown>>({
                 enablePagination={enablePagination}
                 manualPagination={manualPagination}
                 rowCount={rowCount || data.length}
-                onPaginationChange={onPaginationChange || setPagination}
+                onPaginationChange={onPaginationChange}
                 state={{
                     ...state,
-                    // Use the state's pagination if provided, otherwise use our local state
-                    pagination: state?.pagination || pagination,
+                    pagination: state?.pagination || {
+                        pageIndex: 0,
+                        pageSize: 10,
+                    }
                 }}
                 muiTablePaperProps={{
                     elevation: 0,
@@ -129,7 +125,7 @@ const DataTable = <T extends Record<string, unknown>>({
                     sx: { minWidth: { xs: '100%', sm: '300px' } },
                 }}
                 muiPaginationProps={{
-                    rowsPerPageOptions: [5, 10,15,20, 25, 50],
+                    rowsPerPageOptions: [5, 10, 25, 50],
                     showFirstButton: true,
                     showLastButton: true,
                     sx: {
@@ -145,7 +141,7 @@ const DataTable = <T extends Record<string, unknown>>({
                 initialState={{
                     pagination: {
                         pageIndex: 0,
-                        pageSize: 15,
+                        pageSize: 10,
                     },
                 }}
             />
