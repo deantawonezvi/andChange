@@ -82,7 +82,7 @@ export const organisationInfoFields: FormField[] = [
         order: 7
     },
     {
-        fieldName: 'hasEstablishedCMO',
+        fieldName: 'establishedCMO',
         label: 'Is there an established CMO function',
         tooltip: "Is there an established Change Management Office function",
         type: 'boolean',
@@ -112,9 +112,9 @@ export const organisationInfoFields: FormField[] = [
         min: 1,
         max: 5,
         marks: [
-            { value: 1, label: 'Light level of success' },
+            { value: 1, label: 'Low level of success' },
             { value: 3, label: 'Mixed levels of success' },
-            { value: 5, label: 'Low level of success' }
+            { value: 5, label: 'High level of success' }
         ],
         required: true,
         order: 10
@@ -209,4 +209,4 @@ export const organisationInfoFields: FormField[] = [
         required: true,
         order: 18
     }
-]
+];
