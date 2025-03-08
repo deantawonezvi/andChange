@@ -1,8 +1,8 @@
 // src/app/lib/components/tables/dataTable.tsx
-import React, {useMemo} from 'react';
-import {MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState, MRT_TableOptions} from 'material-react-table';
-import {Box, Paper, Typography, useMediaQuery} from '@mui/material';
-import {useTheme} from '@mui/material/styles';
+import React, { useMemo, useState } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef, MRT_PaginationState, MRT_TableOptions } from 'material-react-table';
+import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 interface DataTableProps<T extends Record<string, unknown>> extends
     Pick<MRT_TableOptions<T>, 'muiTableBodyRowProps'> {
@@ -15,7 +15,7 @@ interface DataTableProps<T extends Record<string, unknown>> extends
     rowCount?: number;
     onPaginationChange?: (updater: ((prevState: MRT_PaginationState) => MRT_PaginationState) | MRT_PaginationState) => void;
     state?: {
-        pagination: MRT_PaginationState;
+        pagination?: MRT_PaginationState;
     };
     enableDownload?: boolean;
 }
@@ -36,6 +36,12 @@ const DataTable = <T extends Record<string, unknown>>({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
+    // Default pagination state
+    const [pagination, setPagination] = useState<MRT_PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
 
     const responsiveColumns = useMemo(
         () =>
@@ -84,11 +90,18 @@ const DataTable = <T extends Record<string, unknown>>({
                 enableHiding={false}
                 enablePagination={enablePagination}
                 manualPagination={manualPagination}
-                rowCount={rowCount}
-                onPaginationChange={onPaginationChange}
-                state={state}
+                rowCount={rowCount || data.length}
+                onPaginationChange={onPaginationChange || setPagination}
+                state={{
+                    ...state,
+                    // Use the state's pagination if provided, otherwise use our local state
+                    pagination: state?.pagination || pagination,
+                }}
                 muiTablePaperProps={{
                     elevation: 0,
+                    sx: {
+                        borderRadius: 0,
+                    }
                 }}
                 muiTableBodyRowProps={muiTableBodyRowProps}
                 muiTableBodyProps={{
@@ -116,12 +129,23 @@ const DataTable = <T extends Record<string, unknown>>({
                     sx: { minWidth: { xs: '100%', sm: '300px' } },
                 }}
                 muiPaginationProps={{
-                    rowsPerPageOptions: [5, 10, 20],
+                    rowsPerPageOptions: [5, 10,15,20, 25, 50],
+                    showFirstButton: true,
+                    showLastButton: true,
                     sx: {
                         '.MuiTablePagination-toolbar': {
-                            paddingLeft: '10px',
-                            paddingRight: '10px',
+                            flexWrap: 'wrap',
+                            padding: '8px',
                         },
+                        '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                            marginBottom: '0',
+                        },
+                    },
+                }}
+                initialState={{
+                    pagination: {
+                        pageIndex: 0,
+                        pageSize: 15,
                     },
                 }}
             />
