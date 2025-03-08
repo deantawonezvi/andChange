@@ -1,5 +1,5 @@
-import axios, {AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig} from 'axios';
-import {TOKEN_COOKIE_NAME} from '@/app/lib/constants';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { TOKEN_COOKIE_NAME } from '@/app/lib/constants';
 import Cookies from 'js-cookie';
 
 const createAxiosClient = (baseURL?: string, enableDebug: boolean = false): AxiosInstance => {

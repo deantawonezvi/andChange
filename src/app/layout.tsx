@@ -1,12 +1,12 @@
 "use client"
 import "./globals.css";
-import {ThemeProvider} from "@mui/material/styles";
-import {Suspense} from "react";
-import {AppRouterCacheProvider} from "@mui/material-nextjs/v13-appRouter";
-import {QueryClient} from "@tanstack/query-core";
+import { ThemeProvider } from "@mui/material/styles";
+import { Suspense } from "react";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { QueryClient } from "@tanstack/query-core";
 import theme from "@/app/lib/theme";
-import {QueryClientProvider} from "@tanstack/react-query";
-import {metadata} from "@/app/metadata";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { metadata } from "@/app/metadata";
 
 
 export default function RootLayout({

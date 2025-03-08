@@ -1,4 +1,4 @@
-import {AxiosInstance} from 'axios';
+import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 
 export interface ModelAnagraphicDataDTO {

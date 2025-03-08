@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -12,8 +12,8 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {DataGrid, GridColDef} from '@mui/x-data-grid';
-import {Info, Plus} from 'lucide-react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Info, Plus } from 'lucide-react';
 
 interface ImpactedGroup {
     id: number;

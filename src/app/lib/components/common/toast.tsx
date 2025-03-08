@@ -1,5 +1,5 @@
 import React from 'react';
-import { Snackbar, Alert } from '@mui/material';
+import { Alert, Snackbar } from '@mui/material';
 import { useToast } from '@/app/lib/hooks/useToast';
 
 export const Toast: React.FC = () => {

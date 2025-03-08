@@ -10,7 +10,7 @@ import {
     InitiateAuthCommandInput
 } from "@aws-sdk/client-cognito-identity-provider";
 import Cookies from 'js-cookie';
-import {AuthTokens, LoginCredentials} from "@/app/lib/api/types";
+import { AuthTokens, LoginCredentials } from "@/app/lib/api/types";
 import crypto from 'crypto';
 
 export const TOKEN_COOKIE_NAME = 'andChange_auth_token';

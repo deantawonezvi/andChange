@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -14,8 +14,8 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {Controller, useForm} from 'react-hook-form';
-import {HelpCircle, Upload} from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+import { HelpCircle, Upload } from 'lucide-react';
 
 interface ProjectInformationForm {
     projectCharter?: File;

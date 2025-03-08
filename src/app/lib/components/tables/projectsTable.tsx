@@ -1,13 +1,13 @@
 // src/app/lib/components/tables/projectsTable.tsx
 import React from 'react';
-import {Box} from '@mui/material';
-import {MRT_ColumnDef} from 'material-react-table';
-import {useQuery} from '@tanstack/react-query';
-import {useRouter} from 'next/navigation';
+import { Box } from '@mui/material';
+import { MRT_ColumnDef } from 'material-react-table';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import DataTable from '@/app/lib/components/tables/dataTable';
-import {SProjectDTO} from '@/app/lib/api/services/projectService';
-import {SectionLoader} from '@/app/lib/components/common/pageLoader';
-import {OrganizationService} from '@/app/lib/api/services/organisationService';
+import { SProjectDTO } from '@/app/lib/api/services/projectService';
+import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import { OrganizationService } from '@/app/lib/api/services/organisationService';
 
 interface ProjectTableProps {
     data: SProjectDTO[];

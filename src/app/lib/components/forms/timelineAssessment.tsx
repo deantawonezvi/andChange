@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Alert,
     AlertTitle,
@@ -19,7 +19,7 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
-import {Info as InfoIcon, PlusCircle, Save,} from 'lucide-react';
+import { Info as InfoIcon, PlusCircle, Save, } from 'lucide-react';
 
 interface Milestone {
     name: string;

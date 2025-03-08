@@ -1,8 +1,8 @@
 'use client';
-import React, {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {useForm} from 'react-hook-form';
-import {motion} from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
     Alert,
@@ -16,8 +16,8 @@ import {
     Typography,
     useTheme
 } from '@mui/material';
-import {ArrowLeft, Visibility, VisibilityOff} from '@mui/icons-material';
-import {AuthService} from "@/app/lib/api/auth";
+import { ArrowLeft, Visibility, VisibilityOff } from '@mui/icons-material';
+import { AuthService } from "@/app/lib/api/auth";
 import AuthLoader from "@/app/lib/components/common/authLoader";
 
 interface LoginFormData {

@@ -1,9 +1,9 @@
 'use client'
-import {useCallback, useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import {TOKEN_COOKIE_NAME, TOKEN_EXPIRY_DAYS,} from '@/app/lib/constants';
-import {AuthTokens} from "@/app/lib/api/types";
+import { TOKEN_COOKIE_NAME, TOKEN_EXPIRY_DAYS, } from '@/app/lib/constants';
+import { AuthTokens } from "@/app/lib/api/types";
 
 export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);

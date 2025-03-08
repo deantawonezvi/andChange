@@ -1,9 +1,9 @@
 import React from 'react';
-import {Box} from '@mui/material';
-import {MRT_ColumnDef} from 'material-react-table';
+import { Box } from '@mui/material';
+import { MRT_ColumnDef } from 'material-react-table';
 import DataTable from '@/app/lib/components/tables/dataTable';
-import {SectionLoader} from '@/app/lib/components/common/pageLoader';
-import {SOrganizationDTO} from "@/app/lib/api/services/organisationService";
+import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import { SOrganizationDTO } from "@/app/lib/api/services/organisationService";
 
 interface OrganizationTableProps {
     data: SOrganizationDTO[];

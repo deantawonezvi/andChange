@@ -1,7 +1,7 @@
 import React from 'react';
-import {alpha, Box, CircularProgress, Container, Paper, Typography, useTheme} from '@mui/material';
-import {LogIn, LogOut} from 'lucide-react';
-import {motion} from 'framer-motion';
+import { alpha, Box, CircularProgress, Container, Paper, Typography, useTheme } from '@mui/material';
+import { LogIn, LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface AuthLoaderProps {
     action: 'login' | 'logout';

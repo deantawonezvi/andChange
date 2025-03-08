@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Alert, Box, CircularProgress, Grid, Paper, Typography } from '@mui/material';
+import { Alert, Box, Grid, Paper, Typography } from '@mui/material';
 import {
     Bar,
     BarChart,
