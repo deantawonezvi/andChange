@@ -1,6 +1,3 @@
-import { Control, FieldErrors } from "react-hook-form";
-import { ModelAnagraphicDataDTO } from "./services/modelService";
-
 export interface AuthConfig {
     authUrl: string;
     tokenUrl: string;
