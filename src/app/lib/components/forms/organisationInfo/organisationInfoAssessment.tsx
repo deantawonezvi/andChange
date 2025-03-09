@@ -266,7 +266,7 @@ const OrganizationalAssessmentForm: React.FC = () => {
                 await updateECMAssessmentMutation.mutateAsync(modelUpdates.ecmAssessment);
             }
         } catch (error) {
-            console.error('Error submitting form:', error);
+            console.log('Error submitting form:', error);
         }
     };
 

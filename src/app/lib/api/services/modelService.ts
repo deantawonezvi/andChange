@@ -81,8 +81,43 @@ export interface ModelVariablesDTO {
     governance: ModelGovernanceDTO;
     ecmAssessment: ModelECMAssessmentDTO;
     organizationalReadiness: ModelOrganizationalReadinessDTO;
-    // Additional model properties can be added as needed
+    budget: ModelBudgetDTO;
+    valueStatement: ModelValueStatementDTO;
+    changeCharacteristics: ModelChangeCharacteristicsDTO;
+
 }
+
+export interface ModelBudgetDTO {
+    modelId: number;
+    prepareApproachBudget: number;
+    manageChangeBudget: number;
+    sustainOutcomesBudget: number;
+    sourceOfBudget: string;
+    sufficiencyOfBudget: number;
+    timingAndFlow: number;
+    totalProjectBudget: number;
+}
+
+export interface ModelValueStatementDTO {
+    modelId: number;
+    whyValueStatement: string;
+    whyValueStatementRating: number;
+    whyNowValueStatement: string;
+    whyNowValueStatementRating: number;
+    ifNotValueStatement: string;
+    ifNotValueStatementRating: number;
+}
+
+export interface ModelChangeCharacteristicsDTO {
+    modelId: number;
+    scopeOfChange: number;
+    entryPointOfCM: string;  // Date as string in format "YYYY-MM-DD"
+    amountOfOverallChange: number;
+    degreeOfConfidentialityRequired: number;
+    timeframeAdequacyForChange: number;
+    degreeOfExternalStakeholderImpact: number;
+}
+
 
 export class ModelService {
     private static instance: ModelService;
@@ -176,4 +211,44 @@ export class ModelService {
             throw error;
         }
     }
+
+    async updateBudget(data: ModelBudgetDTO): Promise<ModelBudgetDTO> {
+        try {
+            const response = await this.client.put<ModelBudgetDTO>(
+                '/api/v1/model/budget',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating budget:', error);
+            throw error;
+        }
+    }
+
+    async updateValueStatement(data: ModelValueStatementDTO): Promise<ModelValueStatementDTO> {
+        try {
+            const response = await this.client.put<ModelValueStatementDTO>(
+                '/api/v1/model/value-statements',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating value statement:', error);
+            throw error;
+        }
+    }
+
+    async updateChangeCharacteristics(data: ModelChangeCharacteristicsDTO): Promise<ModelChangeCharacteristicsDTO> {
+        try {
+            const response = await this.client.put<ModelChangeCharacteristicsDTO>(
+                '/api/v1/model/change-characteristics',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating change characteristics:', error);
+            throw error;
+        }
+    }
+
 }
