@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
 import { Building2, CalendarDays, FolderKanban, Globe, MessageSquare, UserRound, Users } from 'lucide-react';
 import ProjectInformationForm from "@/app/lib/components/forms/projectInformation/projectInformation";
@@ -36,46 +36,73 @@ const tabs = [
     {
         label: 'Organisational Information',
         icon: <Building2 size={20} />,
-        description: 'Basic information about your organization and its core values'
+        description: 'Basic information about your organization and its core values',
+        id: 'org-info'
     },
     {
         label: 'Project Information',
         icon: <FolderKanban size={20} />,
-        description: 'Details about the project scope, objectives, and goals'
+        description: 'Details about the project scope, objectives, and goals',
+        id: 'project-info'
     },
     {
         label: 'Timeline',
         icon: <CalendarDays size={20} />,
-        description: 'Project timeline and key milestones'
+        description: 'Project timeline and key milestones',
+        id: 'timeline'
     },
     {
         label: 'Impacted Groups',
         icon: <Users size={20} />,
-        description: 'Information about teams and individuals affected by the change'
+        description: 'Information about teams and individuals affected by the change',
+        id: 'impacted-groups'
     },
     {
         label: 'Leadership',
         icon: <UserRound size={20} />,
-        description: 'Leadership structure and stakeholder information'
+        description: 'Leadership structure and stakeholder information',
+        id: 'leadership'
     },
     {
         label: 'Communication Tone',
         icon: <MessageSquare size={20} />,
-        description: 'Communication strategy and tone settings'
+        description: 'Communication strategy and tone settings',
+        id: 'communication'
     },
     {
         label: 'Cultural Factors',
         icon: <Globe size={20} />,
-        description: 'Cultural considerations and organizational dynamics'
+        description: 'Cultural considerations and organizational dynamics',
+        id: 'cultural-factors'
     },
 ];
 
-export default function ModelCalibration() {
-    const [activeTab, setActiveTab] = useState(0);
+interface ModelCalibrationProps {
+    activeTabIndex?: number;
+    onTabChange?: (index: number) => void;
+}
+
+export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: ModelCalibrationProps) {
+    const [internalActiveTab, setInternalActiveTab] = React.useState(activeTabIndex);
+
+    const activeTab = onTabChange ? activeTabIndex : internalActiveTab;
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setActiveTab(newValue);
+        // If parent component is controlling the tabs, call its handler
+        if (onTabChange) {
+            onTabChange(newValue);
+        } else {
+            // Otherwise, just update internal state
+            setInternalActiveTab(newValue);
+        }
     };
+
+    // Keep internal state in sync with props if they change
+    React.useEffect(() => {
+        if (onTabChange && activeTabIndex !== internalActiveTab) {
+            setInternalActiveTab(activeTabIndex);
+        }
+    }, [activeTabIndex, internalActiveTab, onTabChange]);
 
     return (
         <Box>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Paper, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Paper, Tab, Tabs, Typography, Alert } from '@mui/material';
 import { BarChart3, LineChart, PlayCircle, Settings } from 'lucide-react';
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
@@ -35,11 +35,30 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-const tabs = [
+// Primary tabs definition
+const primaryTabs = [
     { label: 'Dashboard', icon: <BarChart3 size={20} />, id: 'dashboard' },
     { label: 'Model Calibration', icon: <Settings size={20} />, id: 'model-calibration' },
     { label: 'Plan Actions', icon: <PlayCircle size={20} />, id: 'plan-actions' },
     { label: 'Track Progress', icon: <LineChart size={20} />, id: 'track-progress' },
+];
+
+// Model calibration subtabs
+const modelCalibrationTabs = [
+    { label: 'Organisation Info', id: 'org-info' },
+    { label: 'Project Info', id: 'project-info' },
+    { label: 'Timeline', id: 'timeline' },
+    { label: 'Impacted Groups', id: 'impacted-groups' },
+    { label: 'Leadership', id: 'leadership' },
+    { label: 'Communication', id: 'communication' },
+    { label: 'Cultural Factors', id: 'cultural-factors' },
+];
+
+// Plan actions subtabs - can be expanded as needed
+const planActionsTabs = [
+    { label: 'Action List', id: 'action-list' },
+    { label: 'New Action', id: 'new-action' },
+    { label: 'Calendar View', id: 'calendar-view' },
 ];
 
 export default function ProjectPage() {
@@ -48,13 +67,103 @@ export default function ProjectPage() {
     const params = useParams();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
 
-    // Get the tab from URL or default to the first tab
+    // Get URL parameters
     const tabParam = searchParams.get('tab');
-    const initialTabIndex = tabParam
-        ? tabs.findIndex(tab => tab.id === tabParam)
-        : 0;
+    const subtabParam = searchParams.get('subtab');
 
-    const [activeTab, setActiveTab] = useState(initialTabIndex >= 0 ? initialTabIndex : 0);
+    // Track if we detected an invalid URL parameter
+    const [invalidParam, setInvalidParam] = useState<string | null>(null);
+
+    // Initialize tabs with default values
+    const [activeTab, setActiveTab] = useState(0);
+    const [activeSubtab, setActiveSubtab] = useState(0);
+
+    // Determine which subtabs to use based on the primary tab
+    const getSubtabsForPrimaryTab = (primaryTabId: string) => {
+        switch (primaryTabId) {
+            case 'model-calibration':
+                return modelCalibrationTabs;
+            case 'plan-actions':
+                return planActionsTabs;
+            default:
+                return [];
+        }
+    };
+
+    // Validate and process URL parameters
+    useEffect(() => {
+        setInvalidParam(null);
+
+        // Validate primary tab
+        if (tabParam) {
+            const tabIndex = primaryTabs.findIndex(tab => tab.id === tabParam);
+            if (tabIndex >= 0) {
+                setActiveTab(tabIndex);
+
+                // Get appropriate subtabs for this primary tab
+                const currentSubtabs = getSubtabsForPrimaryTab(tabParam);
+
+                // Validate subtab if present
+                if (subtabParam && currentSubtabs.length > 0) {
+                    const subtabIndex = currentSubtabs.findIndex(tab => tab.id === subtabParam);
+                    if (subtabIndex >= 0) {
+                        setActiveSubtab(subtabIndex);
+                    } else {
+                        // Invalid subtab - show error and reset to first subtab
+                        setInvalidParam(`Invalid subtab: "${subtabParam}"`);
+                        setActiveSubtab(0);
+
+                        // Correct the URL
+                        if (tabParam) {
+                            const correctSubtabId = currentSubtabs[0].id;
+                            router.replace(`/projects/${projectId}?tab=${tabParam}&subtab=${correctSubtabId}`);
+                        }
+                    }
+                } else {
+                    // No subtab or not applicable - reset to first subtab
+                    setActiveSubtab(0);
+                }
+            } else {
+                // Invalid primary tab - show error and reset to first tab
+                setInvalidParam(`Invalid tab: "${tabParam}"`);
+                setActiveTab(0);
+
+                // Correct the URL
+                router.replace(`/projects/${projectId}`);
+            }
+        }
+    }, [tabParam, subtabParam, projectId, router]);
+
+    // Update URL when primary tab changes
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setActiveTab(newValue);
+        const tabId = primaryTabs[newValue].id;
+
+        // If this tab has subtabs, include the first subtab in the URL
+        const subtabs = getSubtabsForPrimaryTab(tabId);
+        if (subtabs.length > 0) {
+            const firstSubtabId = subtabs[0].id;
+            router.replace(`/projects/${projectId}?tab=${tabId}&subtab=${firstSubtabId}`);
+            // Reset to first subtab
+            setActiveSubtab(0);
+        } else {
+            router.replace(`/projects/${projectId}?tab=${tabId}`);
+        }
+    };
+
+    // Update URL when subtab changes
+    const handleSubtabChange = (subtabIndex: number) => {
+        setActiveSubtab(subtabIndex);
+
+        // Get current primary tab
+        const primaryTabId = primaryTabs[activeTab].id;
+        const subtabs = getSubtabsForPrimaryTab(primaryTabId);
+
+        if (subtabs.length > 0 && subtabIndex < subtabs.length) {
+            const subtabId = subtabs[subtabIndex].id;
+            router.replace(`/projects/${projectId}?tab=${primaryTabId}&subtab=${subtabId}`);
+        }
+    };
 
     const projectService = ProjectService.getInstance();
     const { data: project, isLoading } = useQuery({
@@ -63,29 +172,12 @@ export default function ProjectPage() {
         enabled: !!projectId
     });
 
-    // Update URL when tab changes
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setActiveTab(newValue);
-
-        const tabId = tabs[newValue].id;
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', tabId);
-
-        router.replace(`/projects/${projectId}?tab=${tabId}`);
-    };
-
-    useEffect(() => {
-        if (tabParam) {
-            const tabIndex = tabs.findIndex(tab => tab.id === tabParam);
-            if (tabIndex >= 0 && tabIndex !== activeTab) {
-                setActiveTab(tabIndex);
-            }
-        }
-    }, [tabParam, activeTab]);
-
     if (isLoading) {
         return <SectionLoader message="Loading project details..." />;
     }
+
+    //const currentPrimaryTabId = primaryTabs[activeTab].id;
+    // const hasSubtabs = getSubtabsForPrimaryTab(currentPrimaryTabId).length > 0;
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -95,7 +187,14 @@ export default function ProjectPage() {
             </Typography>
             <br/>
 
-            {/* Tabs */}
+            {/* Show error message if invalid parameter was detected */}
+            {invalidParam && (
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                    {invalidParam} - Redirected to a valid tab.
+                </Alert>
+            )}
+
+            {/* Primary Tabs */}
             <Paper elevation={0} sx={{ mb: 3, borderRadius: 1 }}>
                 <Tabs
                     value={activeTab}
@@ -111,7 +210,7 @@ export default function ProjectPage() {
                         }
                     }}
                 >
-                    {tabs.map((tab, index) => (
+                    {primaryTabs.map((tab, index) => (
                         <Tab
                             key={index}
                             label={
@@ -134,7 +233,10 @@ export default function ProjectPage() {
             <TabPanel value={activeTab} index={1}>
                 <Typography variant="h4">Model Calibration</Typography>
                 <br/>
-                <ModelCalibration/>
+                <ModelCalibration
+                    activeTabIndex={activeSubtab}
+                    onTabChange={handleSubtabChange}
+                />
             </TabPanel>
 
             <TabPanel value={activeTab} index={2}>
