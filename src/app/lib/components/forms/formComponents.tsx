@@ -57,7 +57,6 @@ export const AdequacyRating: React.FC<AdequacyRatingProps> = ({ value, onChange,
             row
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
-
         >
             {['Inadequate', 'Adequate', 'Complete'].map((label, idx) => (
                 <FormControlLabel
@@ -148,7 +147,10 @@ export const BooleanToggle: React.FC<BooleanToggleProps> = ({
     </Box>
 );
 
-
+export interface SelectOption {
+    value: string | number;
+    label: string;
+}
 
 export interface QuestionWithRatingProps {
     label: string;
@@ -159,7 +161,9 @@ export interface QuestionWithRatingProps {
     required?: boolean;
     multiline?: boolean;
     type?: string;
-    options?: string[];
+    options?: string[] | SelectOption[];
+    optionLabelKey?: string;
+    optionValueKey?: string;
     min?: number;
     max?: number;
     marks?: { value: number; label: string }[];
@@ -169,7 +173,8 @@ export interface QuestionWithRatingProps {
 
 export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                                                           label, tooltip, control, fieldName, ratingFieldName, required,
-                                                                          multiline, type, options, min, max, marks, errors, children
+                                                                          multiline, type, options, optionLabelKey = 'label', optionValueKey = 'value',
+                                                                          min, max, marks, errors, children
                                                                       }) => (
     <Paper elevation={0} sx={{ p: 1, borderRadius: 1 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -203,11 +208,23 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                             {...field}
                                             value={field.value === null ? '' : field.value}
                                         >
-                                            {options.map((option) => (
-                                                <MenuItem key={option} value={option}>
-                                                    {option}
-                                                </MenuItem>
-                                            ))}
+                                            {options.map((option) => {
+                                                if (typeof option === 'string') {
+                                                    return (
+                                                        <MenuItem key={option} value={option}>
+                                                            {option}
+                                                        </MenuItem>
+                                                    );
+                                                } else {
+                                                    const value = option[optionValueKey as keyof typeof option];
+                                                    const label = option[optionLabelKey as keyof typeof option];
+                                                    return (
+                                                        <MenuItem key={String(value)} value={value}>
+                                                            {label}
+                                                        </MenuItem>
+                                                    );
+                                                }
+                                            })}
                                         </Select>
                                     </FormControl>
                                 )}

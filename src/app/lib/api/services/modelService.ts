@@ -84,6 +84,10 @@ export interface ModelVariablesDTO {
     budget: ModelBudgetDTO;
     valueStatement: ModelValueStatementDTO;
     changeCharacteristics: ModelChangeCharacteristicsDTO;
+    pctSponsorship: ModelPCTSponsorshipDTO;
+    pctChangeManagement: ModelPCTChangeManagementDTO;
+    pctSuccess: ModelPCTSuccessDTO;
+
 
 }
 
@@ -111,11 +115,52 @@ export interface ModelValueStatementDTO {
 export interface ModelChangeCharacteristicsDTO {
     modelId: number;
     scopeOfChange: number;
-    entryPointOfCM: string;  // Date as string in format "YYYY-MM-DD"
+    entryPointOfCM: string;
     amountOfOverallChange: number;
     degreeOfConfidentialityRequired: number;
     timeframeAdequacyForChange: number;
     degreeOfExternalStakeholderImpact: number;
+}
+
+export interface ModelPCTSponsorshipDTO {
+    modelId: number;
+    sponsorHasAuthority: number;
+    sponsorCanJustifyChange?: number;
+    organizationHasDefinedVisionAndStrategy?: number;
+    changeIsAlignedWithOrganization?: number;
+    prioritiesSetAndCommunicated?: number;
+    sponsorIsResolvingIssues: number;
+    sponsorIsParticipatingThroughoutLifecycle?: number;
+    sponsorIsEncouragingLeadersToParticipate?: number;
+    sponsorBuildingAwarenessOfNeedDirectly?: number;
+    sponsorIsReinforcingChange?: number;
+}
+
+export interface ModelPCTChangeManagementDTO {
+    modelId: number;
+    assessedImpactOfChange?: number;
+    assessedChangeRisk?: number;
+    changeHasAdoptionAndUsageObjectives?: number;
+    strengthOfSponsorCoalitionAssessed: number;
+    changeStrategyWithSponsorshipCommitment: number;
+    resourcesIdentifiedAndAcquired?: number;
+    resistanceMitigationAndAdoptionPlansUnderway?: number;
+    effectivenessMonitoredAndAdaptionOccurring?: number;
+    organizationReadyToOwnAndSustainChange?: number;
+}
+
+export interface ModelPCTSuccessDTO {
+    modelId: number;
+    processInputsDefined?: number;
+    processBenefitsDefined?: number;
+    projectObjectivesDefined?: number;
+    adoptionAndUsageObjectivesDefined?: number;
+    metricsOfBenefitsAndObjectivesDefined?: number;
+    benefitsAndObjectivesPrioritized?: number;
+    benefitAndObjectiveOwnershipDesignated?: number;
+    benefitAndObjectivePeopleDependencyEvaluated?: number;
+    definitionOfSuccessDefined?: number;
+    sponsorshipConsensusOnDefinitionOfSuccess: number;
 }
 
 
@@ -247,6 +292,45 @@ export class ModelService {
             return response.data;
         } catch (error) {
             console.log('Error updating change characteristics:', error);
+            throw error;
+        }
+    }
+
+    async updatePCTSponsorship(data: ModelPCTSponsorshipDTO): Promise<ModelPCTSponsorshipDTO> {
+        try {
+            const response = await this.client.put<ModelPCTSponsorshipDTO>(
+                '/api/v1/model/pct-sponsorship',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating PCT Sponsorship:', error);
+            throw error;
+        }
+    }
+
+    async updatePCTChangeManagement(data: ModelPCTChangeManagementDTO): Promise<ModelPCTChangeManagementDTO> {
+        try {
+            const response = await this.client.put<ModelPCTChangeManagementDTO>(
+                '/api/v1/model/pct-change-management',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating PCT Change Management:', error);
+            throw error;
+        }
+    }
+
+    async updatePCTSuccess(data: ModelPCTSuccessDTO): Promise<ModelPCTSuccessDTO> {
+        try {
+            const response = await this.client.put<ModelPCTSuccessDTO>(
+                '/api/v1/model/pct-success',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating PCT Success:', error);
             throw error;
         }
     }

@@ -5,6 +5,7 @@ import ProjectInformationForm from "@/app/lib/components/forms/projectInformatio
 import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment";
 import ImpactedGroupsTable from "@/app/lib/components/tables/impactedGroupsTable";
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationInfo/organisationInfoAssessment";
+import LeadershipAssessment from "@/app/lib/components/forms/leadershipAssessment/leadershipAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -176,12 +177,13 @@ export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: Mo
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={4}>
-                    <Typography variant="h6">Leadership</Typography>
-                    <Typography>Leadership and stakeholder management will be implemented here.</Typography>
+                    <Typography variant="h4">Leadership</Typography>
+                    <br/>
+                    <LeadershipAssessment/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={5}>
-                    <Typography variant="h6">Communication Tone</Typography>
+                    <Typography variant="h4">Communication Tone</Typography>
                     <Typography>Communication tone settings will be implemented here.</Typography>
                 </TabPanel>
 
