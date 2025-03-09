@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import { HelpCircle } from 'lucide-react';
+import { CustomDatePicker } from "@/app/lib/components/common/datePicker";
 
 export interface QuestionWithTooltipProps {
     label: string;
@@ -199,6 +200,14 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                         multiline={multiline}
                                         rows={multiline ? 4 : 1}
                                         error={!!errors[fieldName]}
+                                    />
+                                )}
+
+                                {type === 'date' && (
+                                    <CustomDatePicker
+                                        value={field.value || ''}
+                                        onChange={field.onChange}
+                                        error={errors[fieldName]?.message as string}
                                     />
                                 )}
 

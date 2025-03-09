@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
 import { Building2, CalendarDays, FolderKanban, Globe, MessageSquare, UserRound, Users } from 'lucide-react';
 import ProjectInformationForm from "@/app/lib/components/forms/projectInformation/projectInformation";
-import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment";
+import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment/timelineAssessment";
 import ImpactedGroupsTable from "@/app/lib/components/tables/impactedGroupsTable";
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationInfo/organisationInfoAssessment";
 import LeadershipAssessment from "@/app/lib/components/forms/leadershipAssessment/leadershipAssessment";
