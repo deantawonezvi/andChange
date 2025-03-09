@@ -76,7 +76,7 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoading
                 subtitle="Overview of all projects"
                 enablePagination={true}
                 muiTableBodyRowProps={({ row }: { row: any }) => ({
-                    onClick: () => router.push(`/projects/${row.original.id}`),
+                    onClick: () => router.push(`/projects/${row.original.id}?tab=model-calibration`),
                     sx: {
                         cursor: 'pointer',
                         '&:hover': {

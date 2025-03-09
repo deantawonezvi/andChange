@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
+import { Box, Paper, Tab, Tabs, Typography } from '@mui/material';
 import { BarChart3, LineChart, PlayCircle, Settings } from 'lucide-react';
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
@@ -36,16 +36,25 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const tabs = [
-    { label: 'Dashboard', icon: <BarChart3 size={20} /> },
-    { label: 'Model Calibration', icon: <Settings size={20} /> },
-    { label: 'Plan Actions', icon: <PlayCircle size={20} /> },
-    { label: 'Track Progress', icon: <LineChart size={20} /> },
+    { label: 'Dashboard', icon: <BarChart3 size={20} />, id: 'dashboard' },
+    { label: 'Model Calibration', icon: <Settings size={20} />, id: 'model-calibration' },
+    { label: 'Plan Actions', icon: <PlayCircle size={20} />, id: 'plan-actions' },
+    { label: 'Track Progress', icon: <LineChart size={20} />, id: 'track-progress' },
 ];
 
 export default function ProjectPage() {
-    const [activeTab, setActiveTab] = useState(0);
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const params = useParams();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
+
+    // Get the tab from URL or default to the first tab
+    const tabParam = searchParams.get('tab');
+    const initialTabIndex = tabParam
+        ? tabs.findIndex(tab => tab.id === tabParam)
+        : 0;
+
+    const [activeTab, setActiveTab] = useState(initialTabIndex >= 0 ? initialTabIndex : 0);
 
     const projectService = ProjectService.getInstance();
     const { data: project, isLoading } = useQuery({
@@ -54,9 +63,25 @@ export default function ProjectPage() {
         enabled: !!projectId
     });
 
+    // Update URL when tab changes
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
+
+        const tabId = tabs[newValue].id;
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tabId);
+
+        router.replace(`/projects/${projectId}?tab=${tabId}`);
     };
+
+    useEffect(() => {
+        if (tabParam) {
+            const tabIndex = tabs.findIndex(tab => tab.id === tabParam);
+            if (tabIndex >= 0 && tabIndex !== activeTab) {
+                setActiveTab(tabIndex);
+            }
+        }
+    }, [tabParam, activeTab]);
 
     if (isLoading) {
         return <SectionLoader message="Loading project details..." />;
@@ -64,7 +89,6 @@ export default function ProjectPage() {
 
     return (
         <Box sx={{ width: '100%' }}>
-
             {/* Project Title */}
             <Typography variant="h4" component="h1" gutterBottom>
                 {project?.projectName}
