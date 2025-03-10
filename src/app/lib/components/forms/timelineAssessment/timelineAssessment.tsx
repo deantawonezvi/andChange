@@ -4,7 +4,12 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { Save } from 'lucide-react';
-import { ModelService, ModelTimelineAssessmentDTO, ModelChangeCharacteristicsDTO, ModelVariablesDTO } from "@/app/lib/api/services/modelService";
+import {
+    ModelChangeCharacteristicsDTO,
+    ModelService,
+    ModelTimelineAssessmentDTO,
+    ModelVariablesDTO
+} from "@/app/lib/api/services/modelService";
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
 import { useToast } from '@/app/lib/hooks/useToast';
 import Timeline from '@mui/lab/Timeline';

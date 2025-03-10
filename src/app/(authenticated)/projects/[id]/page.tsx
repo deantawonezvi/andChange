@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Paper, Tab, Tabs, Typography, Alert } from '@mui/material';
+import { Alert, Box, Paper, Tab, Tabs, Typography } from '@mui/material';
 import { BarChart3, LineChart, PlayCircle, Settings } from 'lucide-react';
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
