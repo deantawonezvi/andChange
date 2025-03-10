@@ -28,10 +28,15 @@ export interface BooleanFormField extends BaseFormField {
     type: 'boolean';
 }
 
-export type FormField = TextFormField | SelectFormField | SliderFormField | BooleanFormField;
+export interface DateFormField extends BaseFormField {
+    type: 'date';
+}
+
+export type FormField = TextFormField | SelectFormField | SliderFormField | BooleanFormField | DateFormField;
 
 export type FormFieldValue<T extends FormField> =
     T extends BooleanFormField ? boolean :
         T extends SliderFormField ? number :
             T extends SelectFormField ? string :
+                T extends DateFormField ? string :
                 string;

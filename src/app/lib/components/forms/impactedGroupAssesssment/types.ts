@@ -12,6 +12,11 @@ export interface ImpactedGroupFormData {
     whatsInItForMe: string;
     individualsIds: number[];
 
+    organizationalGrouping: string;
+    numberOfIndividuals: number;
+    preferredInteraction: number;
+    readyDate?: Date;
+
     // ABSUP Ratings
     absupAwareness: number;
     absupBuyin: number;
@@ -72,6 +77,20 @@ export interface ImpactedGroupFormData {
 export interface ResistanceDriverOption {
     value: string;
     label: string;
+}
+
+// Add this new interface
+export interface LeaderDetails {
+    name: string;
+    title: string;
+    availability: number;
+    supportLevel: number;
+    influence: number;
+    leadershipAwareness: number;
+    changeCommitment: number;
+    formalSkills: number;
+    visibleParticipation: number;
+    proficiency: number;
 }
 
 export const resistanceDriverOptions: ResistanceDriverOption[] = [
@@ -153,7 +172,37 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
             multiline: true,
             required: true,
             order: 8
-        }
+        },
+        {
+            fieldName: 'organizationalGrouping',
+            label: 'Organisational Grouping',
+            tooltip: 'A cluster of individuals needing to change in the same way',
+            required: false,
+            order: 9
+        },
+        {
+            fieldName: 'preferredInteraction',
+            label: 'Preference for virtual or in-person events',
+            tooltip: 'To what degree does this group prefer virtual or in-person interactions and events?',
+            type: 'slider',
+            min: 1,
+            max: 5,
+            marks: [
+                { value: 1, label: 'Virtual' },
+                { value: 3, label: 'Neutral' },
+                { value: 5, label: 'In-person' }
+            ],
+            required: false,
+            order: 10
+        },
+        {
+            fieldName: 'readyDate',
+            label: 'Override for group adoption date',
+            tooltip: 'If this group needs to adopt change earlier, specify the date',
+            type: 'date',
+            required: false,
+            order: 11
+        },
     ],
     absupFields: [
         {
@@ -246,7 +295,21 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
             tooltip: 'The percentage threshold for successful adoption',
             required: false,
             order: 2
-        }
+        },
+        {
+            fieldName: 'adoptionMeasurable',
+            label: 'Adoption Measurable',
+            tooltip: 'Measures initial engagement, e.g., number of users logging in more than 5 times',
+            required: false,
+            order: 3
+        },
+        {
+            fieldName: 'usageMeasurable',
+            label: 'Usage Measurable',
+            tooltip: 'Captures actual usage, e.g., number of logins per user per day',
+            required: false,
+            order: 4
+        },
     ],
     changeImpactAssessment: [
         {

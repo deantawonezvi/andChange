@@ -1,264 +1,166 @@
-import React, { useState } from 'react';
-import {
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    Paper,
-    TextField,
-    Tooltip,
-    Typography,
-} from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { Info, Plus } from 'lucide-react';
+// src/app/lib/components/tables/impactedGroupsTable.tsx
+'use client';
 
-interface ImpactedGroup {
-    id: number;
-    name: string;
-    overallChange: number;
-    awareness: number;
-    buyIn: number;
-    skills: number;
-    usage: number;
-    proficiency: number;
-}
+import React from 'react';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { Box, Button } from '@mui/material';
+import { Plus } from 'lucide-react';
+import { MRT_ColumnDef } from 'material-react-table';
+import { ImpactedGroupService } from '@/app/lib/api/services/impactedGroupService';
+import DataTable from '@/app/lib/components/tables/dataTable';
+import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 
-const getMetricColor = (value: number) => {
-    if (value >= 4) return 'rgb(74, 222, 128)'; // green
-    if (value === 3) return 'rgb(250, 204, 21)'; // yellow
-    return 'rgb(248, 113, 113)'; // red
-};
 
-const MetricCell = ({ value }: { value: number }) => (
-    <Box
-        sx={{
-            backgroundColor: getMetricColor(value),
-            width: '30px',
-            height: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '4px',
-            margin: 'auto',
-            color: value >= 4 ? 'black' : 'white',
-            fontWeight: 'bold',
-        }}
-    >
-        {value}
-    </Box>
-);
+const ImpactedGroupsTable: React.FC = () => {
+    const params = useParams();
+    const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
+    const impactedGroupService = ImpactedGroupService.getInstance();
 
-const ImpactedGroupsTable = () => {
-    const [groups, setGroups] = useState<ImpactedGroup[]>([
-        {
-            id: 1,
-            name: 'Marketing Team',
-            overallChange: 75,
-            awareness: 4,
-            buyIn: 3,
-            skills: 2,
-            usage: 4,
-            proficiency: 3,
-        },
-        {
-            id: 2,
-            name: 'IT Department',
-            overallChange: 90,
-            awareness: 5,
-            buyIn: 4,
-            skills: 5,
-            usage: 3,
-            proficiency: 4,
-        },
-    ]);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [newGroup, setNewGroup] = useState({
-        name: '',
-        overallChange: 0,
+    // Fetch impacted groups for this project
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['impactedGroups', projectId],
+        queryFn: () => impactedGroupService.getImpactedGroupsByProject(projectId),
+        enabled: !!projectId,
     });
 
-    const columns: GridColDef[] = [
+    // Calculate the overall impact percentage for each group
+    const calculateImpactStrength = (group: any) => {
+        if (!group.changeImpactAssessment) return 0;
+        return impactedGroupService.calculateChangeImpactStrength(group.changeImpactAssessment);
+    };
+
+    // Define columns for the table with the correct type
+    const columns: MRT_ColumnDef<Record<string, unknown>>[] = [
         {
-            field: 'name',
-            headerName: 'Impacted Group',
-            flex: 2,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Groups affected by the change">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
+            accessorKey: 'name',
+            header: 'Impacted Group',
+            size: 200,
         },
         {
-            field: 'overallChange',
-            headerName: 'Overall Change %',
-            flex: 1,
-            renderCell: (params) => (
-                <Typography>
-                    {params.value}%
-                </Typography>
-            ),
+            accessorKey: 'roleDefinition',
+            header: 'Role Definition',
+            size: 200,
         },
         {
-            field: 'awareness',
-            headerName: 'Awareness',
-            flex: 1,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Level of awareness about the change">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
-            renderCell: (params) => <MetricCell value={params.value} />,
+            accessorKey: 'overallImpact',
+            header: 'Change Impact %',
+            size: 150,
+            Cell: ({ cell }) => `${cell.getValue<number>()}%`,
         },
         {
-            field: 'buyIn',
-            headerName: 'Buy-in',
-            flex: 1,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Level of support for the change">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
-            renderCell: (params) => <MetricCell value={params.value} />,
+            accessorKey: 'awareness',
+            header: 'Awareness',
+            size: 120,
+            Cell: ({ cell }) => renderMetricCell(cell.getValue<number>()),
         },
         {
-            field: 'skills',
-            headerName: 'Skills',
-            flex: 1,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Required skills level">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
-            renderCell: (params) => <MetricCell value={params.value} />,
+            accessorKey: 'buyIn',
+            header: 'Buy-in',
+            size: 120,
+            Cell: ({ cell }) => renderMetricCell(cell.getValue<number>()),
         },
         {
-            field: 'usage',
-            headerName: 'Usage',
-            flex: 1,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Actual usage of new processes/systems">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
-            renderCell: (params) => <MetricCell value={params.value} />,
+            accessorKey: 'skill',
+            header: 'Skill',
+            size: 120,
+            Cell: ({ cell }) => renderMetricCell(cell.getValue<number>()),
         },
         {
-            field: 'proficiency',
-            headerName: 'Proficiency',
-            flex: 1,
-            renderHeader: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {params.colDef.headerName}
-                    <Tooltip title="Level of expertise in new processes/systems">
-                        <IconButton size="small">
-                            <Info size={16} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
-            ),
-            renderCell: (params) => <MetricCell value={params.value} />,
+            accessorKey: 'usage',
+            header: 'Usage',
+            size: 120,
+            Cell: ({ cell }) => renderMetricCell(cell.getValue<number>()),
+        },
+        {
+            accessorKey: 'proficiency',
+            header: 'Proficiency',
+            size: 120,
+            Cell: ({ cell }) => renderMetricCell(cell.getValue<number>()),
         },
     ];
 
-    const handleAddGroup = () => {
-        const newId = Math.max(...groups.map(g => g.id)) + 1;
-        setGroups([...groups, {
-            id: newId,
-            name: newGroup.name,
-            overallChange: newGroup.overallChange,
-            awareness: 1,
-            buyIn: 1,
-            skills: 1,
-            usage: 1,
-            proficiency: 1,
-        }]);
-        setOpenDialog(false);
-        setNewGroup({ name: '', overallChange: 0 });
+    // Helper to render color-coded metric cells
+    const renderMetricCell = (value: number) => {
+        const getMetricColor = (val: number) => {
+            if (val >= 4) return 'rgb(74, 222, 128)'; // green
+            if (val === 3) return 'rgb(250, 204, 21)'; // yellow
+            return 'rgb(248, 113, 113)'; // red
+        };
+
+        return (
+            <Box
+                sx={{
+                    backgroundColor: getMetricColor(value),
+                    width: '30px',
+                    height: '30px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                    margin: 'auto',
+                    color: value >= 4 ? 'black' : 'white',
+                    fontWeight: 'bold',
+                }}
+            >
+                {value}
+            </Box>
+        );
     };
 
+    // Transform API data for the table
+    const transformedData: Record<string, unknown>[] = React.useMemo(() => {
+        if (!data) return [];
+
+        return data.map(group => ({
+            id: group.id || 0,
+            name: group.anagraphicDataDTO?.entityName || 'Unnamed Group',
+            roleDefinition: group.anagraphicDataDTO?.roleDefinition || '',
+            overallImpact: calculateImpactStrength(group),
+            awareness: group.groupProjectABSUPDTO?.absupAwareness || 0,
+            buyIn: group.groupProjectABSUPDTO?.absupBuyin || 0,
+            skill: group.groupProjectABSUPDTO?.absupSkill || 0,
+            usage: group.groupProjectABSUPDTO?.absupUse || 0,
+            proficiency: group.groupProjectABSUPDTO?.absupProficiency || 0,
+        }));
+    }, [data]);
+
+    if (isLoading) {
+        return <SectionLoader message="Loading impacted groups..." />;
+    }
+
+    if (error) {
+        return <div>Error: {error instanceof Error ? error.message : 'Unknown error loading groups'}</div>;
+    }
+
     return (
-        <Box sx={{ height: 400, width: '100%' }}>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">
-                    Impacted Group List
-                </Typography>
+        <Box sx={{ width: '100%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
                 <Button
                     variant="contained"
-                    startIcon={<Plus />}
-                    onClick={() => setOpenDialog(true)}
+                    startIcon={<Plus size={20} />}
+                    href={`/projects/${projectId}/impacted-group/new`}
                 >
-                    Create New Impacted Group
+                    Create Impacted Group
                 </Button>
             </Box>
 
-            <Paper elevation={0} sx={{ height: '100%', width: '100%' }}>
-                <DataGrid
-                    rows={groups}
-                    columns={columns}
-                    sx={{
-                        border: 'none',
-                        '& .MuiDataGrid-cell': {
-                            borderColor: 'divider',
+            <DataTable
+                data={transformedData}
+                columns={columns}
+                title="Impacted Groups"
+                subtitle="Groups affected by this change project"
+                enablePagination={true}
+                muiTableBodyRowProps={({ row }: { row: any }) => ({
+                    onClick: () => window.location.href = `/projects/${projectId}/impacted-group/${row.original.id}`,
+                    sx: {
+                        cursor: 'pointer',
+                        '&:hover': {
+                            backgroundColor: 'action.hover',
                         },
-                    }}
-                />
-            </Paper>
-
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-                <DialogTitle>Create New Impacted Group</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <TextField
-                            label="Group Name"
-                            value={newGroup.name}
-                            onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Overall Change %"
-                            type="number"
-                            value={newGroup.overallChange}
-                            onChange={(e) => setNewGroup({ ...newGroup, overallChange: parseInt(e.target.value) || 0 })}
-                            fullWidth
-                            inputProps={{ min: 0, max: 100 }}
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-                    <Button onClick={handleAddGroup} variant="contained" disabled={!newGroup.name}>
-                        Create Group
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    },
+                })}
+            />
         </Box>
     );
 };
