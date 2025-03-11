@@ -7,6 +7,7 @@ import ImpactedGroupsTable from "@/app/lib/components/tables/impactedGroupsTable
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationInfo/organisationInfoAssessment";
 import LeadershipAssessment from "@/app/lib/components/forms/leadershipAssessment/leadershipAssessment";
 import CommunicationToneAssessment from "@/app/lib/components/forms/communicationTone/communicationToneAssessment";
+import CulturalFactorsAssessment from "@/app/lib/components/forms/culturalFactors/culturalFactorsAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -190,8 +191,9 @@ export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: Mo
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={6}>
-                    <Typography variant="h6">Cultural Factors</Typography>
-                    <Typography>Cultural factors assessment will be implemented here.</Typography>
+                    <Typography variant="h4">Cultural Factors</Typography>
+                    <br/>
+                    <CulturalFactorsAssessment/>
                 </TabPanel>
             </Paper>
         </Box>

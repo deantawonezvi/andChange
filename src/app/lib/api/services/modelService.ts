@@ -1,6 +1,7 @@
 import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 import { ModelToneFactorsDTO } from "@/app/lib/components/forms/communicationTone/types";
+import { ModelCulturalFactorsDTO } from '../../components/forms/culturalFactors/types';
 
 export interface ModelAnagraphicDataDTO {
     modelId: number;
@@ -89,6 +90,7 @@ export interface ModelVariablesDTO {
     pctChangeManagement: ModelPCTChangeManagementDTO;
     pctSuccess: ModelPCTSuccessDTO;
     toneFactorsDTO: ModelToneFactorsDTO;
+    culturalFactorsDTO: ModelCulturalFactorsDTO;
 
 
 }
@@ -349,6 +351,22 @@ export class ModelService {
             return response.data;
         } catch (error) {
             console.log('Error updating tone factors:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update the cultural factors for a project
+     */
+    async updateCulturalFactors(data: ModelCulturalFactorsDTO): Promise<ModelCulturalFactorsDTO> {
+        try {
+            const response = await this.client.put<ModelCulturalFactorsDTO>(
+                '/api/v1/model/cultural-factors',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating cultural factors:', error);
             throw error;
         }
     }

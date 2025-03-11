@@ -7,9 +7,10 @@ import { Save } from 'lucide-react';
 import { ModelService } from "@/app/lib/api/services/modelService";
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
 import {
-    CommunicationToneFormData,
+    communicationToneDescriptions,
     communicationToneFields,
-    communicationToneDescriptions, ModelToneFactorsDTO
+    CommunicationToneFormData,
+    ModelToneFactorsDTO
 } from "@/app/lib/components/forms/communicationTone/types";
 import { useToast } from '@/app/lib/hooks/useToast';
 
