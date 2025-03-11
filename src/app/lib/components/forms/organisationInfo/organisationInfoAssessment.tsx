@@ -308,7 +308,7 @@ const OrganizationalAssessmentForm: React.FC = () => {
                             fieldName={field.fieldName}
                             ratingFieldName={field.ratingFieldName}
                             required={field.required}
-                            multiline={field.type !== 'select' && field.type !== 'slider' && field.type !== 'boolean'&& field.type !== 'date' ? field.multiline : undefined}
+                            multiline={field.multiline}
                             type={field.type}
                             options={field.type === 'select' ? field.options : undefined}
                             min={field.type === 'slider' ? field.min : undefined}

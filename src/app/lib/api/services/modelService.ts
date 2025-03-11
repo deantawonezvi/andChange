@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
+import { ModelToneFactorsDTO } from "@/app/lib/components/forms/communicationTone/types";
 
 export interface ModelAnagraphicDataDTO {
     modelId: number;
@@ -87,6 +88,7 @@ export interface ModelVariablesDTO {
     pctSponsorship: ModelPCTSponsorshipDTO;
     pctChangeManagement: ModelPCTChangeManagementDTO;
     pctSuccess: ModelPCTSuccessDTO;
+    toneFactorsDTO: ModelToneFactorsDTO;
 
 
 }
@@ -331,6 +333,22 @@ export class ModelService {
             return response.data;
         } catch (error) {
             console.log('Error updating PCT Success:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update the tone factors for a project
+     */
+    async updateToneFactors(data: ModelToneFactorsDTO): Promise<ModelToneFactorsDTO> {
+        try {
+            const response = await this.client.put<ModelToneFactorsDTO>(
+                '/api/v1/model/tone-factors',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.log('Error updating tone factors:', error);
             throw error;
         }
     }

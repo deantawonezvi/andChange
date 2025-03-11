@@ -5,6 +5,7 @@ export interface BaseFormField {
     tooltip: string;
     required?: boolean;
     order?: number;
+    multiline?: boolean;
 }
 
 export interface TextFormField extends BaseFormField {
@@ -24,6 +25,12 @@ export interface SliderFormField extends BaseFormField {
     marks: { value: number; label: string }[];
 }
 
+export interface RadioFormField extends BaseFormField {
+    type: 'radio';
+    options: { value: number | string; label: string }[];
+    orientation?: 'horizontal' | 'vertical';
+}
+
 export interface BooleanFormField extends BaseFormField {
     type: 'boolean';
 }
@@ -32,11 +39,18 @@ export interface DateFormField extends BaseFormField {
     type: 'date';
 }
 
-export type FormField = TextFormField | SelectFormField | SliderFormField | BooleanFormField | DateFormField;
+export type FormField =
+    | TextFormField
+    | SelectFormField
+    | SliderFormField
+    | RadioFormField
+    | BooleanFormField
+    | DateFormField;
 
 export type FormFieldValue<T extends FormField> =
     T extends BooleanFormField ? boolean :
         T extends SliderFormField ? number :
-            T extends SelectFormField ? string :
-                T extends DateFormField ? string :
-                string;
+            T extends RadioFormField ? number | string :
+                T extends SelectFormField ? string :
+                    T extends DateFormField ? string :
+                        string;

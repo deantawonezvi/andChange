@@ -170,115 +170,192 @@ export interface QuestionWithRatingProps {
     marks?: { value: number; label: string }[];
     errors: FieldErrors<any>;
     children?: React.ReactNode;
+    orientation?: 'horizontal' | 'vertical';
 }
+
+export interface RadioButtonsProps {
+    value: string | number;
+    onChange: (value: string | number) => void;
+    options: { value: string | number; label: string }[];
+    orientation?: 'horizontal' | 'vertical';
+    error?: string;
+}
+
+export const RadioButtons: React.FC<RadioButtonsProps> = ({
+                                                              value, onChange, options, orientation = 'horizontal', error
+                                                          }) => (
+    <Box>
+        <RadioGroup
+            row={orientation === 'horizontal'}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            sx={{
+                display: 'flex',
+                flexDirection: orientation === 'vertical' ? 'column' : 'row',
+                gap: orientation === 'vertical' ? 1 : 2
+            }}
+        >
+            {options.map((option) => (
+                <FormControlLabel
+                    key={String(option.value)}
+                    value={option.value}
+                    control={<Radio size="small" />}
+                    label={
+                        <Typography variant="body2">
+                            {option.label}
+                        </Typography>
+                    }
+                    sx={{
+                        mr: orientation === 'horizontal' ? 2 : 0,
+                        alignItems: 'flex-start',
+                        '.MuiFormControlLabel-label': {
+                            pt: 0.5 // Align label with radio button
+                        }
+                    }}
+                />
+            ))}
+        </RadioGroup>
+        {error && <Typography variant="caption" color="error">{error}</Typography>}
+    </Box>
+);
 
 export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                                                           label, tooltip, control, fieldName, ratingFieldName, required,
                                                                           multiline, type, options, optionLabelKey = 'label', optionValueKey = 'value',
-                                                                          min, max, marks, errors, children
-                                                                      }) => (
-    <Paper elevation={0} sx={{ p: 1, borderRadius: 1 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Controller
-                name={fieldName}
-                control={control}
-                rules={{ required: required ? 'This field is required' : false }}
-                render={({ field }) => (
-                    <QuestionWithTooltip
-                        label={label}
-                        tooltip={tooltip}
-                        error={errors[fieldName]?.message as string}
-                        required={required}
-                    >
-                        {children || (
-                            <>
-                                {(!type || type === 'text') && (
-                                    <TextField
-                                        {...field}
-                                        value={field.value === null ? '' : field.value}
-                                        fullWidth
-                                        multiline={multiline}
-                                        rows={multiline ? 4 : 1}
-                                        error={!!errors[fieldName]}
-                                    />
-                                )}
+                                                                          min, max, marks, errors, children, orientation
+                                                                      }) => {
+    // Determine if multiline should be used based on field type
+    const useMultiline = type !== 'select' && type !== 'slider' && type !== 'boolean' &&
+        type !== 'date' && type !== 'radio' && multiline === true;
 
-                                {type === 'date' && (
-                                    <CustomDatePicker
-                                        value={field.value || ''}
-                                        onChange={field.onChange}
-                                        error={errors[fieldName]?.message as string}
-                                    />
-                                )}
-
-                                {type === 'select' && options && (
-                                    <FormControl fullWidth error={!!errors[fieldName]}>
-                                        <Select
+    return (
+        <Paper elevation={0} sx={{ p: 1, borderRadius: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Controller
+                    name={fieldName}
+                    control={control}
+                    rules={{ required: required ? 'This field is required' : false }}
+                    render={({ field }) => (
+                        <QuestionWithTooltip
+                            label={label}
+                            tooltip={tooltip}
+                            error={errors[fieldName]?.message as string}
+                            required={required}
+                        >
+                            {children || (
+                                <>
+                                    {(!type || type === 'text') && (
+                                        <TextField
                                             {...field}
                                             value={field.value === null ? '' : field.value}
-                                        >
-                                            {options.map((option) => {
-                                                if (typeof option === 'string') {
-                                                    return (
-                                                        <MenuItem key={option} value={option}>
-                                                            {option}
-                                                        </MenuItem>
-                                                    );
-                                                } else {
-                                                    const value = option[optionValueKey as keyof typeof option];
-                                                    const label = option[optionLabelKey as keyof typeof option];
-                                                    return (
-                                                        <MenuItem key={String(value)} value={value}>
-                                                            {label}
-                                                        </MenuItem>
-                                                    );
-                                                }
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                )}
+                                            fullWidth
+                                            multiline={useMultiline}
+                                            rows={useMultiline ? 4 : 1}
+                                            error={!!errors[fieldName]}
+                                        />
+                                    )}
 
-                                {type === 'slider' && (
-                                    <SliderRating
-                                        value={field.value === null ? (min || 1) : field.value}
-                                        onChange={field.onChange}
-                                        min={min || 1}
-                                        max={max || 5}
-                                        marks={marks || []}
-                                        error={errors[fieldName]?.message as string}
-                                    />
-                                )}
+                                    {type === 'date' && (
+                                        <CustomDatePicker
+                                            value={field.value || ''}
+                                            onChange={field.onChange}
+                                            error={errors[fieldName]?.message as string}
+                                        />
+                                    )}
 
-                                {type === 'boolean' && (
-                                    <BooleanToggle
-                                        value={field.value === null ? false : field.value}
-                                        onChange={field.onChange}
-                                        error={errors[fieldName]?.message as string}
-                                    />
-                                )}
-                            </>
-                        )}
-                    </QuestionWithTooltip>
+                                    {type === 'select' && options && (
+                                        <FormControl fullWidth error={!!errors[fieldName]}>
+                                            <Select
+                                                {...field}
+                                                value={field.value === null ? '' : field.value}
+                                            >
+                                                {options.map((option) => {
+                                                    if (typeof option === 'string') {
+                                                        return (
+                                                            <MenuItem key={option} value={option}>
+                                                                {option}
+                                                            </MenuItem>
+                                                        );
+                                                    } else {
+                                                        const value = option[optionValueKey as keyof typeof option];
+                                                        const label = option[optionLabelKey as keyof typeof option];
+                                                        return (
+                                                            <MenuItem key={String(value)} value={value}>
+                                                                {label}
+                                                            </MenuItem>
+                                                        );
+                                                    }
+                                                })}
+                                            </Select>
+                                        </FormControl>
+                                    )}
+
+                                    {type === 'radio' && options && (
+                                        <RadioButtons
+                                            value={field.value === null ? '' : field.value}
+                                            onChange={field.onChange}
+                                            options={
+                                                Array.isArray(options)
+                                                    ? options.map((opt) => {
+                                                        if (typeof opt === 'string') {
+                                                            return { value: opt, label: opt };
+                                                        } else if (typeof opt === 'object' && opt !== null) {
+                                                            return {
+                                                                value: opt[optionValueKey as keyof typeof opt] as string | number,
+                                                                label: opt[optionLabelKey as keyof typeof opt] as string
+                                                            };
+                                                        }
+                                                        return { value: '', label: '' };
+                                                    })
+                                                    : []
+                                            }
+                                            orientation={orientation}
+                                            error={errors[fieldName]?.message as string}
+                                        />
+                                    )}
+
+                                    {type === 'slider' && (
+                                        <SliderRating
+                                            value={field.value === null ? (min || 1) : field.value}
+                                            onChange={field.onChange}
+                                            min={min || 1}
+                                            max={max || 5}
+                                            marks={marks || []}
+                                            error={errors[fieldName]?.message as string}
+                                        />
+                                    )}
+
+                                    {type === 'boolean' && (
+                                        <BooleanToggle
+                                            value={field.value === null ? false : field.value}
+                                            onChange={field.onChange}
+                                            error={errors[fieldName]?.message as string}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </QuestionWithTooltip>
+                    )}
+                />
+
+                {/* Only show AdequacyRating if ratingFieldName exists */}
+                {ratingFieldName && (
+                    <Box>
+                        <Controller
+                            name={ratingFieldName}
+                            control={control}
+                            rules={{ required: 'Rating is required' }}
+                            render={({ field }) => (
+                                <AdequacyRating
+                                    value={field.value === null ? 1 : Number(field.value)}
+                                    onChange={field.onChange}
+                                    error={errors[ratingFieldName]?.message as string}
+                                />
+                            )}
+                        />
+                    </Box>
                 )}
-            />
-
-            {/* Only show AdequacyRating if ratingFieldName exists */}
-            {ratingFieldName && (
-                <Box>
-                    <Controller
-                        name={ratingFieldName}
-                        control={control}
-                        rules={{ required: 'Rating is required' }}
-                        render={({ field }) => (
-                            <AdequacyRating
-                                value={field.value === null ? 1 : Number(field.value)}
-                                onChange={field.onChange}
-                                error={errors[ratingFieldName]?.message as string}
-                            />
-                        )}
-                    />
-                </Box>
-            )}
-        </Box>
-    </Paper>
-);
+            </Box>
+        </Paper>
+    );
+};

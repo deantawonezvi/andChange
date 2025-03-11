@@ -6,6 +6,7 @@ import TimelineAssessment from "@/app/lib/components/forms/timelineAssessment/ti
 import ImpactedGroupsTable from "@/app/lib/components/tables/impactedGroupsTable";
 import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisationInfo/organisationInfoAssessment";
 import LeadershipAssessment from "@/app/lib/components/forms/leadershipAssessment/leadershipAssessment";
+import CommunicationToneAssessment from "@/app/lib/components/forms/communicationTone/communicationToneAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -184,7 +185,8 @@ export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: Mo
 
                 <TabPanel value={activeTab} index={5}>
                     <Typography variant="h4">Communication Tone</Typography>
-                    <Typography>Communication tone settings will be implemented here.</Typography>
+                    <br/>
+                    <CommunicationToneAssessment/>
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={6}>
