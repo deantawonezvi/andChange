@@ -22,9 +22,6 @@ import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import { format, isValid } from 'date-fns';
 import { timelineFields } from "@/app/lib/components/forms/timelineAssessment/types";
 
-// Define timeline assessment fields
-
-
 interface TimelineFormData {
     // Timeline assessment fields from ModelTimelineAssessmentDTO
     kickoff: string;
@@ -164,6 +161,55 @@ const TimelineAssessment: React.FC = () => {
         return isValid(date) ? format(date, 'MMM d, yyyy') : '';
     };
 
+    // Add the onSubmit handler to process and submit the form data
+    const onSubmit = async (formData: TimelineFormData) => {
+        if (!modelData) return;
+
+        try {
+            // Update timeline assessment
+            const timelineData: ModelTimelineAssessmentDTO = {
+                modelId: projectId,
+                kickoff: formData.kickoff,
+                designDefined: formData.designDefined,
+                develop: formData.develop,
+                test: formData.test,
+                deploy: formData.deploy,
+                outcomes: formData.outcomes,
+                releases: formData.releases,
+                impactedGroupPeopleMilestones: formData.impactedGroupPeopleMilestones
+            };
+            await updateTimelineAssessmentMutation.mutateAsync(timelineData);
+
+            // Update change characteristics - only the fields we manage in this form
+            const changeCharacteristicsData: ModelChangeCharacteristicsDTO = {
+                modelId: projectId,
+                entryPointOfCM: formData.entryPointOfCM,
+                timeframeAdequacyForChange: formData.timeframeAdequacyForChange,
+                // Preserve other fields from the existing model
+                scopeOfChange: modelData.changeCharacteristics?.scopeOfChange || 1,
+                amountOfOverallChange: modelData.changeCharacteristics?.amountOfOverallChange || 1,
+                degreeOfConfidentialityRequired: modelData.changeCharacteristics?.degreeOfConfidentialityRequired || 1,
+                degreeOfExternalStakeholderImpact: modelData.changeCharacteristics?.degreeOfExternalStakeholderImpact || 1
+            };
+            await updateChangeCharacteristicsMutation.mutateAsync(changeCharacteristicsData);
+
+            // Update anagraphic data - only the isProjectAgile field
+            if (modelData.anagraphicData) {
+                const anagraphicData = {
+                    ...modelData.anagraphicData, // Keep all existing data
+                    modelId: projectId,
+                    isProjectAgile: formData.isProjectAgile
+                };
+                await updateAnagraphicDataMutation.mutateAsync(anagraphicData);
+            }
+
+            showToast('Timeline information updated successfully', 'success');
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            showToast('An error occurred while saving timeline information', 'error');
+        }
+    };
+
     if (projectId === 0) {
         return <Alert severity="error">Invalid project ID</Alert>;
     }
@@ -183,7 +229,7 @@ const TimelineAssessment: React.FC = () => {
 
     return (
         <Box sx={{ mx: 'auto', p: 3 }}>
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {(updateTimelineAssessmentMutation.isError ||
                         updateChangeCharacteristicsMutation.isError ||
