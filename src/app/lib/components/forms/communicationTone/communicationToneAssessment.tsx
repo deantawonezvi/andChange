@@ -127,7 +127,6 @@ const CommunicationToneAssessment: React.FC = () => {
                                 control={control}
                                 errors={errors}
                             >
-                                {/* We could add field-specific elements here if needed */}
                             </QuestionWithRating>
 
                             {/* Display the description for the currently selected level */}
