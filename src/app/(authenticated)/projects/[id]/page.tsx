@@ -37,10 +37,10 @@ function TabPanel(props: TabPanelProps) {
 
 // Primary tabs definition
 const primaryTabs = [
-    { label: 'Dashboard', icon: <BarChart3 size={20} />, id: 'dashboard' },
-    { label: 'Model Calibration', icon: <Settings size={20} />, id: 'model-calibration' },
-    { label: 'Plan Actions', icon: <PlayCircle size={20} />, id: 'plan-actions' },
-    { label: 'Track Progress', icon: <LineChart size={20} />, id: 'track-progress' },
+    { label: 'Dashboard', icon: <BarChart3 size={20} color="#e85d45" />, id: 'dashboard' },
+    { label: 'Model Calibration', icon: <Settings size={20} color="#e85d45" />, id: 'model-calibration' },
+    { label: 'Plan Actions', icon: <PlayCircle size={20} color="#e85d45" />, id: 'plan-actions' },
+    { label: 'Track Progress', icon: <LineChart size={20} color="#e85d45" />, id: 'track-progress' },
 ];
 
 // Model calibration subtabs

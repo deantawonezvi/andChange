@@ -1,3 +1,4 @@
+// src/app/lib/components/projects/modelCalibration.tsx
 import React from 'react';
 import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
 import { Building2, CalendarDays, FolderKanban, Globe, MessageSquare, UserRound, Users } from 'lucide-react';
@@ -38,43 +39,43 @@ function TabPanel(props: TabPanelProps) {
 const tabs = [
     {
         label: 'Organisational Information',
-        icon: <Building2 size={20} />,
+        icon: <Building2 size={20} color="#e85d45" />,
         description: 'Basic information about your organization and its core values',
         id: 'org-info'
     },
     {
         label: 'Project Information',
-        icon: <FolderKanban size={20} />,
+        icon: <FolderKanban size={20} color="#e85d45" />,
         description: 'Details about the project scope, objectives, and goals',
         id: 'project-info'
     },
     {
         label: 'Timeline',
-        icon: <CalendarDays size={20} />,
+        icon: <CalendarDays size={20} color="#e85d45" />,
         description: 'Project timeline and key milestones',
         id: 'timeline'
     },
     {
         label: 'Impacted Groups',
-        icon: <Users size={20} />,
+        icon: <Users size={20} color="#e85d45" />,
         description: 'Information about teams and individuals affected by the change',
         id: 'impacted-groups'
     },
     {
         label: 'Leadership',
-        icon: <UserRound size={20} />,
+        icon: <UserRound size={20} color="#e85d45" />,
         description: 'Leadership structure and stakeholder information',
         id: 'leadership'
     },
     {
         label: 'Communication Tone',
-        icon: <MessageSquare size={20} />,
+        icon: <MessageSquare size={20} color="#e85d45" />,
         description: 'Communication strategy and tone settings',
         id: 'communication'
     },
     {
         label: 'Cultural Factors',
-        icon: <Globe size={20} />,
+        icon: <Globe size={20} color="#e85d45" />,
         description: 'Cultural considerations and organizational dynamics',
         id: 'cultural-factors'
     },
