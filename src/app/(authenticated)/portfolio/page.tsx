@@ -122,7 +122,7 @@ const PortfolioPage = () => {
 
             <Grid container spacing={3}>
                 {/* People ROI vs Budget Chart */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={12}>
                     <Paper elevation={3} sx={{ p: 2, height: '400px', position: 'relative' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <Typography variant="h6">People ROI vs Budget</Typography>
@@ -179,7 +179,7 @@ const PortfolioPage = () => {
                 </Grid>
 
                 {/* CM Budget vs Risk Chart */}
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={12}>
                     <Paper elevation={3} sx={{ p: 2, height: '400px', position: 'relative' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <Typography variant="h6">CM Budget vs Risk</Typography>
