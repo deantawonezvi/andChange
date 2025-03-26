@@ -254,7 +254,7 @@ const TimelineAssessment: React.FC = () => {
                                     borderRadius: '4px',
                                 },
                             }}>
-                                <Timeline position="alternate" sx={{ minWidth: timelineEvents.length * 250 }}>
+                                <Timeline position="right" sx={{ minWidth: timelineEvents.length * 25 }}>
                                     {timelineEvents.map((event, index) => (
                                         <TimelineItem key={event.id}>
                                             <TimelineOppositeContent color="text.secondary">

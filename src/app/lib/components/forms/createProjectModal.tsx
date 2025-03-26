@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -21,6 +21,7 @@ import { OrganizationService } from "@/app/lib/api/services/organisationService"
 interface CreateProjectModalProps {
     open: boolean;
     onClose: () => void;
+    preselectedOrganizationId?: number
 }
 
 interface FormInputs extends CreateProjectRequestDTO {
@@ -31,18 +32,28 @@ interface FormInputs extends CreateProjectRequestDTO {
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                                                    open,
                                                                    onClose,
+                                                                    preselectedOrganizationId
                                                                }) => {
     const {
         control,
         handleSubmit,
         formState: { errors },
-        reset
+        reset,
+        setValue
     } = useForm<FormInputs>({
         defaultValues: {
             projectName: '',
-            organizationId: 0
+            organizationId: preselectedOrganizationId || 0
         }
     });
+
+    useEffect(() => {
+        if (preselectedOrganizationId) {
+            setValue('organizationId', preselectedOrganizationId);
+        }
+    }, [preselectedOrganizationId, setValue]);
+
+
 
     const queryClient = useQueryClient();
     const projectService = ProjectService.getInstance();
