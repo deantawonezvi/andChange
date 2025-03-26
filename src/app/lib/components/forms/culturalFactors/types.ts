@@ -46,8 +46,8 @@ export const culturalFactorsFields: FormField[] = [
         type: 'radio',
         options: [
             { value: 1, label: 'Non-Expressive' },
-            { value: 2, label: 'Reserved Expression' },
-            { value: 3, label: 'Moderate Expression' },
+            { value: 2, label: 'Reserved Expressiveness' },
+            { value: 3, label: 'Moderate Expressiveness' },
             { value: 4, label: 'Open Expressiveness' },
             { value: 5, label: 'Highly Expressive' }
         ],
@@ -63,8 +63,8 @@ export const culturalFactorsFields: FormField[] = [
             { value: 1, label: 'Low concern of change' },
             { value: 2, label: 'Cursory attention to change' },
             { value: 3, label: 'Some concern about change' },
-            { value: 4, label: 'Moderate concern about change' },
-            { value: 5, label: 'Avoids change, overanalyzes and hesitant with risks' }
+            { value: 4, label: 'Moderately concerned about change' },
+            { value: 5, label: 'Avoids change where possible' }
         ],
         required: true,
         order: 2
@@ -75,11 +75,11 @@ export const culturalFactorsFields: FormField[] = [
         tooltip: 'The extent to which hierarchical relationships are emphasized and accepted',
         type: 'radio',
         options: [
-            { value: 1, label: 'Relaxed relationships with leaders, slow buy-in to change' },
-            { value: 2, label: 'Hierarchy awareness, leaders must assert wishes to be heard' },
-            { value: 3, label: 'Formal but open relationships with leaders, buy-in requires effort' },
-            { value: 4, label: 'Leader influence high, formal and informal communication mix' },
-            { value: 5, label: 'Low access to leaders, hierarchy defines access, resistance high' }
+            { value: 1, label: 'Relaxed relationships with leaders' },
+            { value: 2, label: 'Awareness of hierarchy, perceived access to leaders' },
+            { value: 3, label: 'Somewhat formal relationships with leaders' },
+            { value: 4, label: 'Careful management of hierarchy barriers' },
+            { value: 5, label: 'Low leader access, hierarchy defines access' }
         ],
         required: true,
         order: 3
@@ -91,10 +91,10 @@ export const culturalFactorsFields: FormField[] = [
         type: 'radio',
         options: [
             { value: 1, label: 'Individualistic' },
-            { value: 2, label: 'Individualistic over group' },
-            { value: 3, label: 'Balanced focus on individual and group priorities' },
-            { value: 4, label: 'Team/group above individual' },
-            { value: 5, label: 'Strong group orientation' }
+            { value: 2, label: 'Individualistic over collective' },
+            { value: 3, label: 'Balance of individual & group priorities' },
+            { value: 4, label: 'Group over individual' },
+            { value: 5, label: 'High team/group orientation' }
         ],
         required: true,
         order: 4
@@ -105,11 +105,11 @@ export const culturalFactorsFields: FormField[] = [
         tooltip: 'Whether performance is judged via objective metrics or relationship quality',
         type: 'radio',
         options: [
-            { value: 1, label: 'Relationships drive performance, low instances of metrics' },
-            { value: 2, label: 'Occasional use of metrics but relationships still valued' },
-            { value: 3, label: 'Priority metrics tied to relationships, feedback valued' },
-            { value: 4, label: 'Metrics drive behavior, but relationships still moderate' },
-            { value: 5, label: 'Metrics dominate, training seen as less impactful' }
+            { value: 1, label: 'Relationships drive performance' },
+            { value: 2, label: 'Metrics occasionally referenced' },
+            { value: 3, label: 'Priority metrics tied to relationships' },
+            { value: 4, label: 'Metrics-driven behavior, relationships moderate impact' },
+            { value: 5, label: 'Metrics are the only focus' }
         ],
         required: true,
         order: 5
@@ -121,10 +121,10 @@ export const culturalFactorsFields: FormField[] = [
         type: 'radio',
         options: [
             { value: 1, label: 'Low Assertiveness' },
-            { value: 2, label: 'Team-oriented' },
-            { value: 3, label: 'Mixed assertiveness, some direct, some indirect communicators' },
-            { value: 4, label: 'Mainly assertive but polite' },
-            { value: 5, label: 'Highly assertive, competitive, direct' }
+            { value: 2, label: 'Modest, cooperative, and polite' },
+            { value: 3, label: 'Mixed levels of assertiveness' },
+            { value: 4, label: 'Mainly assertive values' },
+            { value: 5, label: 'High assertiveness' }
         ],
         required: true,
         order: 6
@@ -135,10 +135,10 @@ export const culturalFactorsFields: FormField[] = [
         tooltip: 'The organization\'s preference for predictability versus creativity and risk-taking',
         type: 'radio',
         options: [
-            { value: 1, label: 'High focus on stability, predictability valued, rules followed strictly' },
-            { value: 2, label: 'Some innovation, mostly focused on stability' },
-            { value: 3, label: 'Stability with some innovation allowed' },
-            { value: 4, label: 'Innovation in selected areas, controlled risk' },
+            { value: 1, label: 'High stability focus' },
+            { value: 2, label: 'Some innovation, mostly stable' },
+            { value: 3, label: 'Balance of stability & innovation' },
+            { value: 4, label: 'Innovation in selected areas' },
             { value: 5, label: 'High innovation, disruption accepted' }
         ],
         required: true,
@@ -146,77 +146,77 @@ export const culturalFactorsFields: FormField[] = [
     },
     {
         fieldName: 'consultativeDecisionMakingLevel',
-        label: 'Consultative Decision Making & Inclusivity',
+        label: 'Decision Making & Inclusivity',
         tooltip: 'How widely input is sought and how inclusive the decision-making process is',
         type: 'radio',
         options: [
-            { value: 1, label: 'Little consultation/inclusivity, leaders make most decisions' },
-            { value: 2, label: 'Some delegation of decision-making, more collaboration' },
-            { value: 3, label: 'Some consultation, balanced decision-making' },
-            { value: 4, label: 'More inclusivity and two-way flow, people feel empowered to contribute' },
-            { value: 5, label: 'High consultation, inclusivity, and empowerment' }
+            { value: 1, label: 'Little consultation/inclusivity' },
+            { value: 2, label: 'Powers reserved in many cases' },
+            { value: 3, label: 'Consultation in certain cases' },
+            { value: 4, label: 'Some consultation & inclusivity' },
+            { value: 5, label: 'High consultation & inclusivity' }
         ],
         required: true,
         order: 8
     }
 ];
 
-// Detailed descriptions for each cultural factor level
+// Detailed descriptions for each cultural factor level - updated to match the table
 export const culturalFactorsDescriptions = {
     emotionalExpressiveness: [
-        "Non-Expressive: Emotions are rarely shown. The organization maintains a stoic, business-like atmosphere at all times.",
-        "Reserved Expression: Emotions are controlled and only expressed in private settings or with trusted colleagues.",
-        "Moderate Expression: There is a balanced approach to showing emotions. Appropriate expression is acceptable but not excessive.",
-        "Open Expressiveness: Emotions are freely expressed and body language is animated. People communicate enthusiastically.",
-        "Highly Expressive: Very animated communication with strong emotional displays. Passion and emotional connection are highly valued."
+        "Non-Expressive: Individuals rarely show emotions. Stoic or distant.",
+        "Reserved Expressiveness: Controlled emotions, expressed in comfortable settings.",
+        "Moderate Expressiveness: Express emotions noticeably but not overwhelmingly.",
+        "Open Expressiveness: Freely expressive, body language clear.",
+        "Highly Expressive: Strong emotions, open expressions."
     ],
     uncertaintyAvoidance: [
-        "Low concern about change. The organization embraces ambiguity and is comfortable with risks and unknowns.",
-        "Cursory attention to change. Some planning for change but generally comfortable with uncertainty.",
-        "Some concern about change that can lead to change fatigue. The organization prefers some structure but can adapt.",
-        "Moderate concern about change. The organization prefers planning and structure to reduce ambiguity.",
-        "Avoids change, overanalyzes and is hesitant with risks. The organization strongly prefers rules, structure and predictability."
+        "Low concern of change: Passive approach to change.",
+        "Cursory attention to change: Limited effort to manage change saturation.",
+        "Some concern about change: Risk of change fatigue; good management helps.",
+        "Moderately concerned about change: Change requires clear reasons; good support is needed.",
+        "Avoids change where possible: Resistance to change, over-analysis, full explanations needed."
     ],
     powerDistance: [
-        "Relaxed relationships with leaders, slow buy-in to change. Commands have less power and authority is often questioned.",
-        "Hierarchy awareness exists, but leaders must assert wishes to be heard. Authority is somewhat respected.",
-        "Formal but open relationships with leaders, buy-in requires effort. Moderate respect for authority and hierarchy.",
-        "Leader influence high, formal and informal communication mix. Decisions from above are generally followed.",
-        "Low access to leaders, hierarchy defines access, resistance high. Strong deference to authority and formal hierarchy."
+        "Relaxed relationships with leaders: Buy-in is slow; hearsay influences decisions.",
+        "Awareness of hierarchy, perceived access to leaders: Leader communication acknowledged but hearsay still matters.",
+        "Somewhat formal relationships with leaders: Leaders need effort to gain buy-in.",
+        "Careful management of hierarchy barriers: Leader influence is high, formal & informal comms help.",
+        "Low leader access, hierarchy defines access: Resistance rises due to perceived irrelevance."
     ],
     individualismVsCollectivism: [
-        "Individualistic. Personal achievement and independence are highly valued over group harmony.",
-        "Individualistic over group. Personal achievements are celebrated but some team focus exists.",
-        "Balanced focus on individual and group priorities. Both personal success and team cohesion are valued.",
-        "Team/group above individual. The organization prioritizes team success over individual accomplishments.",
-        "Strong group orientation. Harmony and collective achievement are paramount, with individuals expected to sacrifice for the group."
+        "Individualistic: Independence is valued.",
+        "Individualistic over collective: WIIFM still important but some group awareness.",
+        "Balance of individual & group priorities: Both personal and group goals count.",
+        "Group over individual: Group benefits take priority, but personal interests still considered.",
+        "High team/group orientation: Group consensus over individual choice."
     ],
     performanceViaMetricsVsRelationships: [
-        "Relationships drive performance. Low instances of metrics, focus on pleasing leaders first.",
-        "Occasional use of metrics but relationships still valued. Performance is judged through a mix of data and personal connections.",
-        "Priority metrics tied to relationships, feedback valued. Balanced approach to performance measurement.",
-        "Metrics drive behavior, but relationships still moderate. Data-focused with some consideration for relationship factors.",
-        "Metrics dominate, training seen as less impactful. Highly data-driven culture where numbers are the primary measure of success."
+        "Relationships drive performance: Performance to please leaders first.",
+        "Metrics occasionally referenced: Metrics not fully adopted; leader preferences first.",
+        "Priority metrics tied to relationships: Performance metrics matter but leaders' views still influential.",
+        "Metrics-driven behavior, relationships moderate impact: Metrics strongly influence performance.",
+        "Metrics are the only focus: Change is a waste unless it improves metrics."
     ],
     assertiveness: [
-        "Low Assertiveness. Indirect communication and conflict avoidance are the norm.",
-        "Team-oriented approach with moderate directness. People express opinions but not forcefully.",
-        "Mixed assertiveness. Some direct, some indirect communicators. Variable approaches to conflict resolution.",
-        "Mainly assertive but polite. Direct communication is valued but delivered tactfully.",
-        "Highly assertive, competitive, direct. Forthright communication and strong opinions are expected and valued."
+        "Low Assertiveness: Indirect communication, harmony-focused.",
+        "Modest, cooperative, and polite: Feedback is cautious, indirect.",
+        "Mixed levels of assertiveness: Some direct feedback; competition vs collaboration varies.",
+        "Mainly assertive values: Direct but polite communication.",
+        "High assertiveness: Direct, competitive, and confrontational communication."
     ],
     stabilityVsInnovation: [
-        "High focus on stability. Predictability valued, rules followed strictly. Innovation is resisted.",
-        "Some innovation, mostly focused on stability. Incremental improvements within established frameworks.",
-        "Stability with some innovation allowed. Balanced approach that values reliability but permits new ideas.",
-        "Innovation in selected areas, controlled risk. Organization encourages creativity within defined parameters.",
-        "High innovation, disruption accepted. The organization embraces change, experimentation and breakthrough thinking."
+        "High stability focus: Consistency and reliability valued.",
+        "Some innovation, mostly stable: Innovation accepted if structured.",
+        "Balance of stability & innovation: Trust & customer views valued.",
+        "Innovation in selected areas: Flexibility & adaptability encouraged.",
+        "High innovation, disruption accepted: Encourages experimentation & risk-taking."
     ],
     consultativeDecisionMaking: [
-        "Little consultation/inclusivity. Leaders make most decisions, morale is easy to reduce, innovation is resisted.",
-        "Some delegation of decision-making. More collaboration and growing empowerment.",
-        "Some consultation, balanced decision-making. Moderate transparency with inconsistent conflict resolution.",
-        "More inclusivity and two-way flow. People feel empowered to contribute to decisions that affect them.",
-        "High consultation, inclusivity, and empowerment. Strong community feeling with broad participation in decisions."
+        "Little consultation/inclusivity: Decisions concentrated in leaders.",
+        "Powers reserved in many cases: Some decision-making delegated.",
+        "Consultation in certain cases: Moderate collaboration, mixed engagement.",
+        "Some consultation & inclusivity: Collaborative decision-making emerging.",
+        "High consultation & inclusivity: Strong collaboration, community focus."
     ]
 };
