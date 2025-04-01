@@ -6,6 +6,7 @@ import { QueryClient } from "@tanstack/query-core";
 import theme from "@/app/lib/theme";
 import { QueryClientProvider } from "@tanstack/react-query";
 import Script from "next/script";
+import { metadata } from "@/app/metadata";
 
 export default function RootLayout({
                                        children,
@@ -15,6 +16,8 @@ export default function RootLayout({
     return (
         <html lang="en">
         <head>
+            <title>{(metadata.title as string) ?? " "}</title>
+            <meta name="description" content={(metadata.description as string) ?? " "}/>
             <Script
                 id="feedbucket-script"
                 strategy="afterInteractive"
