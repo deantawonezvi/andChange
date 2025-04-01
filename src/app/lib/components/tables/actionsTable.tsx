@@ -35,7 +35,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const [nameFilter, setNameFilter] = useState('');
     const [dateFilter, setDateFilter] = useState('');
 
-    // Fetch action plan data for the project
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
         queryFn: async () => {
@@ -314,7 +313,34 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     }
 
     if (error) {
-        return <div>Error: {error instanceof Error ? error.message : 'Unknown error loading actions'}</div>;
+        return (
+            <Box sx={{
+                p: 4,
+                border: '1px solid #ffe0e0',
+                borderRadius: 2,
+                bgcolor: '#fff5f5',
+                textAlign: 'center',
+                my: 2
+            }}>
+                <Typography variant="h6" color="error" gutterBottom>
+                    Error Loading Action Plan
+                </Typography>
+                <Typography variant="body1" color="text.secondary" paragraph>
+                    {error instanceof Error
+                        ? error.message
+                        : 'There was a problem retrieving the action plan. Please try again.'}
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => refetch()}
+                    startIcon={<RotateCcw size={18} />}
+                    sx={{ mt: 1 }}
+                >
+                    Retry
+                </Button>
+            </Box>
+        );
     }
 
     return (

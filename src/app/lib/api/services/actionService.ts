@@ -1,8 +1,6 @@
-// src/app/lib/api/services/actionService.ts
 import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 
-// Define interfaces based on the API schema
 export interface ActionCoreDTO {
     id?: number;
     externalActionIdentifier: string;
@@ -83,13 +81,23 @@ export interface ActionOptionsForActionPlanEntitySlotDTO {
     actionOptionsList: ActionSummaryDTO[];
 }
 
-export class ActionService {
+export interface ContentGenerationRequestDTO {
+    id?: number;
+    associatedActionPlanEntitySlotDTO: ActionPlanEntitySlotDTO;
+    submittedRequest: string;
+    generatedResult: string;
+}
+
+export interface GenerateContentForActionPlanRequestDTO {
+    associatedActionPlanEntitySlotDTO: number;
+}
+
+class ActionService {
     private static instance: ActionService;
     private client: AxiosInstance;
 
     private constructor() {
-        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
-        this.client = createAxiosClient(baseURL, process.env.NODE_ENV === 'development');
+        this.client = createAxiosClient();
     }
 
     public static getInstance(): ActionService {
@@ -104,9 +112,7 @@ export class ActionService {
      */
     async getActionsForOrganization(organizationId: number): Promise<ActionSummaryDTO[]> {
         try {
-            const response = await this.client.get<ActionSummaryDTO[]>(
-                `/api/v1/action/actions-for-organization?organization-id=${organizationId}`
-            );
+            const response = await this.client.get(`/api/v1/action/actions-for-organization?organization-id=${organizationId}`);
             return response.data;
         } catch (error) {
             console.log('Error fetching actions for organization:', error);
@@ -115,13 +121,11 @@ export class ActionService {
     }
 
     /**
-     * Get action by ID
+     * Get a specific action by ID
      */
     async getActionById(actionId: number): Promise<ActionSummaryDTO> {
         try {
-            const response = await this.client.get<ActionSummaryDTO>(
-                `/api/v1/action/${actionId}`
-            );
+            const response = await this.client.get(`/api/v1/action/${actionId}`);
             return response.data;
         } catch (error) {
             console.log('Error fetching action:', error);
@@ -130,13 +134,11 @@ export class ActionService {
     }
 
     /**
-     * Get action plan by ID
+     * Get a specific action plan by ID
      */
     async getActionPlanById(actionPlanId: number): Promise<ActionPlanDTO> {
         try {
-            const response = await this.client.get<ActionPlanDTO>(
-                `/api/v1/action-plan/ap/${actionPlanId}`
-            );
+            const response = await this.client.get(`/api/v1/action-plan/ap/${actionPlanId}`);
             return response.data;
         } catch (error) {
             console.log('Error fetching action plan:', error);
@@ -145,14 +147,11 @@ export class ActionService {
     }
 
     /**
-     * Create a new action plan
+     * Create a new action plan for a project
      */
     async createActionPlan(data: CreateActionPlanRequestDTO): Promise<ActionPlanDTO> {
         try {
-            const response = await this.client.post<ActionPlanDTO>(
-                '/api/v1/action-plan/ap',
-                data
-            );
+            const response = await this.client.post('/api/v1/action-plan/ap', data);
             return response.data;
         } catch (error) {
             console.log('Error creating action plan:', error);
@@ -165,10 +164,7 @@ export class ActionService {
      */
     async updateActionPlan(data: CreateActionPlanRequestDTO): Promise<ActionPlanDTO> {
         try {
-            const response = await this.client.put<ActionPlanDTO>(
-                '/api/v1/action-plan/ap',
-                data
-            );
+            const response = await this.client.put('/api/v1/action-plan/ap', data);
             return response.data;
         } catch (error) {
             console.log('Error updating action plan:', error);
@@ -177,29 +173,24 @@ export class ActionService {
     }
 
     /**
-     * Get action plan entity slot by ID
+     * Get a specific action plan entity slot by ID
      */
     async getActionPlanSlotById(slotId: number): Promise<ActionPlanEntitySlotDTO> {
         try {
-            const response = await this.client.get<ActionPlanEntitySlotDTO>(
-                `/api/v1/action-plan/ap/entity-slot/${slotId}`
-            );
+            const response = await this.client.get(`/api/v1/action-plan/ap/entity-slot/${slotId}`);
             return response.data;
         } catch (error) {
-            console.log('Error fetching action plan slot:', error);
+            console.log('Error fetching action plan entity slot:', error);
             throw error;
         }
     }
 
     /**
-     * Update action plan entity slot
+     * Update an action plan entity slot
      */
     async updateActionPlanEntitySlot(data: ActionPlanEntitySlotDTO): Promise<ActionPlanEntitySlotDTO> {
         try {
-            const response = await this.client.put<ActionPlanEntitySlotDTO>(
-                '/api/v1/action-plan/ap/update-action-plan-entity-slot',
-                data
-            );
+            const response = await this.client.put('/api/v1/action-plan/ap/update-action-plan-entity-slot', data);
             return response.data;
         } catch (error) {
             console.log('Error updating action plan entity slot:', error);
@@ -208,13 +199,11 @@ export class ActionService {
     }
 
     /**
-     * Get action options for a slot
+     * Get alternative action options for a slot
      */
     async getActionOptionsForSlot(slotId: number): Promise<ActionOptionsForActionPlanEntitySlotDTO> {
         try {
-            const response = await this.client.get<ActionOptionsForActionPlanEntitySlotDTO>(
-                `/api/v1/action-plan/ap/entity-slot-action-options/${slotId}`
-            );
+            const response = await this.client.get(`/api/v1/action-plan/ap/entity-slot-action-options/${slotId}`);
             return response.data;
         } catch (error) {
             console.log('Error fetching action options for slot:', error);
@@ -223,7 +212,43 @@ export class ActionService {
     }
 
     /**
-     * Helper method to map role codes to readable names
+     * Generate content for an action plan item
+     */
+    async generateContentForActionPlanItem(slotId: number): Promise<ContentGenerationRequestDTO[]> {
+        try {
+            const data: GenerateContentForActionPlanRequestDTO = {
+                associatedActionPlanEntitySlotDTO: slotId
+            };
+            const response = await this.client.post('/api/v1/content/generate-content-for-action-plan-item', data);
+            return response.data;
+        } catch (error) {
+            console.log('Error generating content for action plan item:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get all action plans for a project (helper method, not a direct API endpoint)
+     * This would normally be implemented with a dedicated API endpoint, but since that
+     * doesn't exist, we'll use the local storage to track action plan IDs per project
+     */
+    async getActionPlansForProject(projectId: number): Promise<ActionPlanDTO[]> {
+        try {
+            // Get action plan ID from local storage
+            const actionPlanId = localStorage.getItem(`project_${projectId}_actionPlanId`);
+            if (actionPlanId) {
+                const actionPlan = await this.getActionPlanById(parseInt(actionPlanId));
+                return [actionPlan];
+            }
+            return [];
+        } catch (error) {
+            console.log('Error fetching action plans for project:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Map role codes to readable names
      */
     getRoleReadableName(roleCode: string): string {
         const roleMap: Record<string, string> = {
@@ -234,7 +259,7 @@ export class ActionService {
             'E_PM': 'Project Manager',
             'E_SP': 'Sponsor',
             'E_EXT': 'External',
-            'MULTIPLE': 'Multiple',
+            'MULTIPLE': 'Multiple Stakeholders',
             'AUTHOR': 'Author',
             'NA': 'Not Applicable'
         };
@@ -243,25 +268,34 @@ export class ActionService {
     }
 
     /**
-     * Helper method to get appropriate status label and color
+     * Get status information with color and readable name
      */
-    getStatusInfo(slotState: string): { label: string; color: string } {
-        switch (slotState) {
-            case 'VACANT':
-                return { label: 'Vacant', color: '#9e9e9e' }; // Gray
-            case 'MOOTED':
-                return { label: 'Proposed', color: '#2196f3' }; // Blue
-            case 'ACCEPTED':
-                return { label: 'Accepted', color: '#ff9800' }; // Orange
-            case 'CONTENT_GENERATED':
-                return { label: 'Content Ready', color: '#4caf50' }; // Green
-            case 'COMPLETED':
-                return { label: 'Completed', color: '#4caf50' }; // Green
-            case 'DELETED':
-                return { label: 'Deleted', color: '#f44336' }; // Red
-            default:
-                return { label: slotState, color: '#9e9e9e' }; // Gray
-        }
+    getStatusInfo(slotState: string): { color: string; label: string } {
+        const statusMap: Record<string, { color: string; label: string }> = {
+            'VACANT': { color: '#f44336', label: 'Vacant' },
+            'MOOTED': { color: '#ff9800', label: 'Mooted' },
+            'ACCEPTED': { color: '#2196f3', label: 'Accepted' },
+            'CONTENT_GENERATED': { color: '#4caf50', label: 'Content Generated' },
+            'COMPLETED': { color: '#4caf50', label: 'Completed' },
+            'DELETED': { color: '#9e9e9e', label: 'Deleted' }
+        };
+
+        return statusMap[slotState] || { color: '#9e9e9e', label: slotState };
+    }
+
+    /**
+     * Get ABSUP category information with color and readable name
+     */
+    getAbsupCategoryInfo(category: string): { color: string; label: string } {
+        const categoryMap: Record<string, { color: string; label: string }> = {
+            'AWARENESS': { color: '#2196f3', label: 'Awareness' },
+            'BUYIN': { color: '#4caf50', label: 'Buy-In' },
+            'SKILL': { color: '#ff9800', label: 'Skill' },
+            'USE': { color: '#f44336', label: 'Use' },
+            'PROFICIENCY': { color: '#9c27b0', label: 'Proficiency' }
+        };
+
+        return categoryMap[category] || { color: '#9e9e9e', label: category };
     }
 }
 

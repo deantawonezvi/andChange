@@ -205,7 +205,7 @@ const TimelineAssessment: React.FC = () => {
 
             showToast('Timeline information updated successfully', 'success');
         } catch (error) {
-            console.error('Error submitting form:', error);
+            console.log('Error submitting form:', error);
             showToast('An error occurred while saving timeline information', 'error');
         }
     };

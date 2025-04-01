@@ -8,6 +8,7 @@ import { BarChart3, LineChart, PlayCircle, Settings } from 'lucide-react';
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ModelCalibration from "@/app/lib/components/projects/modelCalibration";
+import ActionsTable from "@/app/lib/components/tables/actionsTable";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -241,7 +242,7 @@ export default function ProjectPage() {
 
             <TabPanel value={activeTab} index={2}>
                 <Typography variant="h6">Plan Actions</Typography>
-                <Typography>Action planning and management interface will be implemented here.</Typography>
+                <ActionsTable projectId={projectId} />
             </TabPanel>
 
             <TabPanel value={activeTab} index={3}>

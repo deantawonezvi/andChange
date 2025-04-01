@@ -342,7 +342,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                 // and make additional API calls to update more complex data
             }
         } catch (error) {
-            console.error('Error submitting form:', error);
+            console.log('Error submitting form:', error);
             showToast('An error occurred while saving. Please try again.', 'error');
         }
     };
