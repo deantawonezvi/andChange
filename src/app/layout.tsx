@@ -1,37 +1,38 @@
 "use client"
 import "./globals.css";
 import { ThemeProvider } from "@mui/material/styles";
-import { Suspense } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { QueryClient } from "@tanstack/query-core";
 import theme from "@/app/lib/theme";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { metadata } from "@/app/metadata";
-
+import Script from "next/script";
 
 export default function RootLayout({
-                                     children,
+                                       children,
                                    }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  const queryClient = new QueryClient();
-  return (
-      <html lang="en">
-      <head>
-        <title>{(metadata.title as string) ?? " "}</title>
-        <meta name="description" content={(metadata.description as string) ?? " "}/>
-      </head>
-      <body>
-      <AppRouterCacheProvider>
-        <ThemeProvider theme={theme}>
-          <Suspense>
-            <QueryClientProvider client={queryClient}>
-                {children}
-            </QueryClientProvider>
-          </Suspense>
-        </ThemeProvider>
-      </AppRouterCacheProvider>
-      </body>
-      </html>
-  );
+    return (
+        <html lang="en">
+        <head>
+            <Script
+                id="feedbucket-script"
+                strategy="afterInteractive"
+                type="module"
+                async
+                src="https://cdn.feedbucket.app/assets/feedbucket.js"
+                data-feedbucket="o2hjs0xFC3HDwDzqWf3b"
+            />
+        </head>
+        <body>
+        <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>
+                <QueryClientProvider client={new QueryClient()}>
+                    {children}
+                </QueryClientProvider>
+            </ThemeProvider>
+        </AppRouterCacheProvider>
+        </body>
+        </html>
+    );
 }
