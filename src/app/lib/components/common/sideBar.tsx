@@ -11,7 +11,6 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Menu,
     MenuItem,
     Toolbar,
     Typography,
@@ -20,8 +19,9 @@ import {
 import { Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid, LogOut, Settings, User } from 'lucide-react';
+import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid } from 'lucide-react';
 import { AuthService } from "@/app/lib/api/auth";
+import LogoutButton from './logoutButton';
 
 export interface SubMenuItem {
     text: string;
@@ -48,27 +48,11 @@ export const menuItems: MenuItem[] = [
 
 const Sidebar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const pathname = usePathname();
     const theme = useTheme();
-    const router = useRouter();
-    const authService = AuthService.getInstance();
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleLogout = async () => {
-        try {
-            await authService.logout();
-            router.push('/login');
-        } catch (error) {
-            console.log('Error logging out:', error);
-        }
     };
 
     const isActive = (path: string) => {
@@ -113,42 +97,13 @@ const Sidebar: React.FC = () => {
                     </ListItem>
                 ))}
             </List>
-
             <Divider sx={{ bgcolor: 'rgba(255, 255, 255, 0.12)', my: 2 }} />
-
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-            >
-                <MenuItem onClick={handleMenuClose}>
-                    <ListItemIcon>
-                        <User size={20} />
-                    </ListItemIcon>
-                    Profile
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose}>
-                    <ListItemIcon>
-                        <Settings size={20} />
-                    </ListItemIcon>
-                    Settings
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-                    <ListItemIcon>
-                        <LogOut size={20} color={theme.palette.error.main} />
-                    </ListItemIcon>
-                    Logout
-                </MenuItem>
-            </Menu>
+            <ListItem>
+                <LogoutButton
+                    variant="text"
+                    fullWidth
+                />
+            </ListItem>
         </Box>
     );
 
