@@ -72,19 +72,38 @@ const TimelineAssessment: React.FC = () => {
 
     // Map API model to form data
     const mapModelToFormData = (model: ModelVariablesDTO): TimelineFormData => {
+
+        const formatDateForForm = (dateString: string | null | undefined): string => {
+            if (!dateString) return '';
+
+            // Try to parse the date and format it appropriately
+            try {
+                const date = new Date(dateString);
+                if (isValid(date)) {
+                    // Format date to match what your form component expects
+                    // If your form expects ISO format:
+                    return date.toISOString().split('T')[0]; // YYYY-MM-DD
+                    // If your form expects another format, adjust accordingly
+                }
+            } catch (e) {
+                console.error('Error parsing date:', dateString, e);
+            }
+            return '';
+        };
+
         return {
-            // Timeline assessment fields
-            kickoff: model.timelineAssessment?.kickoff || '',
-            designDefined: model.timelineAssessment?.designDefined || '',
-            develop: model.timelineAssessment?.develop || '',
-            test: model.timelineAssessment?.test || '',
-            deploy: model.timelineAssessment?.deploy || '',
-            outcomes: model.timelineAssessment?.outcomes || '',
-            releases: model.timelineAssessment?.releases || '',
-            impactedGroupPeopleMilestones: model.timelineAssessment?.impactedGroupPeopleMilestones || '',
+// Timeline assessment fields
+            kickoff: formatDateForForm(model.timelineAssessment?.kickoff),
+            designDefined: formatDateForForm(model.timelineAssessment?.designDefined),
+            develop: formatDateForForm(model.timelineAssessment?.develop),
+            test: formatDateForForm(model.timelineAssessment?.test),
+            deploy: formatDateForForm(model.timelineAssessment?.deploy),
+            outcomes: formatDateForForm(model.timelineAssessment?.outcomes),
+            releases: formatDateForForm(model.timelineAssessment?.releases),
+            impactedGroupPeopleMilestones: formatDateForForm(model.timelineAssessment?.impactedGroupPeopleMilestones),
 
             // Change characteristics fields
-            entryPointOfCM: model.changeCharacteristics?.entryPointOfCM || '',
+            entryPointOfCM: formatDateForForm(model.changeCharacteristics?.entryPointOfCM),
             timeframeAdequacyForChange: model.changeCharacteristics?.timeframeAdequacyForChange || 3,
 
             // Anagraphic data field
@@ -95,6 +114,7 @@ const TimelineAssessment: React.FC = () => {
     React.useEffect(() => {
         if (modelData) {
             const formData = mapModelToFormData(modelData);
+            console.log("Form data being set:", formData);
             reset(formData);
         }
     }, [modelData, reset]);
@@ -147,7 +167,7 @@ const TimelineAssessment: React.FC = () => {
         ];
 
         return events
-            .filter(event => !!event.date) // Only include events with dates
+            .filter(event => !!event.date)
             .sort((a, b) => {
                 if (!a.date) return 1;
                 if (!b.date) return -1;

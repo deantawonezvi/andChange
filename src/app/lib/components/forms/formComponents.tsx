@@ -256,10 +256,14 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                     )}
 
                                     {type === 'date' && (
-                                        <CustomDatePicker
-                                            value={field.value || ''}
-                                            onChange={field.onChange}
-                                            error={errors[fieldName]?.message as string}
+                                        <TextField
+                                            {...field}
+                                            value={field.value === null ? '' : field.value}
+                                            fullWidth
+                                            multiline={useMultiline}
+                                            type="date"
+                                            rows={useMultiline ? 4 : 1}
+                                            error={!!errors[fieldName]}
                                         />
                                     )}
 

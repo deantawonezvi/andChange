@@ -269,13 +269,13 @@ const ImpactedGroupAssessment: React.FC = () => {
                 // Update basic information
                 await updateAnagraphicDataMutation.mutateAsync({
                     entityId: groupId,
-                    entityName: formData.entityName,
-                    roleDefinition: formData.roleDefinition,
-                    definitionOfAdoption: formData.definitionOfAdoption,
-                    uniqueGroupConsiderations: formData.uniqueGroupConsiderations,
-                    hasEmail: formData.hasEmail,
-                    membersColocated: formData.membersColocated,
-                    virtualPreference: formData.virtualPreference,
+                    entityName: formData.entityName || '',
+                    roleDefinition: formData.roleDefinition || '',
+                    definitionOfAdoption: formData.definitionOfAdoption || '',
+                    uniqueGroupConsiderations: formData.uniqueGroupConsiderations || '',
+                    hasEmail: formData.hasEmail || false,
+                    membersColocated: formData.membersColocated || false,
+                    virtualPreference: formData.virtualPreference || 0,
                     whatsInItForMe: formData.whatsInItForMe,
                     individualsToAdd: [], // Would need to calculate delta
                     individualsToRemove: [] // Would need to calculate delta
@@ -284,18 +284,18 @@ const ImpactedGroupAssessment: React.FC = () => {
                 // Update ABSUP ratings
                 await updateABSUPMutation.mutateAsync({
                     entityId: groupId,
-                    absupAwareness: formData.absupAwareness,
-                    absupBuyin: formData.absupBuyin,
-                    absupSkill: formData.absupSkill,
-                    absupUse: formData.absupUse,
-                    absupProficiency: formData.absupProficiency
+                    absupAwareness: formData.absupAwareness || 1,
+                    absupBuyin: formData.absupBuyin || 1,
+                    absupSkill: formData.absupSkill || 1,
+                    absupUse: formData.absupUse || 1,
+                    absupProficiency: formData.absupProficiency || 1
                 });
 
                 // Update resistance assessment
                 await updateResistanceAssessmentMutation.mutateAsync({
                     entityId: groupId,
-                    anticipatedResistanceLevel: formData.anticipatedResistanceLevel,
-                    anticipatedResistanceDriver: formData.anticipatedResistanceDriver,
+                    anticipatedResistanceLevel: formData.anticipatedResistanceLevel || 1,
+                    anticipatedResistanceDriver: formData.anticipatedResistanceDriver || '',
                     resistanceManagementTacticsToAdd: [], // Would need to calculate delta
                     resistanceManagementTacticsToRemove: [] // Would need to calculate delta
                 });
@@ -303,18 +303,18 @@ const ImpactedGroupAssessment: React.FC = () => {
                 // Update change impact assessment
                 await updateChangeImpactAssessmentMutation.mutateAsync({
                     impactGroupId: groupId,
-                    process: formData.process,
-                    systems: formData.systems,
-                    tools: formData.tools,
-                    jobRoles: formData.jobRoles,
-                    criticalBehaviours: formData.criticalBehaviours,
-                    mindsetAttitudesBeliefs: formData.mindsetAttitudesBeliefs,
-                    reportingStructure: formData.reportingStructure,
-                    performanceReviews: formData.performanceReviews,
-                    compensation: formData.compensation,
-                    location: formData.location,
-                    restructuringOrRetrenchments: formData.retrenchments,
-                    clarityOfFutureState: formData.clarityOfFutureState
+                    process: formData.process || 0,
+                    systems: formData.systems || 0,
+                    tools: formData.tools || 0,
+                    jobRoles: formData.jobRoles || 0,
+                    criticalBehaviours: formData.criticalBehaviours || 0,
+                    mindsetAttitudesBeliefs: formData.mindsetAttitudesBeliefs || 0,
+                    reportingStructure: formData.reportingStructure || 0,
+                    performanceReviews: formData.performanceReviews || 0,
+                    compensation: formData.compensation || 0,
+                    location: formData.location || 0,
+                    restructuringOrRetrenchments: formData.retrenchments || 0,
+                    clarityOfFutureState: formData.clarityOfFutureState || 0
                 });
 
                 // Note: We would need additional API calls for updating:
