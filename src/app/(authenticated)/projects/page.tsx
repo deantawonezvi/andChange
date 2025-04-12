@@ -1,6 +1,6 @@
 // Modified src/app/(authenticated)/projects/page.tsx
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';

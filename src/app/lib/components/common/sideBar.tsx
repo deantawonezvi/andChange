@@ -18,9 +18,8 @@ import {
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { BookOpen, Calendar as CalendarIcon, FolderKanban, LayoutGrid } from 'lucide-react';
-import { AuthService } from "@/app/lib/api/auth";
 import LogoutButton from './logoutButton';
 
 export interface SubMenuItem {

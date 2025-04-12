@@ -7,9 +7,9 @@ import { Save } from 'lucide-react';
 import { ModelService } from "@/app/lib/api/services/modelService";
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
 import {
-    CulturalFactorsFormData,
-    culturalFactorsFields,
     culturalFactorsDescriptions,
+    culturalFactorsFields,
+    CulturalFactorsFormData,
     ModelCulturalFactorsDTO
 } from "@/app/lib/components/forms/culturalFactors/types";
 import { useToast } from '@/app/lib/hooks/useToast';
