@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Divider, Paper, Tab, Tabs, Typography } from '@mui/material';
-import { Plus, Users } from 'lucide-react';
+import { FolderKanban, Plus, Users } from 'lucide-react';
 import { OrganizationService } from "@/app/lib/api/services/organisationService";
 import IndividualService from "@/app/lib/api/services/individualService";
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
@@ -11,6 +11,7 @@ import ProjectsTable from '@/app/lib/components/tables/projectsTable';
 import { useToast } from '@/app/lib/hooks/useToast';
 import IndividualsTable from "@/app/lib/components/tables/individualsTable";
 import CreateIndividualModal from "@/app/lib/components/forms/createIndividualModel";
+import CreateProjectModal from "@/app/lib/components/forms/createProjectModal";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -45,6 +46,7 @@ export default function OrganizationDetailsPage() {
     const organizationId = typeof params.id === 'string' ? parseInt(params.id) : 0;
     const [activeTab, setActiveTab] = useState(0);
     const [isCreateIndividualModalOpen, setIsCreateIndividualModalOpen] = useState(false);
+    const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
     const queryClient = useQueryClient();
     const { showToast } = useToast();
 
@@ -79,6 +81,10 @@ export default function OrganizationDetailsPage() {
     // Handle opening the create individual modal
     const handleOpenCreateIndividualModal = () => {
         setIsCreateIndividualModalOpen(true);
+    };
+
+    const handleOpenCreateProjectModal = () => {
+        setIsCreateProjectModalOpen(true);
     };
 
     // Handle closing the create individual modal
@@ -126,15 +132,15 @@ export default function OrganizationDetailsPage() {
             <Paper sx={{ width: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={activeTab} onChange={handleTabChange} aria-label="organization tabs">
-                        <Tab label="Individuals" icon={<Users size={16} />} iconPosition="start" />
-                        <Tab label="Projects" />
+                        <Tab label="Individuals" icon={<Users size={20} color="#e85d45"  />} iconPosition="start" />
+                        <Tab label="Projects" icon={<FolderKanban size={20} color="#e85d45" />} iconPosition="start" />
                     </Tabs>
                 </Box>
 
                 {/* Individuals Tab */}
                 <TabPanel value={activeTab} index={0}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                        <Typography variant="h6">Organization Members</Typography>
+                        <Typography variant="h6">Organization Individuals</Typography>
                         <Button
                             variant="contained"
                             startIcon={<Plus size={16} />}
@@ -167,6 +173,7 @@ export default function OrganizationDetailsPage() {
                         <Button
                             variant="contained"
                             startIcon={<Plus size={16} />}
+                            onClick={handleOpenCreateProjectModal}
                         >
                             Create Project
                         </Button>
@@ -186,6 +193,13 @@ export default function OrganizationDetailsPage() {
                 onClose={handleCloseCreateIndividualModal}
                 organizationId={organizationId}
                 onSuccess={handleIndividualCreated}
+            />
+
+            <CreateProjectModal
+                open={isCreateProjectModalOpen}
+                onClose={() => setIsCreateProjectModalOpen(false)}
+                preselectedOrganizationId={organizationId}
+                organisationSelectEnabled={false}
             />
         </Box>
     );

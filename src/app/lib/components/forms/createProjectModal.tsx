@@ -21,7 +21,8 @@ import { OrganizationService } from "@/app/lib/api/services/organisationService"
 interface CreateProjectModalProps {
     open: boolean;
     onClose: () => void;
-    preselectedOrganizationId?: number
+    preselectedOrganizationId?: number,
+    organisationSelectEnabled?: boolean;
 }
 
 interface FormInputs extends CreateProjectRequestDTO {
@@ -32,7 +33,8 @@ interface FormInputs extends CreateProjectRequestDTO {
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                                                    open,
                                                                    onClose,
-                                                                    preselectedOrganizationId
+                                                                    preselectedOrganizationId,
+                                                                   organisationSelectEnabled = true
                                                                }) => {
     const {
         control,
@@ -121,6 +123,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         name="organizationId"
                         control={control}
                         rules={{ required: 'Please select an organization' }}
+                        disabled={!organisationSelectEnabled}
                         render={({ field }) => (
                             <FormControl
                                 fullWidth
