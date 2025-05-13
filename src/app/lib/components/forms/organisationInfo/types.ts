@@ -83,7 +83,7 @@ export const organisationInfoFields: FormField[] = [
     },
     {
         fieldName: 'establishedCMO',
-        label: 'Is there an established CMO function',
+        label: 'Is there an established CMO function?',
         tooltip: "Is there an established Change Management Office function",
         type: 'boolean',
         required: true,

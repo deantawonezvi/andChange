@@ -121,11 +121,9 @@ export default function ProjectPage() {
                         }
                     }
                 } else {
-                    // No subtab or not applicable - reset to first subtab
                     setActiveSubtab(0);
                 }
             } else {
-                // Invalid primary tab - show error and reset to first tab
                 setInvalidParam(`Invalid tab: "${tabParam}"`);
                 setActiveTab(0);
 
@@ -135,17 +133,14 @@ export default function ProjectPage() {
         }
     }, [tabParam, subtabParam, projectId, router]);
 
-    // Update URL when primary tab changes
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
         const tabId = primaryTabs[newValue].id;
 
-        // If this tab has subtabs, include the first subtab in the URL
         const subtabs = getSubtabsForPrimaryTab(tabId);
         if (subtabs.length > 0) {
             const firstSubtabId = subtabs[0].id;
             router.replace(`/projects/${projectId}?tab=${tabId}&subtab=${firstSubtabId}`);
-            // Reset to first subtab
             setActiveSubtab(0);
         } else {
             router.replace(`/projects/${projectId}?tab=${tabId}`);
@@ -176,9 +171,6 @@ export default function ProjectPage() {
     if (isLoading) {
         return <SectionLoader message="Loading project details..." />;
     }
-
-    //const currentPrimaryTabId = primaryTabs[activeTab].id;
-    // const hasSubtabs = getSubtabsForPrimaryTab(currentPrimaryTabId).length > 0;
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -241,7 +233,8 @@ export default function ProjectPage() {
             </TabPanel>
 
             <TabPanel value={activeTab} index={2}>
-                <Typography variant="h6">Plan Actions</Typography>
+                <Typography variant="h4">Plan Actions</Typography>
+                <br/>
                 <ActionsTable projectId={projectId} />
             </TabPanel>
 

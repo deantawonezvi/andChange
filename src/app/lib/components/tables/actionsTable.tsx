@@ -39,7 +39,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         queryKey: ['actionPlan', projectId],
         queryFn: async () => {
             try {
-                return await actionService.getActionPlanById(projectId);
+                return await actionService.getActionPlanByProjectId(projectId);
             } catch (err) {
                 console.log(err)
             }
@@ -60,7 +60,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     slots.forEach(slot => {
                         flattenedActions.push({
                             id: slot.id || 0,
-                            name: slot.aoID, // We'll need to fetch the actual action name
+                            name: slot.aoID,
                             date: slot.slotDate,
                             absupCategory: category,
                             receiver: 'Impacted Group',

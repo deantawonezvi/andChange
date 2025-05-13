@@ -1,18 +1,20 @@
 // src/app/lib/components/tables/projectsTable.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import DataTable from '@/app/lib/components/tables/dataTable';
-import { SProjectDTO } from '@/app/lib/api/services/projectService';
+import { ProjectService, SProjectDTO } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import { OrganizationService } from '@/app/lib/api/services/organisationService';
 
 interface ProjectTableProps {
-    data: SProjectDTO[];
-    isLoading: boolean;
+    data?: SProjectDTO[];
+    isLoading?: boolean;
     error?: string;
+    organizationId?: number;
+    standalone?: boolean;
 }
 
 interface ProjectTableData extends Record<string, unknown> {
@@ -22,20 +24,69 @@ interface ProjectTableData extends Record<string, unknown> {
     organizationName: string;
 }
 
-const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoadingProjects, error }) => {
+const ProjectsTable: React.FC<ProjectTableProps> = ({
+                                                        data: propData,
+                                                        isLoading: propIsLoading,
+                                                        error: propError,
+                                                        organizationId,
+                                                        standalone = false
+                                                    }) => {
     const router = useRouter();
+    const projectService = ProjectService.getInstance();
     const organizationService = OrganizationService.getInstance();
 
-    const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
+    // Query to fetch all projects if standalone mode
+    const {
+        data: fetchedProjects,
+        isLoading: isLoadingFetchedProjects,
+        error: fetchedProjectsError
+    } = useQuery({
+        queryKey: ['projects'],
+        queryFn: () => projectService.getAllProjects(),
+        enabled: standalone // Only fetch if in standalone mode
+    });
+
+    // Query to fetch organizations for names
+    const {
+        data: organizations,
+        isLoading: isLoadingOrgs
+    } = useQuery({
         queryKey: ['organizations'],
         queryFn: () => organizationService.getAllOrganizations(),
     });
+
+    const projects = useMemo(() => {
+        if (!standalone && propData) {
+            return propData;
+        }
+
+        // If we're fetching our own data
+        if (standalone && fetchedProjects) {
+            if (organizationId) {
+                return fetchedProjects.filter(project => project.organizationId === organizationId);
+            }
+
+            // Otherwise return all projects
+            return fetchedProjects;
+        }
+
+        return [];
+    }, [standalone, propData, fetchedProjects, organizationId]);
+
+    // Derive loading and error states
+    const isLoading = standalone ? isLoadingFetchedProjects : propIsLoading;
+    const error = standalone ? fetchedProjectsError : propError;
+
+    // Handle view project details
+    const handleViewProject = (id: number) => {
+        router.push(`/projects/${id}?tab=model-calibration`);
+    };
 
     const columns: MRT_ColumnDef<ProjectTableData>[] = [
         {
             accessorKey: 'id',
             header: 'ID',
-            size: 100,
+            size: 80,
         },
         {
             accessorKey: 'projectName',
@@ -49,15 +100,15 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoading
         },
     ];
 
-    if (isLoadingProjects || isLoadingOrgs) {
+    if (isLoading || isLoadingOrgs) {
         return <SectionLoader message="Loading projects..." />;
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: {error instanceof Error ? error.message : String(error)}</div>;
     }
 
-    const transformedData: ProjectTableData[] = data.map(project => {
+    const transformedData: ProjectTableData[] = projects.map(project => {
         const organization = organizations?.find(org => org.id === project.organizationId);
         return {
             id: project.id ?? 0,
@@ -72,11 +123,11 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({ data, isLoading: isLoading
             <DataTable
                 data={transformedData}
                 columns={columns}
-                title="Projects"
-                subtitle="Overview of all projects"
+                title={standalone ? "Projects" : ""}
+                subtitle={standalone ? "Overview of all projects" : ""}
                 enablePagination={true}
                 muiTableBodyRowProps={({ row }: { row: any }) => ({
-                    onClick: () => router.push(`/projects/${row.original.id}?tab=model-calibration`),
+                    onClick: () => handleViewProject(row.original.id),
                     sx: {
                         cursor: 'pointer',
                         '&:hover': {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
+import { useRouter } from 'next/navigation';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import { SOrganizationDTO } from "@/app/lib/api/services/organisationService";
@@ -19,16 +20,35 @@ interface OrganizationTableData extends Record<string, unknown> {
 }
 
 const OrganizationsTable: React.FC<OrganizationTableProps> = ({ data, isLoading, error }) => {
+    const router = useRouter();
+
+    const handleViewOrganization = (id: number) => {
+        router.push(`/organisations/${id}`);
+    };
+
+
     const columns: MRT_ColumnDef<OrganizationTableData>[] = [
         {
             accessorKey: 'id',
             header: 'ID',
-            size: 100,
+            size: 80,
         },
         {
             accessorKey: 'organizationName',
             header: 'Organization Name',
             size: 250,
+            Cell: ({ row }) => (
+                <span
+                    style={{
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textDecoration: 'underline'
+                    }}
+                    onClick={() => handleViewOrganization(row.original.id)}
+                >
+                    {row.original.organizationName}
+                </span>
+            ),
         },
         {
             accessorKey: 'industry',
@@ -66,6 +86,16 @@ const OrganizationsTable: React.FC<OrganizationTableProps> = ({ data, isLoading,
                 title="Organizations"
                 subtitle="Overview of all organizations"
                 enablePagination={true}
+                muiTableBodyRowProps={({ row }: { row: any }) => ({
+                    onClick: () => handleViewOrganization(row.original.id),
+                    sx: {
+                        cursor: 'pointer',
+                        '&:hover': {
+                            backgroundColor: 'action.hover',
+                        },
+                    },
+
+                })}
             />
         </Box>
     );

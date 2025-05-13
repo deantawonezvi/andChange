@@ -146,6 +146,24 @@ class ActionService {
         }
     }
 
+    async getActionPlanByProjectId(projectId: number): Promise<ActionPlanDTO | null> {
+        try {
+            const response = await this.client.get(`/api/v1/action-plan/ap-by-project?project-id=${projectId}`);
+            return response.data;
+        } catch (error: unknown) {
+            console.log('Error fetching action plan:', error);
+
+            if (error && typeof error === 'object' && 'response' in error &&
+                error.response && typeof error.response === 'object' &&
+                'status' in error.response && error.response.status === 404) {
+                return null;
+            }
+            throw error;
+        }
+    }
+
+
+
     /**
      * Create a new action plan for a project
      */

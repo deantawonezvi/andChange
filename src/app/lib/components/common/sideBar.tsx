@@ -58,6 +58,9 @@ const Sidebar: React.FC = () => {
         if (path === '/projects') {
             return pathname === path || pathname.startsWith(`${path}/`);
         }
+        if (path === '/organisations') {
+            return pathname === path || pathname.startsWith(`${path}/`);
+        }
         return pathname === path;
     };
 
