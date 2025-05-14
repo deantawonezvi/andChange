@@ -15,7 +15,7 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { Control, Controller, FieldErrors, RegisterOptions } from 'react-hook-form';
 import { HelpCircle } from 'lucide-react';
 
 export interface QuestionWithTooltipProps {
@@ -227,13 +227,25 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
     const useMultiline = type !== 'select' && type !== 'slider' && type !== 'boolean' &&
         type !== 'date' && type !== 'radio' && multiline === true;
 
+    const getValidationRules = (): RegisterOptions => {
+        if (type === 'boolean' && required) {
+            return {
+                validate: (value) => {
+                    // For boolean fields, both true and false are valid values
+                    return value !== null && value !== undefined ? true : 'This field is required'
+                }
+            };
+        }
+        return { required: required ? 'This field is required' : false };
+    };
+
     return (
         <Paper elevation={0} sx={{ p: 1, borderRadius: 1 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Controller
                     name={fieldName}
                     control={control}
-                    rules={{ required: required ? 'This field is required' : false }}
+                    rules={getValidationRules()}
                     render={({ field }) => (
                         <QuestionWithTooltip
                             label={label}

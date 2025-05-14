@@ -116,7 +116,7 @@ export default function OrganizationDetailsPage() {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Organization header */}
-            <Paper sx={{ p: 3, mb: 3 }}>
+            <Paper sx={{ p: 3, mb: 3, border: '3px solid #e85d45', borderRadius: 4 }}>
                 <Typography variant="h4" gutterBottom>
                     {organization?.organizationName}
                 </Typography>

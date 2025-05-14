@@ -87,7 +87,7 @@ export const organisationInfoFields: FormField[] = [
         tooltip: "Is there an established Change Management Office function",
         type: 'boolean',
         required: true,
-        order: 8
+        order: 100
     },
     {
         fieldName: 'changeSaturation',
