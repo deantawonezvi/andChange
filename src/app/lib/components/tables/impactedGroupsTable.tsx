@@ -1,4 +1,3 @@
-// src/app/lib/components/tables/impactedGroupsTable.tsx
 'use client';
 
 import React from 'react';
