@@ -206,10 +206,6 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
                     }
                     sx={{
                         mr: orientation === 'horizontal' ? 2 : 0,
-                        alignItems: 'flex-start',
-                        '.MuiFormControlLabel-label': {
-                            pt: 0.5 // Align label with radio button
-                        }
                     }}
                 />
             ))}
