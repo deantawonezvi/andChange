@@ -20,7 +20,6 @@ const IndividualsTable: React.FC<IndividualsTableProps> = ({
                                                                data
                                                            }) => {
 
-    // Map the data to the format expected by the DataTable component
     const tableData: IndividualTableData[] = data.map((individual) => ({
         id: individual.id || 0,
         fullName: `${individual.firstName} ${individual.lastName}`,

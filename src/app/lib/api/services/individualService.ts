@@ -19,7 +19,9 @@ export class IndividualService {
     private client: AxiosInstance;
 
     private constructor() {
-        this.client = createAxiosClient(process.env.NEXT_PUBLIC_BASE_API_URL);
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+        this.client = createAxiosClient(baseURL, process.env.NODE_ENV === 'development');
     }
 
     public static getInstance(): IndividualService {
