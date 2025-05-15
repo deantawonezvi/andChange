@@ -166,39 +166,46 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             accessorKey: 'name',
             header: 'Name',
             size: 200,
+            enableColumnFilter: true,
         },
         {
             accessorKey: 'date',
             header: 'Start Date',
             size: 120,
-            Cell: ({ cell }) => formatDate(cell.getValue<string>())
+            Cell: ({ cell }) => formatDate(cell.getValue<string>()),
+            enableColumnFilter: true,
         },
         {
             accessorKey: 'absupCategory',
             header: 'ABSUP Category',
             size: 150,
-            Cell: ({ cell }) => renderAbsupCategory(cell.getValue<string>())
+            Cell: ({ cell }) => renderAbsupCategory(cell.getValue<string>()),
+            enableColumnFilter: true,
         },
         {
             accessorKey: 'receiver',
             header: 'Receiver',
             size: 150,
+            enableColumnFilter: true,
         },
         {
             accessorKey: 'sender',
             header: 'Sender',
             size: 150,
+            enableColumnFilter: true,
         },
         {
             accessorKey: 'status',
             header: 'Status',
             size: 150,
-            Cell: ({ row }) => renderStatus(row.original.status, row.original.rawStatus)
+            Cell: ({ row }) => renderStatus(row.original.status, row.original.rawStatus),
+            enableColumnFilter: true,
         },
         {
             id: 'actions',
             header: 'Actions',
             size: 120,
+            enableColumnFilter: false,
             Cell: ({ row }) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Edit">
@@ -361,7 +368,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     </Button>
                 </Box>
             ) : (
-
                 <DataTable
                     data={transformedData as unknown as Record<string, unknown>[]}
                     columns={columns as unknown as MRT_ColumnDef<Record<string, unknown>, unknown>[]}
