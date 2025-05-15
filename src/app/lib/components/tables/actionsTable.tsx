@@ -3,8 +3,8 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Button, Chip, IconButton, TextField, Tooltip, Typography } from '@mui/material';
-import { Calendar, Edit, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Box, Button, Chip, IconButton, Tooltip, Typography } from '@mui/material';
+import { Edit, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
 import { format } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
@@ -347,27 +347,8 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                        placeholder="Filter by name"
-                        size="small"
-                        value={nameFilter}
-                        onChange={(e) => setNameFilter(e.target.value)}
-                    />
-                    <TextField
-                        placeholder="Filter by date (YYYY-MM-DD)"
-                        size="small"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                    />
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<Calendar size={20} />}
-                        onClick={() => window.location.href = `/calendar?projectId=${projectId}`}
-                    >
-                        View Calendar
-                    </Button>
                     <Button
                         variant="contained"
                         startIcon={<Plus size={20} />}
