@@ -1,7 +1,7 @@
 // src/app/lib/components/tables/actionsTable.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Button, Chip, IconButton, Tooltip, Typography } from '@mui/material';
 import { Edit, Plus, RotateCcw, Trash2 } from 'lucide-react';
@@ -32,8 +32,6 @@ interface FlattenedAction {
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const actionService = ActionService.getInstance();
     const { showToast } = useToast();
-    const [nameFilter, setNameFilter] = useState('');
-    const [dateFilter, setDateFilter] = useState('');
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
@@ -161,14 +159,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         });
     }, [actionPlan]);
 
-    // Apply filters to the data
-    const filteredData = React.useMemo(() => {
-        return transformedData.filter(action => {
-            const matchesName = action.name.toLowerCase().includes(nameFilter.toLowerCase());
-            const matchesDate = !dateFilter || action.date.includes(dateFilter);
-            return matchesName && matchesDate;
-        });
-    }, [transformedData, nameFilter, dateFilter]);
 
     // Define table columns
     const columns: MRT_ColumnDef<FlattenedAction>[] = [
@@ -373,7 +363,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             ) : (
 
                 <DataTable
-                    data={filteredData as unknown as Record<string, unknown>[]}
+                    data={transformedData as unknown as Record<string, unknown>[]}
                     columns={columns as unknown as MRT_ColumnDef<Record<string, unknown>, unknown>[]}
                     title="Project Actions"
                     subtitle="All planned and scheduled actions for this project"
