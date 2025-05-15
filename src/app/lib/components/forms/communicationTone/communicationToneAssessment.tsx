@@ -21,13 +21,16 @@ const CommunicationToneAssessment: React.FC = () => {
     const modelService = ModelService.getInstance();
     const { showToast } = useToast();
 
-    const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<CommunicationToneFormData>({
+    const { control, handleSubmit, reset,watch, formState: { errors, isDirty } } = useForm<CommunicationToneFormData>({
         defaultValues: {
             formalityCasualityLevel: 3,
             enthusiasmLevel: 3,
             emotionalExpressivenessLevel: 3
         }
     });
+
+    const formValues = watch();
+
 
     const { data: modelData, isLoading, error } = useQuery({
         queryKey: ['model', projectId],
@@ -102,7 +105,7 @@ const CommunicationToneAssessment: React.FC = () => {
     );
 
     return (
-        <Box sx={{ mx: 'auto', p: 3 }}>
+        <Box sx={{ mx: 'auto'}}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {updateToneFactorsMutation.isError && (
@@ -116,7 +119,7 @@ const CommunicationToneAssessment: React.FC = () => {
                     </Typography>
 
                     {sortedFields.map((field) => (
-                        <Paper key={field.fieldName} elevation={0} sx={{ p: 3, mb: 2, borderRadius: 1 }}>
+                        <Paper key={field.fieldName} elevation={0} sx={{ py: 3, mb: 2, borderRadius: 1 }}>
                             <QuestionWithRating
                                 label={field.label}
                                 tooltip={field.tooltip}
@@ -133,17 +136,17 @@ const CommunicationToneAssessment: React.FC = () => {
                             {/* Display the description for the currently selected level */}
                             {field.fieldName === 'formalityCasualityLevel' && (
                                 <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('formality', control._formValues.formalityCasualityLevel)}
+                                    {getDescription('formality', formValues.formalityCasualityLevel)}
                                 </Typography>
                             )}
                             {field.fieldName === 'enthusiasmLevel' && (
                                 <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('enthusiasm', control._formValues.enthusiasmLevel)}
+                                    {getDescription('enthusiasm', formValues.enthusiasmLevel)}
                                 </Typography>
                             )}
                             {field.fieldName === 'emotionalExpressivenessLevel' && (
                                 <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('emotionalExpressiveness', control._formValues.emotionalExpressivenessLevel)}
+                                    {getDescription('emotionalExpressiveness', formValues.emotionalExpressivenessLevel)}
                                 </Typography>
                             )}
                         </Paper>

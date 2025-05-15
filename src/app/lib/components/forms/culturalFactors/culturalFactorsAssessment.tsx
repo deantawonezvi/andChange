@@ -120,7 +120,7 @@ const CulturalFactorsAssessment: React.FC = () => {
     );
 
     return (
-        <Box sx={{ mx: 'auto', p: 3 }}>
+        <Box sx={{ mx: 'auto'}}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {updateCulturalFactorsMutation.isError && (
@@ -135,7 +135,7 @@ const CulturalFactorsAssessment: React.FC = () => {
                     </Typography>
 
                     {sortedFields.map((field) => (
-                        <Paper key={field.fieldName} elevation={0} sx={{ p: 3, mb: 2, borderRadius: 1 }}>
+                        <Paper key={field.fieldName} elevation={0} sx={{ py: 3, mb: 2, borderRadius: 1 }}>
                             <QuestionWithRating
                                 label={field.label}
                                 tooltip={field.tooltip}

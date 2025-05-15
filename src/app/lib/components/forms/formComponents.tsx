@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Control, Controller, FieldErrors, RegisterOptions } from 'react-hook-form';
 import { HelpCircle } from 'lucide-react';
+import theme from "@/app/lib/theme";
 
 export interface QuestionWithTooltipProps {
     label: string;
@@ -27,12 +28,12 @@ export interface QuestionWithTooltipProps {
 }
 
 export const QuestionWithTooltip: React.FC<QuestionWithTooltipProps> = ({
-                                                                            label, tooltip, error, required, children
+                                                                            label, tooltip, error, children
                                                                         }) => (
     <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ flex: 1, color: error ? 'error.main' : 'text.primary' }}>
-                {label}{required && ' *'}
+            <Typography variant="subtitle1" sx={{ flex: 1, color: error ? 'error.main' : 'text.primary', fontWeight: 'bold' }}>
+                {label}
             </Typography>
             <Tooltip title={tooltip}>
                 <IconButton size="small">
@@ -62,7 +63,11 @@ export const AdequacyRating: React.FC<AdequacyRatingProps> = ({ value, onChange,
                 <FormControlLabel
                     key={idx + 1}
                     value={idx + 1}
-                    control={<Radio size="small" />}
+                    control={<Radio size="small" sx={{
+                        '&.Mui-checked': {
+                            color: theme.palette.secondary.main,
+                        },
+                    }}  />}
                     label={label}
                     sx={{ mr: 1 }}
                 />
@@ -198,15 +203,16 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
                 <FormControlLabel
                     key={String(option.value)}
                     value={option.value}
-                    control={<Radio size="small" />}
+                    control={<Radio size="medium" sx={{
+                        '&.Mui-checked': {
+                            color: theme.palette.secondary.main,
+                        },
+                    }} />}
                     label={
-                        <Typography variant="body2">
+                        <Typography variant="body1">
                             {option.label}
                         </Typography>
                     }
-                    sx={{
-                        mr: orientation === 'horizontal' ? 2 : 0,
-                    }}
                 />
             ))}
         </RadioGroup>

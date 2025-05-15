@@ -201,7 +201,7 @@ const LeadershipAssessment: React.FC = () => {
     );
 
     return (
-        <Box sx={{ mx: 'auto', p: 3 }}>
+        <Box sx={{ mx: 'auto' }}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {(updatePCTSuccessMutation.isError ||

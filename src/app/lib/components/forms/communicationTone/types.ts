@@ -24,7 +24,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'Casual' },
             { value: 5, label: 'Highly Casual' }
         ],
-        orientation: 'vertical',
+        orientation: 'horizontal',
         required: true,
         order: 1
     },
@@ -40,7 +40,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'High Enthusiasm' },
             { value: 5, label: 'Extreme Enthusiasm' }
         ],
-        orientation: 'vertical',
+        orientation: 'horizontal',
         required: true,
         order: 2
     },
@@ -56,7 +56,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'Open Expressiveness' },
             { value: 5, label: 'Highly Expressive' }
         ],
-        orientation: 'vertical',
+        orientation: 'horizontal',
         required: true,
         order: 3
     }
@@ -65,11 +65,11 @@ export const communicationToneFields: FormField[] = [
 // Additional field data for detailed descriptions that can be used in tooltips or help text
 export const communicationToneDescriptions = {
     formality: [
-        "Strict adherence to formal rules, structured, uses full titles and last names, avoids contractions and slang.",
-        "Adheres to standard conventions, polite language, may include titles, slightly more relaxed.",
-        "Bridges formal and casual, relaxed yet respectful, uses first names, contractions, and more direct language.",
-        "Informal, uses colloquial language, slang, contractions, and idiomatic expressions. Friendly and personal.",
-        "Very informal, can include jargon, text speak, and even profanity when acceptable. Resembles conversation among close friends."
+        "This level is characterized by a strict adherence to formal rules of language. Communications are structured, use full titles and last names, and avoid contractions and slang. The language is precise and may include technical or legal jargon. Highly formal communication is typical in diplomatic correspondence, legal documents, and traditional business settings.",
+        "Formal communication still adheres to standard conventions of grammar and syntax but is less rigid than highly formal communication. It uses polite language and may still include titles but can be slightly more relaxed in terms of sentence structure. This tone is common in professional business communications, official letters, and emails to unfamiliar recipients.",
+        "This level bridges formal and casual communication. It is relaxed yet respectful and might mix more conversational language with formalities. Moderately formal communication often uses first names, some contractions, and more direct language. It’s appropriate for internal company communications, professional but friendly emails, and presentations..",
+        "Casual communication is informal and uses colloquial language. It often includes slang, contractions, and idiomatic expressions. The tone is friendly and personal, suitable for communications among colleagues who know each other well, in less formal company cultures, or in personal correspondence.",
+        "Highly casual communication is very informal and can include jargon, text speak, and even profanity when deemed acceptable among the participants. It resembles conversation among close friends and is marked by a significant departure from formal language conventions. This level of communication is usually inappropriate in professional settings but can be seen in personal texts, chats among close peers, or in creative contexts that value authenticity and personality."
     ],
     enthusiasm: [
         "Very little interest or excitement, purely functional, lacking in energy.",
