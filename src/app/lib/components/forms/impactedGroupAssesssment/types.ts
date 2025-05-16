@@ -305,7 +305,7 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
         },
         {
             fieldName: 'usageMeasurable',
-            label: 'Usage Measurable',
+            label: 'Proficiency Measurable',
             tooltip: 'Captures actual usage, e.g., number of logins per user per day',
             required: false,
             order: 4
