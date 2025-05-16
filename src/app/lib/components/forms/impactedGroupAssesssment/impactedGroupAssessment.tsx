@@ -21,6 +21,7 @@ import {
 } from "@/app/lib/components/forms/impactedGroupAssesssment/types";
 import { useToast } from '@/app/lib/hooks/useToast';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import ImpactRadarChart from '../../common/impactAssessmentRadarChart';
 
 const ImpactedGroupAssessment: React.FC = () => {
     const params = useParams();
@@ -406,15 +407,22 @@ const ImpactedGroupAssessment: React.FC = () => {
                 <Stack spacing={3}>
                     {/* Overall impact summary */}
                     <Paper sx={{ p: 3, mb: 4 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="h5">
-                                {isEditMode ? 'Edit Impacted Group' : 'Create New Impacted Group'}
-                            </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box>
+                                <Typography variant="h5">
+                                    {isEditMode ? 'Edit Impacted Group' : 'Create New Impacted Group'}
+                                </Typography>
+                                {isEditMode && (
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                        {impactedGroup?.anagraphicDataDTO?.entityName || ''}
+                                    </Typography>
+                                )}
+                            </Box>
 
                             {isEditMode && (
-                                <Box sx={{ textAlign: 'center' }}>
-                                    <Typography variant="h6">Change Impact Strength</Typography>
-                                    <Typography variant="h4" color="primary">{changeImpactStrength}%</Typography>
+                                <Box sx={{ flexGrow: 1, ml: 4 }}>
+                                    {/* Radar Chart Integration */}
+                                    <ImpactRadarChart watch={watch} />
                                 </Box>
                             )}
                         </Box>
