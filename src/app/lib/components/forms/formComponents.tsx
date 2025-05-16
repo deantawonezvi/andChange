@@ -257,7 +257,7 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                         >
                             {children || (
                                 <>
-                                    {(!type || type === 'text') && (
+                                    {(!type || type === 'text' || type === 'number') && (
                                         <TextField
                                             {...field}
                                             value={field.value === null ? '' : field.value}
@@ -265,6 +265,7 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                             multiline={useMultiline}
                                             rows={useMultiline ? 4 : 1}
                                             error={!!errors[fieldName]}
+                                            type={type || 'text'}
                                         />
                                     )}
 

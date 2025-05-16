@@ -284,31 +284,38 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
     adoptionAssessment: [
         {
             fieldName: 'adoptionAssessment',
-            label: 'Adoption Measurable',
+            label: 'Adoption Measurable (%)',
             tooltip: 'This measures if users have begun engaging with the change. For example, in a system change it may be number of individual that have logged in more than 5 times.',
             required: false,
-            order: 1
+            order: 1,
+            type: "number"
         },
         {
             fieldName: 'adoption_threshold',
             label: 'Adoption Threshold (%)',
             tooltip: 'The percentage threshold for successful adoption',
             required: false,
-            order: 2
+            order: 2,
+            type: "number"
+
         },
         {
             fieldName: 'adoptionMeasurable',
-            label: 'Usage Measurable',
+            label: 'Usage Measurable (%)',
             tooltip: 'Measures initial engagement, e.g., number of users logging in more than 5 times',
             required: false,
-            order: 3
+            order: 3,
+            type: "number"
+
         },
         {
             fieldName: 'usageMeasurable',
-            label: 'Proficiency Measurable',
+            label: 'Proficiency Measurable (%)',
             tooltip: 'Captures actual usage, e.g., number of logins per user per day',
             required: false,
-            order: 4
+            order: 4,
+            type: "number"
+
         },
     ],
     changeImpactAssessment: [

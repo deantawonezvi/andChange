@@ -13,6 +13,11 @@ export interface TextFormField extends BaseFormField {
     multiline?: boolean;
 }
 
+export interface NumberFormField extends BaseFormField {
+    type?: 'number';
+    multiline?: boolean;
+}
+
 export interface SelectFormField extends BaseFormField {
     type: 'select';
     options: string[];
@@ -41,6 +46,7 @@ export interface DateFormField extends BaseFormField {
 
 export type FormField =
     | TextFormField
+    | NumberFormField
     | SelectFormField
     | SliderFormField
     | RadioFormField
