@@ -298,7 +298,7 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
         },
         {
             fieldName: 'adoptionMeasurable',
-            label: 'Adoption Measurable',
+            label: 'Usage Measurable',
             tooltip: 'Measures initial engagement, e.g., number of users logging in more than 5 times',
             required: false,
             order: 3
