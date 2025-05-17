@@ -138,7 +138,7 @@ const ImpactedGroupsTable: React.FC = () => {
                 <Button
                     variant="contained"
                     startIcon={<Plus size={20} />}
-                    href={`/projects/${projectId}/impacted-group/new`}
+                    href={`/projects/${projectId}/impacted-groups/new`}
                 >
                     Create Impacted Group
                 </Button>
@@ -151,7 +151,7 @@ const ImpactedGroupsTable: React.FC = () => {
                 subtitle="Groups affected by this change project"
                 enablePagination={true}
                 muiTableBodyRowProps={({ row }: { row: any }) => ({
-                    onClick: () => window.location.href = `/projects/${projectId}/impacted-group/${row.original.id}`,
+                    onClick: () => window.location.href = `/projects/${projectId}/impacted-groups/${row.original.id}`,
                     sx: {
                         cursor: 'pointer',
                         '&:hover': {

@@ -1,4 +1,3 @@
-// src/app/lib/components/common/pageHeader.tsx
 import React from 'react';
 import { Box, Button, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -40,11 +39,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         <>
             {currentMenuItem && (
                 <Box sx={{ mb: 4 }}>
-
-
                     <Box sx={{
                         display: 'flex',
-                        alignItems: 'center',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        alignItems: isMobile ? 'flex-start' : 'center',
                         justifyContent: 'space-between',
                         pb: 2,
                         borderBottom: `3px solid ${theme.palette.secondary.main}`,
@@ -52,6 +50,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         <Box sx={{
                             display: 'flex',
                             alignItems: 'center',
+                            mb: isMobile ? 2 : 0
                         }}>
                             <Box
                                 sx={{
@@ -68,24 +67,42 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                             </Typography>
                         </Box>
 
-                        {/* Breadcrumbs component */}
-                        {showBreadcrumbs && <Breadcrumbs />}
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            alignItems: isMobile ? 'flex-start' : 'center',
+                            gap: 2,
+                            width: isMobile ? '100%' : 'auto'
+                        }}>
+                            {/* Breadcrumbs component */}
+                            {showBreadcrumbs && (
+                                <Box sx={{
+                                    minWidth: 0,
+                                    flexShrink: 1,
+                                    mr: isMobile ? 0 : 2,
+                                    width: isMobile ? '100%' : 'auto'
+                                }}>
+                                    <Breadcrumbs />
+                                </Box>
+                            )}
 
-                        {/* Action button (if provided) */}
-                        {actionButton && (
-                            <Button
-                                variant="contained"
-                                startIcon={actionButton.icon || <PlusCircle size={20} />}
-                                onClick={actionButton.onClick}
-                                sx={{
-                                    px: isMobile ? 2 : 3,
-                                    py: isMobile ? 0.75 : 1,
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {actionButton.label}
-                            </Button>
-                        )}
+                            {/* Action button (if provided) */}
+                            {actionButton && (
+                                <Button
+                                    variant="contained"
+                                    startIcon={actionButton.icon || <PlusCircle size={20} />}
+                                    onClick={actionButton.onClick}
+                                    sx={{
+                                        px: isMobile ? 2 : 3,
+                                        py: isMobile ? 0.75 : 1,
+                                        whiteSpace: 'nowrap',
+                                        width: isMobile ? '100%' : 'auto'
+                                    }}
+                                >
+                                    {actionButton.label}
+                                </Button>
+                            )}
+                        </Box>
                     </Box>
                 </Box>
             )}

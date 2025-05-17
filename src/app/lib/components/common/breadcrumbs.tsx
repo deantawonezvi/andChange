@@ -1,11 +1,12 @@
-'use client';
-
 import React, { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { alpha, Box, Breadcrumbs as MuiBreadcrumbs, Chip, Typography, useTheme } from '@mui/material';
-import { ChevronRight, FileText, Home, Layers, Settings, Users } from 'lucide-react';
-import { menuItems } from '@/app/lib/components/common/sideBar';
+import { BookOpen, Calendar, ChevronRight, FileText, FolderKanban, Home, LayoutGrid, Plus, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ProjectService } from '@/app/lib/api/services/projectService';
+import { OrganizationService } from '@/app/lib/api/services/organisationService';
+import { ImpactedGroupService } from '@/app/lib/api/services/impactedGroupService';
 
 interface BreadcrumbsProps {
     extraCrumbs?: {
@@ -22,183 +23,232 @@ type PathSegment = {
     icon: React.ReactNode;
 };
 
-// Create mapping from menuItems + additional paths
-const pathToTitleMapping: Record<string, { title: string; icon: React.ReactNode }> = {
-    '': { title: 'Home', icon: <Home size={16} /> },
-    // Additional paths not in menuItems
-    'best-practises': { title: 'Best Practices', icon: <FileText size={16} /> },
-    'model-calibration': { title: 'Model Calibration', icon: <Settings size={16} /> },
-    'impacted-groups': { title: 'Impacted Groups', icon: <Users size={16} /> },
-    'timeline': { title: 'Timeline', icon: <Layers size={16} /> },
-};
-
-menuItems.forEach(item => {
-    const pathSegment = item.path.split('/').filter(Boolean)[0];
-    if (pathSegment) {
-        pathToTitleMapping[pathSegment] = {
-            title: item.text,
-            icon: React.cloneElement(item.icon as React.ReactElement, { size: 16 })
-        };
-    }
-});
-
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
-                                                            extraCrumbs,
-                                                            showHome = true
-                                                        }) => {
+const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ extraCrumbs = [], showHome = true }) => {
     const pathname = usePathname();
     const theme = useTheme();
 
-    const breadcrumbs = useMemo(() => {
-        const pathSegments = pathname.split('/').filter(Boolean);
+    // Initialize services
+    const projectService = ProjectService.getInstance();
+    const organizationService = OrganizationService.getInstance();
+    const impactedGroupService = ImpactedGroupService.getInstance();
 
-        // Initialize result array with home if showHome is true
+    // Parse the path segments
+    const pathSegments = useMemo(() => {
+        const segments = pathname.split('/').filter(Boolean);
+
+        // Extract IDs from the path
+        const projectId = segments.includes('projects') && segments[segments.indexOf('projects') + 1]
+            ? parseInt(segments[segments.indexOf('projects') + 1])
+            : null;
+
+        const organisationId = segments.includes('organisations') && segments[segments.indexOf('organisations') + 1]
+            ? parseInt(segments[segments.indexOf('organisations') + 1])
+            : null;
+
+        const impactedGroupId = segments.includes('impacted-group') && segments[segments.indexOf('impacted-group') + 1]
+            ? parseInt(segments[segments.indexOf('impacted-group') + 1])
+            : null;
+
+        return { segments, projectId, organisationId, impactedGroupId };
+    }, [pathname]);
+
+    // Fetch project data if needed
+    const {
+        data: projectData,
+        isLoading: isLoadingProject
+    } = useQuery({
+        queryKey: ['project', pathSegments.projectId],
+        queryFn: () => projectService.getProjectById(pathSegments.projectId as number),
+        enabled: !!pathSegments.projectId && !isNaN(pathSegments.projectId)
+    });
+
+    // Fetch organization data if needed
+    const {
+        data: organisationData,
+        isLoading: isLoadingOrganisation
+    } = useQuery({
+        queryKey: ['organisation', pathSegments.organisationId],
+        queryFn: () => organizationService.getOrganizationById(pathSegments.organisationId as number),
+        enabled: !!pathSegments.organisationId && !isNaN(pathSegments.organisationId)
+    });
+
+    // Fetch impacted group data if needed
+    const {
+        data: impactedGroupData,
+        isLoading: isLoadingImpactedGroup
+    } = useQuery({
+        queryKey: ['impactedGroup', pathSegments.impactedGroupId],
+        queryFn: () => impactedGroupService.getImpactedGroupById(pathSegments.impactedGroupId as number),
+        enabled: !!pathSegments.impactedGroupId && !isNaN(pathSegments.impactedGroupId)
+    });
+
+    // Generate breadcrumbs based on path and fetched data
+    const breadcrumbs = useMemo(() => {
+        // Start with Home
         const result: PathSegment[] = showHome
-            ? [{ title: 'Home', href: '/projects', icon: <Home size={16} /> }]
+            ? [{ title: 'Home', href: '/', icon: <Home size={16} /> }]
             : [];
 
-        // Build up breadcrumbs path
         let currentPath = '';
+        let prevTitle = '';
 
-        pathSegments.forEach((segment, index) => {
+        // Map for common paths
+        const pathMap: Record<string, { title: string; icon: React.ReactNode }> = {
+            'projects': { title: 'Projects', icon: <FolderKanban size={16} /> },
+            'organisations': { title: 'Organisations', icon: <BookOpen size={16} /> },
+            'portfolio': { title: 'Portfolio', icon: <LayoutGrid size={16} /> },
+            'calendar': { title: 'Calendar', icon: <Calendar size={16} /> },
+            'impacted-group': { title: 'Impacted Groups', icon: <Users size={16} /> }
+        };
+
+        // Process each path segment
+        pathSegments.segments.forEach((segment) => {
+            // Update current path
             currentPath += `/${segment}`;
 
-            const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            // Check for numeric IDs or UUIDs
-            const isDynamicSegment = segment.match(/^\d+$/) !== null ||
-                uuidPattern.test(segment) ||
-                // Additional check for other potential dynamic segments that don't have a mapping
-                (index > 0 && !pathToTitleMapping[segment]);
+            // Check if this is an ID segment (numeric)
+            const isIdSegment = !isNaN(Number(segment));
 
-            if (isDynamicSegment && index > 0) {
-                // For dynamic segments, use the previous segment's title with "Details" appended
-                const prevSegment = pathSegments[index - 1];
-                const prevTitle = pathToTitleMapping[prevSegment]?.title || prevSegment;
-                const icon = pathToTitleMapping[prevSegment]?.icon || <FileText size={16} />;
+            // Determine title and icon based on path segment
+            let title = '';
+            let icon: any = <FileText size={16} />;
 
-                result.push({
-                    title: `${prevTitle} Details`,
-                    href: currentPath,
-                    icon
-                });
+            if (pathMap[segment]) {
+                // Known path segment
+                title = pathMap[segment].title;
+                icon = pathMap[segment].icon;
+                prevTitle = title;
+            } else if (isIdSegment) {
+                // This is an ID segment, get the entity name from fetched data
+                if (prevTitle === 'Projects' && pathSegments.projectId && projectData) {
+                    title = projectData.projectName;
+                    icon = <FolderKanban size={16} />;
+                } else if (prevTitle === 'Organisations' && pathSegments.organisationId && organisationData) {
+                    title = organisationData.organizationName;
+                    icon = <BookOpen size={16} />;
+                } else if (prevTitle === 'Impacted Groups' && pathSegments.impactedGroupId && impactedGroupData) {
+                    title = impactedGroupData.anagraphicDataDTO?.entityName || `Group ${segment}`;
+                    icon = <Users size={16} />;
+                } else {
+                    // If data hasn't loaded yet or isn't available
+                    title = `${prevTitle} ${segment}`;
+                }
+            } else if (segment === 'new') {
+                title = 'New';
+                icon = <Plus size={16} />;
             } else {
-                // For static segments, use the mapping or the segment itself
-                const info = pathToTitleMapping[segment] || {
-                    title: segment.charAt(0).toUpperCase() + segment.slice(1),
-                    icon: <FileText size={16} />
-                };
-
-                result.push({
-                    title: info.title,
-                    href: currentPath,
-                    icon: info.icon
-                });
+                // Other segments (like "edit", etc.)
+                title = segment.charAt(0).toUpperCase() + segment.slice(1);
             }
+
+            // Add to breadcrumbs
+            result.push({
+                title,
+                href: currentPath,
+                icon
+            });
         });
 
-        // Add any extra crumbs
-        if (extraCrumbs) {
-            extraCrumbs.forEach(crumb => {
-                result.push({
-                    title: crumb.title,
-                    href: crumb.href || '',
-                    icon: crumb.icon || <FileText size={16} />
-                });
-            });
-        }
-
-        return result;
-    }, [pathname, extraCrumbs, showHome]);
+        // Add any extra breadcrumbs
+        return [...result, ...extraCrumbs.map(crumb => ({
+            title: crumb.title,
+            href: crumb.href || '#',
+            icon: crumb.icon || <FileText size={16} />
+        }))];
+    }, [
+        pathname,
+        showHome,
+        extraCrumbs,
+        pathSegments.segments,
+        pathSegments.projectId,
+        pathSegments.organisationId,
+        pathSegments.impactedGroupId,
+        projectData,
+        organisationData,
+        impactedGroupData
+    ]);
 
     // Don't render if it's just the home breadcrumb
     if (breadcrumbs.length <= 1) {
         return null;
     }
 
+    // Loading indicator for breadcrumbs
+    if (
+        (pathSegments.projectId && isLoadingProject) ||
+        (pathSegments.organisationId && isLoadingOrganisation) ||
+        (pathSegments.impactedGroupId && isLoadingImpactedGroup)
+    ) {
+        return (
+            <Box sx={{ py: 0.5 }}>
+                <Chip
+                    label="Loading..."
+                    size="small"
+                    sx={{
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        color: theme.palette.primary.main
+                    }}
+                />
+            </Box>
+        );
+    }
+
     return (
-        <Box
+        <MuiBreadcrumbs
+            separator={<ChevronRight size={16} />}
+            aria-label="breadcrumb"
             sx={{
-                mb: 3,
-                display: 'flex',
-                alignItems: 'center',
+                '.MuiBreadcrumbs-ol': {
+                    flexWrap: 'nowrap',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                }
             }}
         >
-            <MuiBreadcrumbs
-                separator={<ChevronRight size={16} color={theme.palette.text.secondary} />}
-                aria-label="breadcrumb"
-                sx={{
-                    '& .MuiBreadcrumbs-ol': {
-                        alignItems: 'center',
-                    }
-                }}
-            >
-                {breadcrumbs.map((crumb, index) => {
-                    const isLast = index === breadcrumbs.length - 1;
+            {breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
 
-                    // Render current page as non-link Typography
-                    if (isLast) {
-                        return (
-                            <Chip
-                                key={crumb.href}
-                                icon={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
-                                        {crumb.icon}
-                                    </Box>
-                                }
-                                label={crumb.title}
-                                size="small"
-                                sx={{
-                                    backgroundColor: alpha(theme.palette.secondary.main, 0.1),
-                                    color: theme.palette.secondary.main,
-                                    fontWeight: 500,
-                                    '& .MuiChip-icon': {
-                                        color: theme.palette.secondary.main,
-                                    }
-                                }}
-                            />
-                        );
-                    }
-
-                    // Render links for all but the current page
-                    return (
-                        <Link
-                            key={crumb.href}
-                            href={crumb.href}
-                            style={{
-                                textDecoration: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                color: theme.palette.text.secondary,
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    '&:hover': {
-                                        color: theme.palette.primary.main,
-                                    }
-                                }}
-                            >
-                                <Box sx={{ mr: 0.5, display: 'flex' }}>
-                                    {crumb.icon}
-                                </Box>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        '&:hover': {
-                                            textDecoration: 'underline',
-                                        }
-                                    }}
-                                >
-                                    {crumb.title}
-                                </Typography>
-                            </Box>
-                        </Link>
-                    );
-                })}
-            </MuiBreadcrumbs>
-        </Box>
+                return isLast ? (
+                    // Last item is just text
+                    <Box
+                        key={crumb.href}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: theme.palette.text.primary,
+                            fontWeight: 500
+                        }}
+                    >
+                        <Box sx={{ mr: 0.75, display: 'flex', alignItems: 'center' }}>
+                            {crumb.icon}
+                        </Box>
+                        <Typography variant="body2" component="span" noWrap>
+                            {crumb.title}
+                        </Typography>
+                    </Box>
+                ) : (
+                    // Link for other items
+                    <Link
+                        key={crumb.href}
+                        href={crumb.href}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            color: theme.palette.text.secondary,
+                            textDecoration: 'none'
+                        }}
+                    >
+                        <Box sx={{ mr: 0.75, display: 'flex', alignItems: 'center' }}>
+                            {crumb.icon}
+                        </Box>
+                        <Typography variant="body2" component="span" noWrap>
+                            {crumb.title}
+                        </Typography>
+                    </Link>
+                );
+            })}
+        </MuiBreadcrumbs>
     );
 };
 
