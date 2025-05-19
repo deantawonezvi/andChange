@@ -391,9 +391,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         );
     }
 
-    // Calculate impact strength
-    const changeImpactStrength = calculateChangeImpactStrength();
-
     // Get field groups for each section
     const basicInfoFields = impactedGroupFormFields.basicInfo || [];
     const absupFields = impactedGroupFormFields.absupFields || [];

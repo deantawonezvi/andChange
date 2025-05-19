@@ -1,4 +1,3 @@
-// src/app/lib/components/common/enhancedLoaders.tsx
 import React from 'react';
 import {
     Box,
@@ -21,7 +20,6 @@ import {
 import { alpha } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 
-// Page-level loading with fade-in animation and gradient-overlay shimmer effect
 export const FullPageLoader = () => {
     const theme = useTheme();
 
@@ -346,7 +344,6 @@ export const InlineLoader: React.FC<{
     );
 };
 
-// Section loader with a branded appearance
 export const SectionLoader: React.FC<{
     message?: string;
     height?: string | number;
