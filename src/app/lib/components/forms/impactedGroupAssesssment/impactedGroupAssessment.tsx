@@ -102,20 +102,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Calculate change impact strength
-    const calculateChangeImpactStrength = React.useCallback(() => {
-        const formValues = watch();
-        const impactFields = [
-            'process', 'systems', 'tools', 'jobRoles', 'criticalBehaviours',
-            'mindsetAttitudesBeliefs', 'reportingStructure', 'performanceReviews',
-            'compensation', 'location', 'retrenchments', 'clarityOfFutureState'
-        ];
-
-        const totalRating = impactFields.reduce((sum, field) => sum + (formValues[field as keyof ImpactedGroupFormData] as number || 0), 0);
-        const maxPossibleRating = impactFields.length * 5;
-        return Math.round((totalRating / maxPossibleRating) * 100);
-    }, [watch]);
-
     // Fetch impacted group data for edit mode
     const { data: impactedGroup, isLoading: isLoadingGroup, error: groupError } = useQuery({
         queryKey: ['impactedGroup', groupId],
