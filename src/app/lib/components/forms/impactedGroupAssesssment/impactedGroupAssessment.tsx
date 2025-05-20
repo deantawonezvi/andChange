@@ -326,7 +326,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                 });
 
                 // Note: After creation, we would need to navigate to the new group
-                // and make additional API calls to update more complex data
             }
         } catch (error) {
             console.log('Error submitting form:', error);
@@ -488,18 +487,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                                         errors={errors}
                                     />
                                 ))}
-
-                                {/* Adoption assessments will need custom handling for multiple entries */}
-                                {/* This is a placeholder for future implementation */}
-                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={<Plus size={16} />}
-                                        onClick={() => {/* Handle adding new adoption assessment */}}
-                                    >
-                                        Add Adoption Measure
-                                    </Button>
-                                </Box>
                             </Box>
                         </Collapse>
                     </Paper>

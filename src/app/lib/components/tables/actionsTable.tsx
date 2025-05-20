@@ -11,6 +11,7 @@ import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ActionService from '@/app/lib/api/services/actionService';
 import { useToast } from '@/app/lib/hooks/useToast';
+import GenerateActionsButton from '../forms/generateActionsButton';
 
 interface ActionsTableProps {
     projectId: number;
@@ -31,7 +32,6 @@ interface FlattenedAction {
 
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const actionService = ActionService.getInstance();
-    const { showToast } = useToast();
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
@@ -163,12 +163,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     // Define table columns
     const columns: MRT_ColumnDef<FlattenedAction>[] = [
         {
-            accessorKey: 'name',
-            header: 'Name',
-            size: 200,
-            enableColumnFilter: true,
-        },
-        {
             accessorKey: 'date',
             header: 'Start Date',
             size: 120,
@@ -270,20 +264,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         );
     };
 
-    // Action handlers
-    const handleCreateActionPlan = async () => {
-        try {
-            await actionService.createActionPlan({
-                projectId,
-                additiveProcess: false,
-            });
-            showToast('Action plan created successfully', 'success');
-            refetch();
-        } catch (err) {
-            console.log(err)
-            showToast('Failed to create action plan', 'error');
-        }
-    };
 
     const handleEditAction = (actionId: number) => {
         // Placeholder for edit functionality
@@ -300,10 +280,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         console.log('View history for action', actionId);
     };
 
-    const handleGenerateActions = () => {
-        // Placeholder for generate actions functionality
-        console.log('Generate actions');
-    };
 
     if (isLoading) {
         return <SectionLoader message="Loading actions..." />;
@@ -346,26 +322,18 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 <Box sx={{ display: 'flex', gap: 2 }}>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                        variant="contained"
-                        startIcon={<Plus size={20} />}
-                        onClick={handleGenerateActions}
-                    >
-                        Generate Actions
-                    </Button>
+                    <GenerateActionsButton
+                        projectId={projectId}
+                    />
                 </Box>
             </Box>
 
             {(!actionPlan || !actionPlan.id) ? (
                 <Box sx={{ textAlign: 'center', my: 4 }}>
                     <Typography variant="h6" gutterBottom>No action plan exists yet for this project</Typography>
-                    <Button
-                        variant="contained"
-                        onClick={handleCreateActionPlan}
-                        sx={{ mt: 2 }}
-                    >
-                        Create Action Plan
-                    </Button>
+                    <GenerateActionsButton
+                        projectId={projectId}
+                    />
                 </Box>
             ) : (
                 <DataTable
