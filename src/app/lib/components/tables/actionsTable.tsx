@@ -4,13 +4,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Button, Chip, IconButton, Tooltip, Typography } from '@mui/material';
-import { Edit, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Edit, RotateCcw, Trash2 } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
 import { format } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ActionService from '@/app/lib/api/services/actionService';
-import { useToast } from '@/app/lib/hooks/useToast';
 import GenerateActionsButton from '../forms/generateActionsButton';
 
 interface ActionsTableProps {
