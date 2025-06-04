@@ -132,13 +132,32 @@ export default function OrganizationDetailsPage() {
             <Paper sx={{ width: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={activeTab} onChange={handleTabChange} aria-label="organization tabs">
-                        <Tab label="Individuals" icon={<Users size={20} color="#e85d45"  />} iconPosition="start" />
                         <Tab label="Projects" icon={<FolderKanban size={20} color="#e85d45" />} iconPosition="start" />
+                        <Tab label="Individuals" icon={<Users size={20} color="#e85d45"  />} iconPosition="start" />
                     </Tabs>
                 </Box>
+                {/* Projects Tab */}
+                <TabPanel value={activeTab} index={0}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Typography variant="h6">Organization Projects</Typography>
+                        <Button
+                            variant="contained"
+                            startIcon={<Plus size={16} />}
+                            onClick={handleOpenCreateProjectModal}
+                        >
+                            Create Project
+                        </Button>
+                    </Box>
+                    <Divider sx={{ mb: 2 }} />
+
+                    <ProjectsTable
+                        standalone={true}
+                        organizationId={organizationId}
+                    />
+                </TabPanel>
 
                 {/* Individuals Tab */}
-                <TabPanel value={activeTab} index={0}>
+                <TabPanel value={activeTab} index={1}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                         <Typography variant="h6">Organization Individuals</Typography>
                         <Button
@@ -166,25 +185,7 @@ export default function OrganizationDetailsPage() {
                     )}
                 </TabPanel>
 
-                {/* Projects Tab */}
-                <TabPanel value={activeTab} index={1}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                        <Typography variant="h6">Organization Projects</Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<Plus size={16} />}
-                            onClick={handleOpenCreateProjectModal}
-                        >
-                            Create Project
-                        </Button>
-                    </Box>
-                    <Divider sx={{ mb: 2 }} />
 
-                    <ProjectsTable
-                        standalone={true}
-                        organizationId={organizationId}
-                    />
-                </TabPanel>
             </Paper>
 
             {/* Create Individual Modal */}
