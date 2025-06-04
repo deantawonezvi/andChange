@@ -3,7 +3,7 @@ import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Collapse, Grid, IconButton, Paper, Stack, Typography } from '@mui/material';
-import { ChevronDown, ChevronUp, Plus, Save, Tag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, Tag } from 'lucide-react';
 import {
     CreateCommonEntityRequestDTO,
     EImpactedGroupDTO,
