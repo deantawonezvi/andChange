@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
-import { Button, CircularProgress } from '@mui/material';
-import { PlayCircle } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Alert,
+    Box
+} from '@mui/material';
+import { PlayCircle, AlertTriangle } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ActionService, { CreateActionPlanRequestDTO } from '@/app/lib/api/services/actionService';
 import { useToast } from '@/app/lib/hooks/useToast';
 
@@ -12,8 +22,16 @@ interface GenerateActionsButtonProps {
 
 const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const queryClient = useQueryClient();
     const { showToast } = useToast();
+
+    // Check if there's an existing action plan
+    const { data: existingActionPlan } = useQuery({
+        queryKey: ['actionPlan', projectId],
+        queryFn: () => ActionService.getInstance().getActionPlanByProjectId(projectId),
+        enabled: !!projectId
+    });
 
     const generateActionsMutation = useMutation({
         mutationFn: (data: CreateActionPlanRequestDTO) => {
@@ -30,10 +48,21 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
         },
         onSettled: () => {
             setIsLoading(false);
+            setShowConfirmDialog(false);
         }
     });
 
     const handleGenerateActions = () => {
+        // If there's an existing action plan, show confirmation dialog
+        if (existingActionPlan) {
+            setShowConfirmDialog(true);
+        } else {
+            // No existing plan, proceed directly
+            executeGeneration();
+        }
+    };
+
+    const executeGeneration = () => {
         setIsLoading(true);
 
         // Create the request payload with the specified format
@@ -64,16 +93,66 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
         generateActionsMutation.mutate(requestData);
     };
 
+    const handleConfirmGeneration = () => {
+        setShowConfirmDialog(false);
+        executeGeneration();
+    };
+
+    const handleCancelGeneration = () => {
+        setShowConfirmDialog(false);
+    };
+
     return (
-        <Button
-            variant="contained"
-            color="primary"
-            onClick={handleGenerateActions}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : <PlayCircle />}
-        >
-            {isLoading ? 'Generating...' : 'Generate Actions'}
-        </Button>
+        <>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleGenerateActions}
+                disabled={isLoading}
+                startIcon={isLoading ? <CircularProgress size={20} /> : <PlayCircle />}
+            >
+                {isLoading ? 'Generating...' : 'Generate Actions'}
+            </Button>
+
+            {/* Confirmation Dialog */}
+            <Dialog
+                open={showConfirmDialog}
+                onClose={handleCancelGeneration}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AlertTriangle size={24} color="orange" />
+                    Replace Existing Action Plan?
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        This project already has an existing action plan. Generating new actions will replace the current action plan and all its associated data.
+                    </DialogContentText>
+                    <Box mt={2}>
+                        <Alert severity="warning">
+                            <strong>Warning:</strong> This action cannot be undone. All current actions, schedules, and progress will be lost.
+                        </Alert>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleCancelGeneration}
+                        variant="outlined"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleConfirmGeneration}
+                        variant="contained"
+                        color="warning"
+                        startIcon={<PlayCircle />}
+                    >
+                        Generate
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 
