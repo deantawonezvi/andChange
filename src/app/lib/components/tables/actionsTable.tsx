@@ -455,7 +455,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             header: '',
             size: 80,
             enableColumnFilter: false,
-            Cell: ({ row }) => (
+            Cell: () => (
                 <IconButton size="small">
                     <RotateCcw size={16} />
                 </IconButton>
