@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { Box, Button, Chip, IconButton, Tab, Tabs, Tooltip, Typography } from '@mui/material';
 import { Edit, RotateCcw, Trash2, Users, Shield, Heart } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
@@ -9,7 +9,10 @@ import { format } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ActionService from '@/app/lib/api/services/actionService';
+import { ImpactedGroupService } from '@/app/lib/api/services/impactedGroupService';
 import GenerateActionsButton from '../forms/generateActionsButton';
+import MOPService from "@/app/lib/api/services/mopService";
+import SponsorService from "@/app/lib/api/services/sponsorService";
 
 interface ActionsTableProps {
     projectId: number;
@@ -27,6 +30,15 @@ interface FlattenedAction {
     entityId?: number;
     entityType?: string;
     entityName?: string;
+    actionId?: number;
+    verb?: string;
+    actionName?: string;
+    // Enhanced group action fields
+    slotId?: number;
+    associatedEntityId?: number;
+    whoReceiver?: string;
+    whoSender?: string;
+    stateTarget?: string;
 }
 
 interface TabPanelProps {
@@ -93,7 +105,10 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                             rawStatus: slot.slotState,
                             entityId: parseInt(groupId),
                             entityType: 'impactedGroup',
-                            entityName: `Group ${groupId}`
+                            entityName: `Group ${groupId}`,
+                            actionId: slot.actionId,
+                            slotId: slot.id,
+                            stateTarget: category
                         });
                     });
                 });
@@ -116,7 +131,10 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                             rawStatus: slot.slotState,
                             entityId: parseInt(mopId),
                             entityType: 'mop',
-                            entityName: `MOP ${mopId}`
+                            entityName: `MOP ${mopId}`,
+                            actionId: slot.actionId,
+                            slotId: slot.id,
+                            stateTarget: category
                         });
                     });
                 });
@@ -139,7 +157,10 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                             rawStatus: slot.slotState,
                             entityId: parseInt(sponsorId),
                             entityType: 'sponsor',
-                            entityName: `Sponsor ${sponsorId}`
+                            entityName: `Sponsor ${sponsorId}`,
+                            actionId: slot.actionId,
+                            slotId: slot.id,
+                            stateTarget: category
                         });
                     });
                 });
@@ -160,7 +181,8 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                         status: actionService.getStatusInfo(slot.slotState).label,
                         rawStatus: slot.slotState,
                         entityType: 'project',
-                        entityName: 'Project Health'
+                        entityName: 'Project Health',
+                        actionId: slot.actionId
                     });
                 });
             });
@@ -179,7 +201,8 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     status: actionService.getStatusInfo(slot.slotState).label,
                     rawStatus: slot.slotState,
                     entityType: 'hygiene',
-                    entityName: 'Project Hygiene'
+                    entityName: 'Project Hygiene',
+                    actionId: slot.actionId // ← ADDED THIS
                 });
             });
         }
@@ -195,72 +218,249 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         };
     }, [actionPlan, actionService]);
 
-    // Common column definitions for Groups table
+    // Fetch action slot details for group actions
+    const groupActionSlotQueries = useQueries({
+        queries: groupActions.map(action => ({
+            queryKey: ['actionSlotDetails', action.slotId],
+            queryFn: () => actionService.getActionPlanSlotById(action.slotId!),
+            enabled: !!action.slotId && activeTab === 0, // Only fetch when groups tab is active
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    // Fetch action details for group actions
+    const groupActionQueries = useQueries({
+        queries: groupActions.map(action => ({
+            queryKey: ['actionDetails', action.actionId],
+            queryFn: () => actionService.getActionById(action.actionId!),
+            enabled: !!action.actionId && activeTab === 0,
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    // Fetch entity details for group actions
+    const groupEntityQueries = useQueries({
+        queries: groupActions.map(action => ({
+            queryKey: ['entityDetails', action.entityType, action.entityId],
+            queryFn: async () => {
+                const slotDetails = groupActionSlotQueries[groupActions.indexOf(action)]?.data;
+                if (!slotDetails) return null;
+
+                // Determine which entity ID to use based on slot details
+                let entityId = null;
+                let entityType = '';
+
+                if (slotDetails.associatedImpactedGroupId) {
+                    entityId = slotDetails.associatedImpactedGroupId;
+                    entityType = 'impactedGroup';
+                } else if (slotDetails.associatedMOPId) {
+                    entityId = slotDetails.associatedMOPId;
+                    entityType = 'mop';
+                } else if (slotDetails.associatedSponsorId) {
+                    entityId = slotDetails.associatedSponsorId;
+                    entityType = 'sponsor';
+                }
+
+                if (!entityId) return null;
+
+                const igService = ImpactedGroupService.getInstance();
+                const mopService = MOPService.getInstance();
+                const sponsorService = SponsorService.getInstance();
+
+                try {
+                    switch (entityType) {
+                        case 'impactedGroup':
+                            return { data: await igService.getImpactedGroupById(entityId), type: 'impactedGroup' };
+                        case 'mop':
+                            return { data: await mopService.getMOPById(entityId), type: 'mop' };
+                        case 'sponsor':
+                            return { data: await sponsorService.getSponsorById(entityId), type: 'sponsor' };
+                        default:
+                            return null;
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch ${entityType} with ID ${entityId}:`, error);
+                    return null;
+                }
+            },
+            enabled: !!action.slotId && activeTab === 0 && !!groupActionSlotQueries[groupActions.indexOf(action)]?.data,
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    // Enhanced group actions with fetched details
+    const enhancedGroupActions = React.useMemo(() => {
+        return groupActions.map((action, index) => {
+            const slotDetails = groupActionSlotQueries[index]?.data;
+            const actionDetails = groupActionQueries[index]?.data;
+            const entityDetails = groupEntityQueries[index]?.data;
+
+            // Map WHO codes to readable names
+            const mapWhoCode = (code: string) => {
+                const whoMapping: Record<string, string> = {
+                    'E_IG': 'E_IG',
+                    'E_MOP': 'E_MOP',
+                    'E_SP': 'E_SP',
+                    'E_CM': 'E_CM',
+                    'MULTIPLE': 'MULTIPLE',
+                    'AUTHOR': 'AUTHOR'
+                };
+                return whoMapping[code] || code;
+            };
+
+            return {
+                ...action,
+                entityName: entityDetails?.data?.anagraphicDataDTO?.entityName || action.entityName,
+                actionName: actionDetails?.actionCore?.actionName || action.name,
+                whoReceiver: slotDetails ? mapWhoCode(slotDetails.whoReceiver) : action.receiver,
+                whoSender: slotDetails ? mapWhoCode(slotDetails.whoSender) : action.sender,
+                stateTarget: slotDetails?.absuptargeted || action.absupCategory,
+                entityType: entityDetails?.type || action.entityType
+            };
+        });
+    }, [groupActions, groupActionSlotQueries, groupActionQueries, groupEntityQueries]);
+
+    // Fetch action details for hygiene actions
+    const hygieneActionQueries = useQueries({
+        queries: hygieneActions.map(action => ({
+            queryKey: ['actionDetails', action.actionId],
+            queryFn: () => actionService.getActionById(action.actionId!),
+            enabled: !!action.actionId && activeTab === 1, // Only fetch when hygiene tab is active
+            staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+        })),
+    });
+
+    // Enhanced hygiene actions with fetched details
+    const enhancedHygieneActions = React.useMemo(() => {
+        return hygieneActions.map((action, index) => {
+            const actionDetails = hygieneActionQueries[index]?.data;
+            return {
+                ...action,
+                verb: actionDetails?.actionCore?.actionVerb?.verbName || 'Loading...',
+                actionName: actionDetails?.actionCore?.actionName || action.name,
+            };
+        });
+    }, [hygieneActions, hygieneActionQueries]);
+
+    // Common column definitions for Groups table - UPDATED
     const groupColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
+            accessorKey: 'entityName',
+            header: 'NAME',
+            size: 150,
+            enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = groupEntityQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.entityName || 'N/A');
+            }
+        },
+        {
+            accessorKey: 'entityType',
+            header: 'TYPE',
+            size: 150,
+            enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const typeMapping: Record<string, string> = {
+                    'impactedGroup': 'Impacted Group',
+                    'mop': 'MOP',
+                    'sponsor': 'Sponsor'
+                };
+                return typeMapping[row.original.entityType || ''] || row.original.entityType;
+            }
+        },
+        {
+            accessorKey: 'actionName',
+            header: 'ACTION',
+            size: 400,
+            enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = groupActionQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.actionName || row.original.name);
+            }
+        },
+        {
             accessorKey: 'date',
-            header: 'Start Date',
+            header: 'DATE',
             size: 120,
             Cell: ({ cell }) => formatDate(cell.getValue<string>()),
-            enableColumnFilter: true,
-        },
-        {
-            accessorKey: 'entityName',
-            header: 'Target Group',
-            size: 150,
-            enableColumnFilter: true,
-        },
-        {
-            accessorKey: 'absupCategory',
-            header: 'ABSUP Category',
-            size: 150,
-            Cell: ({ cell }) => renderAbsupCategory(cell.getValue<string>()),
-            enableColumnFilter: true,
-        },
-        {
-            accessorKey: 'receiver',
-            header: 'Receiver',
-            size: 150,
             enableColumnFilter: true,
         },
         {
             accessorKey: 'status',
-            header: 'Status',
-            size: 150,
+            header: 'STATUS',
+            size: 120,
             Cell: ({ row }) => renderStatus(row.original.status, row.original.rawStatus),
             enableColumnFilter: true,
         },
         {
-            id: 'actions',
-            header: 'Actions',
+            accessorKey: 'whoSender',
+            header: 'SENDER',
+            size: 100,
+            enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = groupActionSlotQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.whoSender || 'N/A');
+            }
+        },
+        {
+            accessorKey: 'whoReceiver',
+            header: 'RECEIVER',
+            size: 100,
+            enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = groupActionSlotQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.whoReceiver || 'N/A');
+            }
+        },
+        {
+            accessorKey: 'stateTarget',
+            header: 'STATE TARGET',
             size: 120,
-            enableColumnFilter: false,
-            Cell: ({ row }) => renderActionButtons(row.original.id),
+            Cell: ({ row }) => renderAbsupCategory(row.original.stateTarget || row.original.absupCategory),
+            enableColumnFilter: true,
         },
     ];
 
-    // Column definitions for Hygiene table
+    // Column definitions for Hygiene table - UPDATED
     const hygieneColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'verb',
-            header: 'Verb',
-            size: 150,
+            header: 'VERB',
+            size: 120,
             enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = hygieneActionQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.verb || 'N/A');
+            }
         },
         {
-            accessorKey: 'action',
-            header: 'Action',
-            size: 200,
+            accessorKey: 'actionName',
+            header: 'ACTION',
+            size: 400,
             enableColumnFilter: true,
+            Cell: ({ row }) => {
+                const isLoading = hygieneActionQueries.some(query => query.isLoading);
+                return isLoading ? 'Loading...' : (row.original.actionName || row.original.name);
+            }
         },
         {
             accessorKey: 'date',
-            header: 'Date',
+            header: 'DATE',
             size: 120,
             Cell: ({ cell }) => formatDate(cell.getValue<string>()),
             enableColumnFilter: true,
         },
-
+        {
+            id: 'actions',
+            header: '',
+            size: 80,
+            enableColumnFilter: false,
+            Cell: ({ row }) => (
+                <IconButton size="small">
+                    <RotateCcw size={16} />
+                </IconButton>
+            ),
+        },
     ];
 
     // Column definitions for Health table
@@ -387,7 +587,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
 
     // Get counts for tab labels
     const getTabCounts = () => ({
-        groups: groupActions.length,
+        groups: enhancedGroupActions.length,
         hygiene: hygieneActions.length,
         health: healthActions.length
     });
@@ -446,6 +646,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Typography variant="h5" component="h2">
+                        Project Actions
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 2 }}>
@@ -455,12 +656,10 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
 
             {/* Tabs */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={activeTab} onChange={handleTabChange} aria-label="action plan tabs"   variant="scrollable"
-                >
+                <Tabs value={activeTab} onChange={handleTabChange} aria-label="action plan tabs" variant="scrollable">
                     <Tab
                         id="actions-tab-0"
                         aria-controls="actions-tabpanel-0"
-
                         label={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {<Users size={20} color="#e85d45" />}
@@ -494,7 +693,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             {/* Tab Panels */}
             <TabPanel value={activeTab} index={0}>
                 <DataTable
-                    data={groupActions as unknown as Record<string, unknown>[]}
+                    data={enhancedGroupActions as unknown as Record<string, unknown>[]}
                     columns={groupColumns as unknown as MRT_ColumnDef<Record<string, unknown>, unknown>[]}
                     title="Group Actions"
                     subtitle="Actions targeting impacted groups, managers, and sponsors"
@@ -504,7 +703,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
 
             <TabPanel value={activeTab} index={1}>
                 <DataTable
-                    data={hygieneActions as unknown as Record<string, unknown>[]}
+                    data={enhancedHygieneActions as unknown as Record<string, unknown>[]}
                     columns={hygieneColumns as unknown as MRT_ColumnDef<Record<string, unknown>, unknown>[]}
                     title="Hygiene Actions"
                     subtitle="General maintenance and hygiene activities"
