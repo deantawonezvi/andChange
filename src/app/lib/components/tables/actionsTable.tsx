@@ -33,7 +33,6 @@ interface FlattenedAction {
     actionId?: number;
     verb?: string;
     actionName?: string;
-    // Enhanced group action fields
     slotId?: number;
     associatedEntityId?: number;
     whoReceiver?: string;
