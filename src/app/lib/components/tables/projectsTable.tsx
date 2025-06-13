@@ -123,8 +123,8 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
             <DataTable
                 data={transformedData}
                 columns={columns}
-                title={standalone ? "Projects" : ""}
-                subtitle={standalone ? "Overview of all projects" : ""}
+                title={"Projects"}
+                subtitle={"Overview of all projects"}
                 enablePagination={true}
                 muiTableBodyRowProps={({ row }: { row: any }) => ({
                     onClick: () => handleViewProject(row.original.id),

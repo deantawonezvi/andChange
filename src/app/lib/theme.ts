@@ -1,4 +1,3 @@
-// src/app/lib/theme.ts - Extended with table theming options
 import { createTheme } from "@mui/material";
 import { Noto_Sans } from 'next/font/google';
 
@@ -8,7 +7,6 @@ const workSans = Noto_Sans({
     display: 'swap',
 });
 
-// Extend the theme declaration to include table specific styling
 declare module '@mui/material/styles' {
     interface Theme {
         andChangeComponents: {
@@ -102,7 +100,6 @@ declare module '@mui/material/styles' {
             card: string;
             button: string;
             hover: string;
-            // Add table specific shadow options
             tableRow?: string;
             tableHeader?: string;
         };

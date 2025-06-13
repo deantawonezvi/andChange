@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { Box, Button, Chip, IconButton, Tab, Tabs, Tooltip, Typography } from '@mui/material';
-import { Edit, RotateCcw, Trash2, Users, Shield, Heart } from 'lucide-react';
+import { Edit, Heart, RotateCcw, Shield, Trash2, Users } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
 import { format } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
@@ -67,6 +67,10 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const [activeTab, setActiveTab] = useState(0);
     const actionService = ActionService.getInstance();
+    const [showGroupFilters, setShowGroupFilters] = useState(false);
+    const [showHygieneFilters, setShowHygieneFilters] = useState(false);
+    const [showHealthFilters, setShowHealthFilters] = useState(false);
+
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
@@ -329,7 +333,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    // Enhanced hygiene actions with fetched details
     const enhancedHygieneActions = React.useMemo(() => {
         return hygieneActions.map((action, index) => {
             const actionDetails = hygieneActionQueries[index]?.data;
