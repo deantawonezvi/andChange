@@ -67,9 +67,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const [activeTab, setActiveTab] = useState(0);
     const actionService = ActionService.getInstance();
-    const [showGroupFilters, setShowGroupFilters] = useState(false);
-    const [showHygieneFilters, setShowHygieneFilters] = useState(false);
-    const [showHealthFilters, setShowHealthFilters] = useState(false);
 
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
@@ -311,10 +308,12 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 return whoMapping[code] || code;
             };
 
+            const verb = actionDetails?.actionCore?.actionVerb?.verbName || ''
+
             return {
                 ...action,
                 entityName: entityDetails?.data?.anagraphicDataDTO?.entityName || action.entityName,
-                actionName: actionDetails?.actionCore?.actionName || action.name,
+                actionName: `${verb} ${actionDetails?.actionCore?.actionName || action.name}`,
                 whoReceiver: slotDetails ? mapWhoCode(slotDetails.whoReceiver) : action.receiver,
                 whoSender: slotDetails ? mapWhoCode(slotDetails.whoSender) : action.sender,
                 stateTarget: slotDetails?.absuptargeted || action.absupCategory,
