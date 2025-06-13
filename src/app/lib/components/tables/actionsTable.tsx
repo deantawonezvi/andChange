@@ -341,13 +341,27 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         });
     }, [hygieneActions, hygieneActionQueries]);
 
-// Complete group columns with dropdown filter for TYPE
+    const entityNameOptions = React.useMemo(() => {
+        const uniqueNames = [...new Set(
+            enhancedGroupActions
+                .map(action => action.entityName)
+                .filter(name => name && name !== 'N/A' && name !== 'Loading...')
+        )].sort();
+
+        return uniqueNames.map(name => ({
+            label: name,
+            value: name
+        }));
+    }, [enhancedGroupActions])
+
     const groupColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'entityName',
             header: 'NAME',
             size: 150,
             enableColumnFilter: true,
+            filterVariant: 'select',
+            filterSelectOptions: entityNameOptions,
             Cell: ({ row }) => {
                 const isLoading = groupEntityQueries.some(query => query.isLoading);
                 return isLoading ? 'Loading...' : (row.original.entityName || 'N/A');
@@ -421,8 +435,16 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             accessorKey: 'stateTarget',
             header: 'STATE TARGET',
             size: 120,
-            Cell: ({ row }) => renderAbsupCategory(row.original.stateTarget || row.original.absupCategory),
             enableColumnFilter: true,
+            filterVariant: 'select',
+            filterSelectOptions: [
+                { label: 'AWARENESS', value: 'AWARENESS' },
+                { label: 'BUYIN', value: 'BUYIN' },
+                { label: 'SKILL', value: 'SKILL' },
+                { label: 'USE', value: 'USE' },
+                { label: 'PROFICIENCY', value: 'PROFICIENCY' }
+            ],
+            Cell: ({ row }) => renderAbsupCategory(row.original.stateTarget || row.original.absupCategory),
         },
     ];
 
