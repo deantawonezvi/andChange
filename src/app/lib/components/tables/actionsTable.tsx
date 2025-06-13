@@ -341,7 +341,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         });
     }, [hygieneActions, hygieneActionQueries]);
 
-    // Common column definitions for Groups table - UPDATED
+// Complete group columns with dropdown filter for TYPE
     const groupColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'entityName',
@@ -358,6 +358,12 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             header: 'TYPE',
             size: 150,
             enableColumnFilter: true,
+            filterVariant: 'select', // Enables dropdown filter
+            filterSelectOptions: [
+                { label: 'Impacted Group', value: 'impactedGroup' },
+                { label: 'MOP', value: 'mop' },
+                { label: 'Sponsor', value: 'sponsor' }
+            ],
             Cell: ({ row }) => {
                 const typeMapping: Record<string, string> = {
                     'impactedGroup': 'Impacted Group',
@@ -420,7 +426,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         },
     ];
 
-    // Column definitions for Hygiene table - UPDATED
     const hygieneColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'verb',
