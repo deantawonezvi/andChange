@@ -4,13 +4,12 @@ import Cookies from 'js-cookie';
 
 const createAxiosClient = (baseURL?: string, enableDebug: boolean = false): AxiosInstance => {
     const axiosClient: AxiosInstance = axios.create({
-        baseURL: process.env.NODE_ENV === 'development'
-            ? ''
-            : (baseURL || process.env.NEXT_PUBLIC_API_BASE_URL),
+        baseURL: 'http://35.177.78.241:9000',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/hal+json'
-        }
+        },
+        maxRedirects: 0,
     });
 
     axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {

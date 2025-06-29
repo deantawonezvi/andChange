@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Card, CardContent, Chip, Divider, Grid, Paper, Typography } from '@mui/material';
 import { Building2, User, Users } from 'lucide-react';
 import { EImpactedGroupDTO, ImpactedGroupService } from '@/app/lib/api/services/impactedGroupService';
 import { ESponsorDTO, SponsorService } from '@/app/lib/api/services/sponsorService';
 import { EManagerOfPeopleDTO, MOPService } from '@/app/lib/api/services/mopService';
+import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
+import TeamLeaderAssessmentPopup from './teamLeaderAssessmentPopup';
 
 interface LeadershipStructureData {
     impactedGroup: EImpactedGroupDTO;
@@ -16,7 +18,13 @@ interface LeadershipStructureData {
 
 const LeadershipStructureAssessment: React.FC = () => {
     const params = useParams();
+    const queryClient = useQueryClient();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
+
+    // State for popup management
+    const [popupOpen, setPopupOpen] = useState(false);
+    const [selectedImpactedGroup, setSelectedImpactedGroup] = useState<EImpactedGroupDTO | null>(null);
+    const [organizationId, setOrganizationId] = useState<number | null>(null);
 
     // Fetch impacted groups for the project
     const {
@@ -28,6 +36,20 @@ const LeadershipStructureAssessment: React.FC = () => {
         queryFn: () => ImpactedGroupService.getInstance().getImpactedGroupsByProject(projectId),
         enabled: !!projectId
     });
+
+    // Fetch project details to get organization ID
+    const { data: projectData } = useQuery({
+        queryKey: ['project', projectId],
+        queryFn: () => ProjectService.getInstance().getProjectById(projectId),
+        enabled: !!projectId
+    });
+
+// Set organization ID when project data is loaded
+    useEffect(() => {
+        if (projectData?.organizationId) {
+            setOrganizationId(projectData.organizationId);
+        }
+    }, [projectData]);
 
     // Fetch leadership details for each impacted group
     const leadershipQueries = useQuery({
@@ -64,6 +86,23 @@ const LeadershipStructureAssessment: React.FC = () => {
         },
         enabled: !!impactedGroups?.length
     });
+
+    const handleCreateTeamLeader = (impactedGroup: EImpactedGroupDTO) => {
+        setSelectedImpactedGroup(impactedGroup);
+        setPopupOpen(true);
+    };
+
+    const handleCloseTeamLeaderAssessment = () => {
+        setPopupOpen(false);
+        setSelectedImpactedGroup(null);
+    };
+
+    const handleAssessmentSuccess = () => {
+        queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
+
+        // You might also want to show a success message
+        console.log('Team leader assessment saved successfully');
+    };
 
     if (loadingGroups || leadershipQueries.isLoading) {
         return <SectionLoader message="Loading leadership structure..." />;
@@ -174,7 +213,7 @@ const LeadershipStructureAssessment: React.FC = () => {
 
                     <Divider sx={{ my: 2 }} />
 
-                    {/* Team Leaders Level */}
+                    {/* Team Leaders Level - THIS IS WHERE THE POPUP IS TRIGGERED */}
                     <Box sx={{ mb: 3 }}>
                         <Box sx={{
                             display: 'flex',
@@ -194,14 +233,20 @@ const LeadershipStructureAssessment: React.FC = () => {
                             <Button
                                 variant="outlined"
                                 size="small"
-                                disabled
+                                onClick={() => handleCreateTeamLeader(impactedGroup)}
                                 sx={{
                                     minWidth: 'auto',
                                     px: 2,
-                                    opacity: 0.6
+                                    backgroundColor: '#e8f5e8',
+                                    borderColor: '#4caf50',
+                                    color: '#2e7d32',
+                                    '&:hover': {
+                                        backgroundColor: '#d4edda',
+                                        borderColor: '#2e7d32'
+                                    }
                                 }}
                             >
-                                Define
+                                Add Team Leader
                             </Button>
                         </Box>
 
@@ -215,19 +260,34 @@ const LeadershipStructureAssessment: React.FC = () => {
                             gap: 1
                         }}>
                             {teamLeaders.length > 0 ? (
-                                teamLeaders.map(leader => (
-                                    <Chip
-                                        key={leader.id}
-                                        icon={<Users size={16} />}
-                                        label={leader.anagraphicDataDTO.entityName}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{
-                                            backgroundColor: '#f3e5f5',
-                                            borderColor: '#9c27b0'
-                                        }}
-                                    />
-                                ))
+                                <>
+                                    {teamLeaders.map(leader => (
+                                        <Chip
+                                            key={leader.id}
+                                            icon={<Users size={16} />}
+                                            label={leader.anagraphicDataDTO.entityName}
+                                            size="small"
+                                            variant="outlined"
+                                            sx={{
+                                                backgroundColor: '#f3e5f5',
+                                                borderColor: '#9c27b0'
+                                            }}
+                                        />
+                                    ))}
+                                    {teamLeaders.length > 0 && (
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: 'text.secondary',
+                                                textAlign: 'center',
+                                                mt: 0.5,
+                                                fontStyle: 'italic'
+                                            }}
+                                        >
+                                            {teamLeaders.length} team leader{teamLeaders.length !== 1 ? 's' : ''}
+                                        </Typography>
+                                    )}
+                                </>
                             ) : (
                                 <Typography
                                     variant="caption"
@@ -287,6 +347,9 @@ const LeadershipStructureAssessment: React.FC = () => {
                 <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
                     Leadership Structure
                 </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                    Connect this impacted group with the leadership structure through this assessment.
+                </Typography>
             </Box>
 
             <Grid container spacing={3}>
@@ -302,6 +365,55 @@ const LeadershipStructureAssessment: React.FC = () => {
                     </Grid>
                 ))}
             </Grid>
+
+            {/* Summary Section */}
+            <Paper sx={{ mt: 4, p: 3, backgroundColor: '#fafafa' }}>
+                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Building2 size={20} />
+                    Leadership Structure Summary
+                </Typography>
+
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Total Impacted Groups
+                        </Typography>
+                        <Typography variant="h4" sx={{ color: 'primary.main' }}>
+                            {leadershipData.length}
+                        </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Groups with Sponsors
+                        </Typography>
+                        <Typography variant="h4" sx={{ color: 'success.main' }}>
+                            {leadershipData.filter(d => d.sponsors.length > 0).length}
+                        </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Groups with Team Leaders
+                        </Typography>
+                        <Typography variant="h4" sx={{ color: 'info.main' }}>
+                            {leadershipData.filter(d => d.teamLeaders.length > 0).length}
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Paper>
+
+            {/* TEAM LEADER ASSESSMENT POPUP - CREATE ONLY */}
+            {organizationId && (
+                <TeamLeaderAssessmentPopup
+                    open={popupOpen}
+                    onClose={handleCloseTeamLeaderAssessment}
+                    impactedGroupId={selectedImpactedGroup?.id || 0}
+                    projectId={projectId}
+                    organizationId={organizationId}
+                    onSuccess={handleAssessmentSuccess}
+                />
+            )}
         </Box>
     );
 };

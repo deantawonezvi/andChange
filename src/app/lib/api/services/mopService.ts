@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 
 export interface EManagerOfPeopleDTO {
@@ -102,7 +102,9 @@ export class MOPService {
     private client: AxiosInstance;
 
     private constructor() {
-        this.client = createAxiosClient();
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+        this.client = createAxiosClient(baseURL, process.env.NODE_ENV === 'development');
     }
 
     public static getInstance(): MOPService {
@@ -118,8 +120,20 @@ export class MOPService {
     }
 
     async createMOP(mop: CreateCommonEntityRequestDTO): Promise<EManagerOfPeopleDTO> {
-        const response = await this.client.post<EManagerOfPeopleDTO>('/api/v1/people/mop/', mop);
-        return response.data;
+        console.log('Creating MOP with data:', mop);
+        console.log('Base URL:', this.client.defaults.baseURL);
+
+        try {
+            const response = await this.client.post<EManagerOfPeopleDTO>('/api/v1/people/mop/', mop);
+            return response.data;
+        } catch (error) {
+            console.error('MOP creation error:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Request config:', error.config);
+                console.error('Response:', error.response?.data);
+            }
+            throw error;
+        }
     }
 
     async updateAnagraphicData(data: UpdateAnagraphicDataRequestDTO): Promise<EManagerOfPeopleDTO> {
