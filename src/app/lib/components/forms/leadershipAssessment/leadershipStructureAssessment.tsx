@@ -9,6 +9,7 @@ import { EManagerOfPeopleDTO, MOPService } from '@/app/lib/api/services/mopServi
 import { ProjectService } from '@/app/lib/api/services/projectService';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import TeamLeaderAssessmentPopup from './teamLeaderAssessmentPopup';
+import SponsorAssessmentPopup from "@/app/lib/components/forms/leadershipAssessment/sponsorAssessmentPopup";
 
 interface LeadershipStructureData {
     impactedGroup: EImpactedGroupDTO;
@@ -23,6 +24,7 @@ const LeadershipStructureAssessment: React.FC = () => {
 
     // State for popup management
     const [popupOpen, setPopupOpen] = useState(false);
+    const [sponsorPopup, setSponsorPopupOpen] = useState(false);
     const [selectedImpactedGroup, setSelectedImpactedGroup] = useState<EImpactedGroupDTO | null>(null);
     const [organizationId, setOrganizationId] = useState<number | null>(null);
 
@@ -37,7 +39,6 @@ const LeadershipStructureAssessment: React.FC = () => {
         enabled: !!projectId
     });
 
-    // Fetch project details to get organization ID
     const { data: projectData } = useQuery({
         queryKey: ['project', projectId],
         queryFn: () => ProjectService.getInstance().getProjectById(projectId),
@@ -92,15 +93,23 @@ const LeadershipStructureAssessment: React.FC = () => {
         setPopupOpen(true);
     };
 
+    const handleCreateSponsor = (impactedGroup: EImpactedGroupDTO) => {
+        setSelectedImpactedGroup(impactedGroup);
+        setSponsorPopupOpen(true);
+    };
+
     const handleCloseTeamLeaderAssessment = () => {
         setPopupOpen(false);
         setSelectedImpactedGroup(null);
     };
 
+    const handleCloseSponsorAssessment = () => {
+        setSponsorPopupOpen(false);
+        setSelectedImpactedGroup(null);
+    };
+
     const handleAssessmentSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
-
-        console.log('Team leader assessment saved successfully');
     };
 
     if (loadingGroups || leadershipQueries.isLoading) {
@@ -159,15 +168,15 @@ const LeadershipStructureAssessment: React.FC = () => {
                             </Typography>
                             <Button
                                 variant="outlined"
+                                onClick={() => handleCreateSponsor(impactedGroup)}
                                 size="small"
-                                disabled
                                 sx={{
                                     minWidth: 'auto',
                                     px: 2,
                                     opacity: 0.6
                                 }}
                             >
-                                Define
+                                Add Senior Leader
                             </Button>
                         </Box>
 
@@ -346,9 +355,6 @@ const LeadershipStructureAssessment: React.FC = () => {
                 <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
                     Leadership Structure
                 </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                    Connect this impacted group with the leadership structure through this assessment.
-                </Typography>
             </Box>
 
             <Grid container spacing={3}>
@@ -406,6 +412,17 @@ const LeadershipStructureAssessment: React.FC = () => {
                 <TeamLeaderAssessmentPopup
                     open={popupOpen}
                     onClose={handleCloseTeamLeaderAssessment}
+                    impactedGroupId={selectedImpactedGroup?.id || 0}
+                    projectId={projectId}
+                    organizationId={organizationId}
+                    onSuccess={handleAssessmentSuccess}
+                />
+            )}
+
+            {organizationId && (
+                <SponsorAssessmentPopup
+                    open={sponsorPopup}
+                    onClose={handleCloseSponsorAssessment}
                     impactedGroupId={selectedImpactedGroup?.id || 0}
                     projectId={projectId}
                     organizationId={organizationId}

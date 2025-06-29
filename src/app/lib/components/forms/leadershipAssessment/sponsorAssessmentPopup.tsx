@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
     Alert,
@@ -14,16 +14,17 @@ import {
     Typography
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { MOPService } from '@/app/lib/api/services/mopService';
+import { SponsorService } from '@/app/lib/api/services/sponsorService';
 import { IndividualService } from '@/app/lib/api/services/individualService';
 import { QuestionWithRating } from '@/app/lib/components/forms/formComponents';
 import ImpactedGroupService from "@/app/lib/api/services/impactedGroupService";
 import { useQueryClient } from "@tanstack/react-query";
 
-interface TeamLeaderAssessmentFormData {
+interface SponsorAssessmentFormData {
     firstName: string;
     lastName: string;
     entityName: string;
+    sponsorTitle: string;
     absupAwareness: number;
     absupBuyin: number;
     absupSkill: number;
@@ -34,33 +35,39 @@ interface TeamLeaderAssessmentFormData {
     specialTactics: string;
 }
 
-interface TeamLeaderAssessmentPopupProps {
+interface SponsorAssessmentPopupProps {
     open: boolean;
     onClose: () => void;
     impactedGroupId: number;
     projectId: number;
-    organizationId: number
+    organizationId: number;
     onSuccess?: () => void;
 }
 
-const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
-                                                                                 open,
-                                                                                 onClose,
-                                                                                 impactedGroupId,
-                                                                                 projectId,
-                                                                                 organizationId,
-                                                                                 onSuccess
-                                                                             }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
+                                                                           open,
+                                                                           onClose,
+                                                                           impactedGroupId,
+                                                                           projectId,
+                                                                           organizationId,
+                                                                           onSuccess
+                                                                       }) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const queryClient = useQueryClient();
 
-
-    const { control, handleSubmit, reset, formState: { errors } } = useForm<TeamLeaderAssessmentFormData>({
+    const {
+        control,
+        handleSubmit,
+        reset,
+        watch,
+        formState: { errors }
+    } = useForm<SponsorAssessmentFormData>({
         defaultValues: {
             firstName: '',
             lastName: '',
             entityName: '',
+            sponsorTitle: '',
             absupAwareness: 3,
             absupBuyin: 3,
             absupSkill: 3,
@@ -72,65 +79,32 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         }
     });
 
-    useEffect(() => {
-        if (open) {
-            reset({
-                firstName: '',
-                lastName: '',
-                entityName: '',
-                absupAwareness: 3,
-                absupBuyin: 3,
-                absupSkill: 3,
-                absupUse: 3,
-                absupProficiency: 3,
-                anticipatedResistanceLevel: 3,
-                anticipatedResistanceDriver: 'AWARENESS',
-                specialTactics: ''
-            });
-        }
-    }, [open, reset]);
-
-    const onSubmit = async (data: TeamLeaderAssessmentFormData) => {
-        setIsSubmitting(true);
+    const onSubmit = async (data: SponsorAssessmentFormData) => {
+        setIsLoading(true);
         setError(null);
 
-        let createdIndividualId: number | null = null;
-        let createdMOPId: number | null = null;
-
-
         try {
+            const sponsorService = SponsorService.getInstance();
             const individualService = IndividualService.getInstance();
-            const mopService = MOPService.getInstance();
             const impactedGroupService = ImpactedGroupService.getInstance();
 
             // STEP 1: Create individual
-            const newIndividual = await individualService.createIndividual({
-                organizationId: organizationId,
+            const individual = await individualService.createIndividual({
+                organizationId,
                 firstName: data.firstName,
                 lastName: data.lastName
             });
 
-            createdIndividualId = newIndividual.id!;
-
-            // STEP 2: Create Manager of People
-            const result = await mopService.createMOP({
-                projectId: projectId,
-                entityName: data.entityName || `${data.firstName} ${data.lastName}`,
-                roleDefinition: 'Team Leader',
-                definitionOfAdoption: 'Leading team through change process',
-                uniqueGroupConsiderations: data.specialTactics || '',
-                hasEmail: true,
-                membersColocated: true,
-                virtualPreference: 3,
-                whatsInItForMe: 'Leadership development and team success',
-                individualIds: [createdIndividualId]
+            // STEP 2: Create Sponsor
+            const sponsor = await sponsorService.createSponsor({
+                projectId,
+                entityName: data.entityName,
+                individualIds: [individual.id!]
             });
 
-            createdMOPId = result.id!;
-
-            // STEP 3: Update ABSUP ratings
-            await mopService.updateProjectABSUP({
-                entityId: createdMOPId,
+            // STEP 4: Update ABSUP Assessment
+            await sponsorService.updateProjectABSUP({
+                entityId: sponsor.id!,
                 absupAwareness: data.absupAwareness,
                 absupBuyin: data.absupBuyin,
                 absupSkill: data.absupSkill,
@@ -138,43 +112,55 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 absupProficiency: data.absupProficiency
             });
 
+            // STEP 5: Update sponsor title (via anagraphic data)
+            await sponsorService.updateAnagraphicData({
+                entityId: sponsor.id!,
+                entityName: data.entityName,
+                roleDefinition: data.sponsorTitle,
+                individualsToAdd: [],
+                individualsToRemove: []
+            });
+
+            // STEP 6: Associate sponsor with impacted group
             await impactedGroupService.updateEntities({
                 impactGroupId: impactedGroupId,
-                sponsorEntitiesToAdd: [],
+                sponsorEntitiesToAdd: [sponsor.id!],
                 sponsorEntitiesToRemove: [],
                 momEntitiesToAdd: [],
                 momEntitiesToRemove: [],
-                mopEntitiesToAdd: [createdMOPId],
+                mopEntitiesToAdd: [],
                 mopEntitiesToRemove: []
             });
 
-            queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
-
+            // Invalidate relevant queries
+            queryClient.invalidateQueries({
+                queryKey: ['impacted-groups', 'project', projectId]
+            });
+            queryClient.invalidateQueries({
+                queryKey: ['impacted-group', impactedGroupId]
+            });
 
             onSuccess?.();
-            onClose();
-
+            handleClose();
         } catch (err) {
-            console.error('Error creating team leader:', err);
-            setError('Failed to create team leader. Please try again.');
+            console.error('Error creating sponsor:', err);
+            setError(err instanceof Error ? err.message : 'Failed to create sponsor');
         } finally {
-            setIsSubmitting(false);
+            setIsLoading(false);
         }
     };
 
     const handleClose = () => {
-        if (!isSubmitting) {
-            reset();
-            setError(null);
-            onClose();
-        }
+        reset();
+        setError(null);
+        onClose();
     };
 
     const questionConfigs = [
         {
             fieldName: 'absupAwareness' as const,
             label: 'Awareness of the role of leadership in change',
-            tooltip: 'How aware is the team leader of their role in leading change?',
+            tooltip: 'How aware is this executive of their role in leading change?',
             marks: [
                 { value: 1, label: 'Unaware' },
                 { value: 3, label: 'Partial' },
@@ -184,7 +170,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         {
             fieldName: 'absupBuyin' as const,
             label: 'Buy-in to the process of change management',
-            tooltip: 'How committed is the team leader to the change management process?',
+            tooltip: 'How committed is this executive to the change management process?',
             marks: [
                 { value: 1, label: 'Limited' },
                 { value: 3, label: 'Some' },
@@ -193,8 +179,8 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         },
         {
             fieldName: 'absupSkill' as const,
-            label: 'Skills formally developed in the team leader\'s role in change',
-            tooltip: 'What level of formal change leadership skills does the team leader have?',
+            label: 'Skills formally developed in a leader\'s role in change',
+            tooltip: 'What level of change leadership skills does this executive have?',
             marks: [
                 { value: 1, label: 'None' },
                 { value: 3, label: 'Basic' },
@@ -203,8 +189,8 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         },
         {
             fieldName: 'absupUse' as const,
-            label: 'Actively managing the change with their team',
-            tooltip: 'How actively is the team leader managing change with their team?',
+            label: 'Usage of the skills in being visible and building a coalition for the change',
+            tooltip: 'How consistently does this executive use their change leadership skills?',
             marks: [
                 { value: 1, label: 'Rare' },
                 { value: 3, label: 'Occasional' },
@@ -214,7 +200,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         {
             fieldName: 'absupProficiency' as const,
             label: 'Proficiency in leading change',
-            tooltip: 'How proficient is the team leader at leading change initiatives?',
+            tooltip: 'What is this executive\'s overall proficiency in leading change?',
             marks: [
                 { value: 1, label: 'Novice' },
                 { value: 3, label: 'Competent' },
@@ -224,7 +210,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         {
             fieldName: 'anticipatedResistanceLevel' as const,
             label: 'What is the anticipated level of resistance for this group?',
-            tooltip: 'Based on your assessment, what level of resistance do you expect from this team?',
+            tooltip: 'Based on your assessment, what level of resistance do you expect from this executive?',
             marks: [
                 { value: 1, label: 'Low' },
                 { value: 3, label: 'Medium' },
@@ -236,8 +222,8 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
     const resistanceDriverOptions = [
         { value: 'AWARENESS', label: 'Awareness of the role of leadership in change' },
         { value: 'BUYIN', label: 'Buy-in to the process of change management' },
-        { value: 'SKILL', label: 'Skills formally developed in the team leader\'s role in change' },
-        { value: 'USE', label: 'Actively managing the change with their team' },
+        { value: 'SKILL', label: 'Skills formally developed in a leader\'s role in change' },
+        { value: 'USE', label: 'Usage of the skills in being visible and building a coalition for the change' },
         { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
     ];
 
@@ -250,7 +236,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
             PaperProps={{
                 sx: {
                     borderRadius: 2,
-                    maxHeight: '90vh'
+                    minHeight: '600px'
                 }
             }}
         >
@@ -258,23 +244,17 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                borderBottom: '1px solid #e0e0e0',
-                pb: 2
+                pb: 1
             }}>
                 <Typography variant="h6" component="div">
-                    Add New Team Leader Assessment
+                    Leadership Assessment
                 </Typography>
-                <IconButton
-                    onClick={handleClose}
-                    size="small"
-                    sx={{ color: 'grey.500' }}
-                    disabled={isSubmitting}
-                >
+                <IconButton onClick={handleClose} size="small">
                     <Close />
                 </IconButton>
             </DialogTitle>
 
-            <DialogContent sx={{ pt: 3 }}>
+            <DialogContent sx={{ pt: 2 }}>
                 {error && (
                     <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
@@ -282,6 +262,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 )}
 
                 <Box component="form" noValidate>
+                    {/* Name Fields */}
                     <Box sx={{ mb: 4 }}>
                         <Controller
                             name="firstName"
@@ -296,7 +277,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                                     error={!!fieldState.error}
                                     helperText={fieldState.error?.message}
                                     variant="outlined"
-                                    disabled={isSubmitting}
+                                    disabled={isLoading}
                                 />
                             )}
                         />
@@ -315,12 +296,34 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                                     error={!!fieldState.error}
                                     helperText={fieldState.error?.message}
                                     variant="outlined"
-                                    disabled={isSubmitting}
+                                    disabled={isLoading}
                                 />
                             )}
                         />
                     </Box>
 
+                    {/* Title Field */}
+                    <Box sx={{ mb: 4 }}>
+                        <Controller
+                            name="sponsorTitle"
+                            control={control}
+                            rules={{ required: 'Title is required' }}
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    label="Title"
+                                    placeholder="Enter the preferred title to use in communications"
+                                    error={!!fieldState.error}
+                                    helperText={fieldState.error?.message}
+                                    variant="outlined"
+                                    disabled={isLoading}
+                                />
+                            )}
+                        />
+                    </Box>
+
+                    {/* Questions using the same config as team leader */}
                     {questionConfigs.map((config) => (
                         <Box key={config.fieldName} sx={{ mb: 3 }}>
                             <QuestionWithRating
@@ -342,7 +345,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     <Box sx={{ mb: 4 }}>
                         <QuestionWithRating
                             label="Which area is likely to be the strongest driver of resistance?"
-                            tooltip="Select the ABSUP dimension that is most likely to cause resistance in this team."
+                            tooltip="Select the ABSUP dimension that is most likely to cause resistance for this executive."
                             control={control}
                             fieldName="anticipatedResistanceDriver"
                             type="radio"
@@ -359,7 +362,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     <Box sx={{ mb: 2 }}>
                         <QuestionWithRating
                             label="What special tactics need to be considered?"
-                            tooltip="Enter any specific strategies, approaches, or considerations needed for this team leader or group."
+                            tooltip="Enter any specific strategies, approaches, or considerations needed for this executive or group."
                             control={control}
                             fieldName="specialTactics"
                             type="text"
@@ -368,36 +371,43 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                             required={false}
                         />
                     </Box>
+
+                    {/* Hidden Entity Name Field - auto-populated */}
+                    <Controller
+                        name="entityName"
+                        control={control}
+                        render={({ field }) => {
+                            // Auto-populate entity name based on first and last name
+                            const firstName = watch('firstName');
+                            const lastName = watch('lastName');
+                            if (firstName && lastName && !field.value) {
+                                field.onChange(`${firstName} ${lastName}`);
+                            }
+                            return <input type="hidden" {...field} />;
+                        }}
+                    />
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{
-                px: 3,
-                py: 2,
-                borderTop: '1px solid #e0e0e0'
-            }}>
+            <DialogActions sx={{ p: 3, pt: 1 }}>
+                <Button
+                    onClick={handleClose}
+                    variant="outlined"
+                    disabled={isLoading}
+                >
+                    Cancel
+                </Button>
                 <Button
                     onClick={handleSubmit(onSubmit)}
                     variant="contained"
-                    fullWidth
-                    disabled={isSubmitting}
-                    sx={{
-                        py: 1.5,
-                        backgroundColor: '#000',
-                        '&:hover': {
-                            backgroundColor: '#333'
-                        },
-                        '&:disabled': {
-                            backgroundColor: '#ccc'
-                        }
-                    }}
-                    startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
+                    disabled={isLoading}
+                    startIcon={isLoading ? <CircularProgress size={20} /> : null}
                 >
-                    {isSubmitting ? 'Creating Assessment...' : 'Create Team Leader'}
+                    Save Assessment
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-export default TeamLeaderAssessmentPopup;
+export default SponsorAssessmentPopup;
