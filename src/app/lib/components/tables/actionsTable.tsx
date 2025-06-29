@@ -100,7 +100,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
             queryClient.invalidateQueries({ queryKey: ['actionSlotDetails', slotId] });
         },
-        onError: (error, slotId) => {
+        onError: (error) => {
             console.error('Error rerolling content:', error);
             showToast('Failed to regenerate content. Please try again.', 'error');
         },
