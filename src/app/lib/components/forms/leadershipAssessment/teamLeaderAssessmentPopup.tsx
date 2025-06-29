@@ -17,6 +17,8 @@ import { Close } from '@mui/icons-material';
 import { MOPService } from '@/app/lib/api/services/mopService';
 import { IndividualService } from '@/app/lib/api/services/individualService';
 import { QuestionWithRating } from '@/app/lib/components/forms/formComponents';
+import ImpactedGroupService from "@/app/lib/api/services/impactedGroupService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TeamLeaderAssessmentFormData {
     firstName: string;
@@ -51,6 +53,8 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                                                                              }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
+
 
     const { control, handleSubmit, reset, formState: { errors } } = useForm<TeamLeaderAssessmentFormData>({
         defaultValues: {
@@ -90,23 +94,25 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         setIsSubmitting(true);
         setError(null);
 
+        let createdIndividualId: number | null = null;
+        let createdMOPId: number | null = null;
+
+
         try {
             const individualService = IndividualService.getInstance();
             const mopService = MOPService.getInstance();
+            const impactedGroupService = ImpactedGroupService.getInstance();
 
-            console.log('Creating individual...', { firstName: data.firstName, lastName: data.lastName });
-
+            // STEP 1: Create individual
             const newIndividual = await individualService.createIndividual({
                 organizationId: organizationId,
                 firstName: data.firstName,
                 lastName: data.lastName
             });
 
-            const individualId = newIndividual.id!;
-            console.log('Individual created successfully:', individualId);
+            createdIndividualId = newIndividual.id!;
 
-            console.log('Creating Manager of People...', { entityName: data.entityName, individualId });
-
+            // STEP 2: Create Manager of People
             const result = await mopService.createMOP({
                 projectId: projectId,
                 entityName: data.entityName || `${data.firstName} ${data.lastName}`,
@@ -117,16 +123,14 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 membersColocated: true,
                 virtualPreference: 3,
                 whatsInItForMe: 'Leadership development and team success',
-                individualIds: [individualId]
+                individualIds: [createdIndividualId]
             });
 
-            const newManagerId = result.id!;
-            console.log('Manager of People created successfully:', newManagerId);
+            createdMOPId = result.id!;
 
-            console.log('Updating ABSUP ratings...');
-
+            // STEP 3: Update ABSUP ratings
             await mopService.updateProjectABSUP({
-                entityId: newManagerId,
+                entityId: createdMOPId,
                 absupAwareness: data.absupAwareness,
                 absupBuyin: data.absupBuyin,
                 absupSkill: data.absupSkill,
@@ -134,29 +138,18 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 absupProficiency: data.absupProficiency
             });
 
-            console.log('ABSUP ratings updated successfully');
+            await impactedGroupService.updateEntities({
+                impactGroupId: impactedGroupId,
+                sponsorEntitiesToAdd: [],
+                sponsorEntitiesToRemove: [],
+                momEntitiesToAdd: [],
+                momEntitiesToRemove: [],
+                mopEntitiesToAdd: [createdMOPId],
+                mopEntitiesToRemove: []
+            });
 
-            // STEP 4: Update resistance assessment if API supports it
-            // Note: You may need to implement resistance assessment update
-            // await mopService.updateResistanceAssessment({
-            //     entityId: newManagerId,
-            //     anticipatedResistanceLevel: data.anticipatedResistanceLevel,
-            //     anticipatedResistanceDriver: data.anticipatedResistanceDriver,
-            //     resistanceManagementTacticsToAdd: [],
-            //     resistanceManagementTacticsToRemove: []
-            // });
+            queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
 
-            // STEP 5: Associate this manager with the impacted group
-            // This would require updating the impacted group's managersOfPeople array
-            // You'll need to implement this via ImpactedGroupService.updateEntities()
-            //
-            // await ImpactedGroupService.getInstance().updateEntities({
-            //     impactGroupId: impactedGroupId,
-            //     mopEntitiesToAdd: [newManagerId],
-            //     mopEntitiesToRemove: []
-            // });
-
-            console.log('Team leader created successfully. Individual ID:', individualId, 'Manager ID:', newManagerId);
 
             onSuccess?.();
             onClose();

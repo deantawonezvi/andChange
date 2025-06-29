@@ -100,7 +100,6 @@ const LeadershipStructureAssessment: React.FC = () => {
     const handleAssessmentSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
 
-        // You might also want to show a success message
         console.log('Team leader assessment saved successfully');
     };
 
@@ -403,7 +402,6 @@ const LeadershipStructureAssessment: React.FC = () => {
                 </Grid>
             </Paper>
 
-            {/* TEAM LEADER ASSESSMENT POPUP - CREATE ONLY */}
             {organizationId && (
                 <TeamLeaderAssessmentPopup
                     open={popupOpen}

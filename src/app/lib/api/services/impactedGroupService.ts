@@ -437,7 +437,7 @@ export class ImpactedGroupService {
     async updateEntities(data: UpdateIGManageEntitiesRequestDTO): Promise<EImpactedGroupDTO> {
         try {
             const response = await this.client.put<EImpactedGroupDTO>(
-                '/api/v1/people/ig/manage-entities',
+                '/api/v1/people/ig/management-entities',
                 data
             );
             return response.data;
