@@ -9,6 +9,8 @@ import OrganizationalAssessmentForm from "@/app/lib/components/forms/organisatio
 import LeadershipAssessment from "@/app/lib/components/forms/leadershipAssessment/leadershipAssessment";
 import CommunicationToneAssessment from "@/app/lib/components/forms/communicationTone/communicationToneAssessment";
 import CulturalFactorsAssessment from "@/app/lib/components/forms/culturalFactors/culturalFactorsAssessment";
+import LeadershipStructureAssessment
+    from "@/app/lib/components/forms/leadershipAssessment/leadershipStructureAssessment";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -180,7 +182,8 @@ export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: Mo
                 </TabPanel>
 
                 <TabPanel value={activeTab} index={4}>
-                    <Typography variant="h4">Leadership</Typography>
+                    <br/>
+                    <LeadershipStructureAssessment/>
                     <br/>
                     <LeadershipAssessment/>
                 </TabPanel>

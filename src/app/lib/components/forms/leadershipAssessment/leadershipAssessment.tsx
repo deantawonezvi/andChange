@@ -15,7 +15,6 @@ import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
 import { useToast } from '@/app/lib/hooks/useToast';
 import { leadershipFields } from "@/app/lib/components/forms/leadershipAssessment/types";
 
-// Define the leadership fields based on the table provided
 
 interface LeadershipFormData {
     // PCT Success fields
@@ -63,7 +62,6 @@ const LeadershipAssessment: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map from API model to form data
     const mapModelToFormData = (model: ModelVariablesDTO): LeadershipFormData => {
         return {
             // PCT Success field
@@ -202,6 +200,9 @@ const LeadershipAssessment: React.FC = () => {
 
     return (
         <Box sx={{ mx: 'auto' }}>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+                Sponsorship Unity Assessment
+            </Typography>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {(updatePCTSuccessMutation.isError ||

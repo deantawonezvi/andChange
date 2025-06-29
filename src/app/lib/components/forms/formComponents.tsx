@@ -225,7 +225,6 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                                                           multiline, type, options, optionLabelKey = 'label', optionValueKey = 'value',
                                                                           min, max, marks, errors, children, orientation
                                                                       }) => {
-    // Determine if multiline should be used based on field type
     const useMultiline = type !== 'select' && type !== 'slider' && type !== 'boolean' &&
         type !== 'date' && type !== 'radio' && multiline === true;
 
