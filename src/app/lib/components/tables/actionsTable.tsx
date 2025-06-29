@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { Box, Button, Chip, IconButton, Tab, Tabs, Tooltip, Typography } from '@mui/material';
-import { Edit, Heart, RotateCcw, Shield, Trash2, Users } from 'lucide-react';
+import { useQueries, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Box, Button, Chip, IconButton, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@mui/material';
+import { Edit, Heart, RotateCcw, Shield, Trash2, Users, Shuffle } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
 import { format } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
@@ -13,6 +13,8 @@ import { ImpactedGroupService } from '@/app/lib/api/services/impactedGroupServic
 import GenerateActionsButton from '../forms/generateActionsButton';
 import MOPService from "@/app/lib/api/services/mopService";
 import SponsorService from "@/app/lib/api/services/sponsorService";
+import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
+import { useToast } from '@/app/lib/hooks/useToast';
 
 interface ActionsTableProps {
     projectId: number;
@@ -66,8 +68,11 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
 
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const [activeTab, setActiveTab] = useState(0);
+    const [rerollingSlots, setRerollingSlots] = useState<Set<number>>(new Set());
     const actionService = ActionService.getInstance();
-
+    const contentService = ContentGenerationService.getInstance();
+    const { showToast } = useToast();
+    const queryClient = useQueryClient();
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
@@ -79,6 +84,33 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             }
         },
         enabled: !!projectId,
+    });
+
+    // Reroll mutation for content generation
+    const rerollMutation = useMutation({
+        mutationFn: async (slotId: number) => {
+            return await contentService.rerollContentForActionPlanItem(slotId);
+        },
+        onMutate: (slotId: number) => {
+            setRerollingSlots(prev => new Set([...prev, slotId]));
+        },
+        onSuccess: (data, slotId) => {
+            showToast('Content regenerated successfully!', 'success');
+            // Invalidate and refetch relevant queries
+            queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
+            queryClient.invalidateQueries({ queryKey: ['actionSlotDetails', slotId] });
+        },
+        onError: (error, slotId) => {
+            console.error('Error rerolling content:', error);
+            showToast('Failed to regenerate content. Please try again.', 'error');
+        },
+        onSettled: (data, error, slotId) => {
+            setRerollingSlots(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(slotId);
+                return newSet;
+            });
+        }
     });
 
     // Transform data into separate categories
@@ -202,7 +234,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     rawStatus: slot.slotState,
                     entityType: 'hygiene',
                     entityName: 'Project Hygiene',
-                    actionId: slot.actionId // ← ADDED THIS
+                    actionId: slot.actionId
                 });
             });
         }
@@ -223,7 +255,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         queries: groupActions.map(action => ({
             queryKey: ['actionSlotDetails', action.slotId],
             queryFn: () => actionService.getActionPlanSlotById(action.slotId!),
-            enabled: !!action.slotId && activeTab === 0, // Only fetch when groups tab is active
+            enabled: !!action.slotId && activeTab === 0,
             staleTime: 5 * 60 * 1000,
         })),
     });
@@ -246,7 +278,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 const slotDetails = groupActionSlotQueries[groupActions.indexOf(action)]?.data;
                 if (!slotDetails) return null;
 
-                // Determine which entity ID to use based on slot details
                 let entityId = null;
                 let entityType = '';
 
@@ -295,7 +326,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             const actionDetails = groupActionQueries[index]?.data;
             const entityDetails = groupEntityQueries[index]?.data;
 
-            // Map WHO codes to readable names
             const mapWhoCode = (code: string) => {
                 const whoMapping: Record<string, string> = {
                     'E_IG': 'E_IG',
@@ -327,8 +357,8 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         queries: hygieneActions.map(action => ({
             queryKey: ['actionDetails', action.actionId],
             queryFn: () => actionService.getActionById(action.actionId!),
-            enabled: !!action.actionId && activeTab === 1, // Only fetch when hygiene tab is active
-            staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+            enabled: !!action.actionId && activeTab === 1,
+            staleTime: 5 * 60 * 1000,
         })),
     });
 
@@ -356,6 +386,36 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         }));
     }, [enhancedGroupActions])
 
+    // Handler for reroll button
+    const handleRerollContent = (slotId: number) => {
+        if (!slotId) {
+            showToast('Invalid slot ID', 'error');
+            return;
+        }
+        rerollMutation.mutate(slotId);
+    };
+
+    // Render reroll button with loading state
+    const renderRerollButton = (slotId: number) => {
+        const isRerolling = rerollingSlots.has(slotId);
+
+        return (
+            <Tooltip title="Reroll Content">
+                <IconButton
+                    onClick={() => handleRerollContent(slotId)}
+                    disabled={isRerolling || !slotId}
+                    size="small"
+                >
+                    {isRerolling ? (
+                        <CircularProgress size={16} />
+                    ) : (
+                        <Shuffle size={16} />
+                    )}
+                </IconButton>
+            </Tooltip>
+        );
+    };
+
     const groupColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'entityName',
@@ -374,7 +434,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             header: 'TYPE',
             size: 150,
             enableColumnFilter: true,
-            filterVariant: 'select', // Enables dropdown filter
+            filterVariant: 'select',
             filterSelectOptions: [
                 { label: 'Impacted Group', value: 'impactedGroup' },
                 { label: 'MOP', value: 'mop' },
@@ -447,6 +507,22 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 { label: 'PROFICIENCY', value: 'PROFICIENCY' }
             ],
             Cell: ({ row }) => renderAbsupCategory(row.original.stateTarget || row.original.absupCategory),
+        },
+        {
+            id: 'actions',
+            header: 'ACTIONS',
+            size: 100,
+            enableColumnFilter: false,
+            Cell: ({ row }) => (
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {renderRerollButton(row.original.slotId || 0)}
+                    <Tooltip title="Edit">
+                        <IconButton onClick={() => handleEditAction(row.original.id)} size="small">
+                            <Edit size={16} />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            ),
         },
     ];
 
