@@ -148,7 +148,9 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 mopEntitiesToRemove: []
             });
 
-            queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
+            await queryClient.invalidateQueries({queryKey: ['leadership-structure', projectId]});
+
+            location.reload();
 
 
             onSuccess?.();
@@ -282,7 +284,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 )}
 
                 <Box component="form" noValidate>
-                    <Box sx={{ mb: 4 }}>
+                    <Box sx={{ mb: 4, mt: 2 }}>
                         <Controller
                             name="firstName"
                             control={control}

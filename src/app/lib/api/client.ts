@@ -4,7 +4,9 @@ import Cookies from 'js-cookie';
 
 const createAxiosClient = (baseURL?: string, enableDebug: boolean = false): AxiosInstance => {
     const axiosClient: AxiosInstance = axios.create({
-        baseURL: 'http://35.177.78.241:9000',
+        baseURL: process.env.NODE_ENV === 'development'
+            ? ''
+            : (baseURL || process.env.NEXT_PUBLIC_API_BASE_URL),
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/hal+json'

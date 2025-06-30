@@ -140,6 +140,9 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 queryKey: ['impacted-group', impactedGroupId]
             });
 
+            location.reload();
+
+
             onSuccess?.();
             handleClose();
         } catch (err) {
