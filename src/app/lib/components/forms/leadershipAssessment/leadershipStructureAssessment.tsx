@@ -164,6 +164,7 @@ const LeadershipStructureAssessment: React.FC = () => {
                             </Typography>
                             <Button
                                 variant="outlined"
+                                disabled={sponsors.length > 0}
                                 onClick={() => handleCreateSponsor(impactedGroup)}
                                 size="small"
                                 sx={{
