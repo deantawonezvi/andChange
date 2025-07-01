@@ -80,10 +80,8 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         mode: 'onChange'
     });
 
-    
     useEffect(() => {
         if (isEditMode && existingTeamLeader && open) {
-            
             const nameParts = existingTeamLeader.anagraphicDataDTO.entityName.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
@@ -102,7 +100,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 specialTactics: existingTeamLeader.anagraphicDataDTO.uniqueGroupConsiderations || ''
             });
         } else if (!isEditMode && open) {
-            
             reset({
                 firstName: '',
                 lastName: '',
@@ -129,9 +126,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
             const impactedGroupService = ImpactedGroupService.getInstance();
 
             if (isEditMode && existingTeamLeader) {
-                
-
-                
+                // Update existing team leader
                 await mopService.updateAnagraphicData({
                     entityId: existingTeamLeader.id!,
                     entityName: data.entityName,
@@ -146,7 +141,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     individualsToRemove: []
                 });
 
-                
                 await mopService.updateProjectABSUP({
                     entityId: existingTeamLeader.id!,
                     absupAwareness: data.absupAwareness,
@@ -156,20 +150,14 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     absupProficiency: data.absupProficiency
                 });
 
-                
-                
-
             } else {
-                
-
-                
+                // Create new team leader
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,
                     lastName: data.lastName
                 });
 
-                
                 const teamLeader = await mopService.createMOP({
                     projectId,
                     entityName: data.entityName,
@@ -183,7 +171,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     individualIds: [individual.id!]
                 });
 
-                
                 await mopService.updateProjectABSUP({
                     entityId: teamLeader.id!,
                     absupAwareness: data.absupAwareness,
@@ -193,7 +180,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     absupProficiency: data.absupProficiency
                 });
 
-                
                 await impactedGroupService.updateEntities({
                     impactGroupId: impactedGroupId,
                     sponsorEntitiesToAdd: [],
@@ -205,7 +191,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 });
             }
 
-            
             queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
             queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
 
@@ -226,20 +211,76 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         onClose();
     };
 
-    const absupMarks = [
-        { value: 1, label: 'Very Low' },
-        { value: 2, label: 'Low' },
-        { value: 3, label: 'Moderate' },
-        { value: 4, label: 'High' },
-        { value: 5, label: 'Very High' }
+    // Question configurations with better labels and marks
+    const questionConfigs = [
+        {
+            fieldName: 'absupAwareness' as const,
+            label: 'Awareness of the role of leadership in change',
+            tooltip: 'How aware is the team leader of their role in leading change?',
+            marks: [
+                { value: 1, label: 'Unaware' },
+                { value: 3, label: 'Partial' },
+                { value: 5, label: 'Clear' }
+            ]
+        },
+        {
+            fieldName: 'absupBuyin' as const,
+            label: 'Buy-in to the process of change management',
+            tooltip: 'How committed is the team leader to the change management process?',
+            marks: [
+                { value: 1, label: 'Limited' },
+                { value: 3, label: 'Some' },
+                { value: 5, label: 'Full' }
+            ]
+        },
+        {
+            fieldName: 'absupSkill' as const,
+            label: 'Skills formally developed in the team leader\'s role in change',
+            tooltip: 'What level of formal change leadership skills does the team leader have?',
+            marks: [
+                { value: 1, label: 'None' },
+                { value: 3, label: 'Basic' },
+                { value: 5, label: 'Advanced' }
+            ]
+        },
+        {
+            fieldName: 'absupUse' as const,
+            label: 'Actively managing the change with their team',
+            tooltip: 'How actively is the team leader managing change with their team?',
+            marks: [
+                { value: 1, label: 'Rare' },
+                { value: 3, label: 'Occasional' },
+                { value: 5, label: 'Consistent' }
+            ]
+        },
+        {
+            fieldName: 'absupProficiency' as const,
+            label: 'Proficiency in leading change',
+            tooltip: 'How proficient is the team leader at leading change initiatives?',
+            marks: [
+                { value: 1, label: 'Novice' },
+                { value: 3, label: 'Competent' },
+                { value: 5, label: 'Expert' }
+            ]
+        },
+        {
+            fieldName: 'anticipatedResistanceLevel' as const,
+            label: 'What is the anticipated level of resistance for this group?',
+            tooltip: 'Based on your assessment, what level of resistance do you expect from this team?',
+            marks: [
+                { value: 1, label: 'Low' },
+                { value: 3, label: 'Medium' },
+                { value: 5, label: 'High' }
+            ]
+        }
     ];
 
     const resistanceDriverOptions = [
-        { value: 'AWARENESS', label: 'Awareness' },
-        { value: 'BUYIN', label: 'Buy-in' },
-        { value: 'SKILL', label: 'Skill' },
-        { value: 'USE', label: 'Use' },
-        { value: 'PROFICIENCY', label: 'Proficiency' }
+        { value: 'AWARENESS', label: 'Awareness of the role of leadership in change' },
+        { value: 'BUYIN', label: 'Buy-in to the process of change management' },
+        { value: 'SKILL', label: 'Skills formally developed in the team leader\'s role in change' },
+        { value: 'USE', label: 'Actively managing the change with their team' },
+        { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
     ];
 
     return (
@@ -272,7 +313,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                     )}
 
                     <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
-                        {!isEditMode && (
                             <>
                                 <QuestionWithRating
                                     label="First Name"
@@ -294,97 +334,29 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                                     errors={errors}
                                 />
                             </>
-                        )}
-
-                        <QuestionWithRating
-                            label="Team Leader Name"
-                            tooltip="Enter the team leader's full name as it will appear in the system"
-                            control={control}
-                            fieldName="entityName"
-                            required
-                            type="text"
-                            errors={errors}
-                        />
                     </Box>
 
                     <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                        <QuestionWithRating
-                            label="Awareness Level"
-                            tooltip="How aware is this team leader of the change initiative?"
-                            control={control}
-                            fieldName="absupAwareness"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Buy-in Level"
-                            tooltip="How committed is this team leader to the change?"
-                            control={control}
-                            fieldName="absupBuyin"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Skill Level"
-                            tooltip="What is this team leader's skill level for managing the change?"
-                            control={control}
-                            fieldName="absupSkill"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Use Level"
-                            tooltip="How actively will this team leader use/implement the new processes?"
-                            control={control}
-                            fieldName="absupUse"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Proficiency Level"
-                            tooltip="What is this team leader's expected proficiency with the change?"
-                            control={control}
-                            fieldName="absupProficiency"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
+                        {questionConfigs.map((config) => (
+                            <QuestionWithRating
+                                key={config.fieldName}
+                                label={config.label}
+                                tooltip={config.tooltip}
+                                control={control}
+                                fieldName={config.fieldName}
+                                type="slider"
+                                min={1}
+                                max={5}
+                                marks={config.marks}
+                                errors={errors}
+                            />
+                        ))}
                     </Box>
 
                     <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                        <QuestionWithRating
-                            label="Anticipated Resistance Level"
-                            tooltip="How much resistance do you expect from this team leader?"
-                            control={control}
-                            fieldName="anticipatedResistanceLevel"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
                         <QuestionWithRating
                             label="Primary Resistance Driver"
-                            tooltip="What aspect is most likely to drive resistance?"
+                            tooltip="What aspect is most likely to drive resistance from this team leader?"
                             control={control}
                             fieldName="anticipatedResistanceDriver"
                             type="select"

@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import { Save } from 'lucide-react';
 import { ModelService } from "@/app/lib/api/services/modelService";
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
@@ -21,16 +21,13 @@ const CommunicationToneAssessment: React.FC = () => {
     const modelService = ModelService.getInstance();
     const { showToast } = useToast();
 
-    const { control, handleSubmit, reset,watch, formState: { errors, isDirty } } = useForm<CommunicationToneFormData>({
+    const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<CommunicationToneFormData>({
         defaultValues: {
             formalityCasualityLevel: 3,
             enthusiasmLevel: 3,
             emotionalExpressivenessLevel: 3
         }
     });
-
-    const formValues = watch();
-
 
     const { data: modelData, isLoading, error } = useQuery({
         queryKey: ['model', projectId],
@@ -81,8 +78,17 @@ const CommunicationToneAssessment: React.FC = () => {
         }
     };
 
-    const getDescription = (dimension: keyof typeof communicationToneDescriptions, level: number): string => {
-        return communicationToneDescriptions[dimension][level - 1] || '';
+    const getDescriptionsForField = (fieldName: string): string[] => {
+        switch (fieldName) {
+            case 'formalityCasualityLevel':
+                return communicationToneDescriptions.formality;
+            case 'enthusiasmLevel':
+                return communicationToneDescriptions.enthusiasm;
+            case 'emotionalExpressivenessLevel':
+                return communicationToneDescriptions.emotionalExpressiveness;
+            default:
+                return [];
+        }
     };
 
     if (projectId === 0) {
@@ -116,37 +122,19 @@ const CommunicationToneAssessment: React.FC = () => {
                     </Typography>
 
                     {sortedFields.map((field) => (
-                        <Paper key={field.fieldName} elevation={0} sx={{ py: 3, mb: 2, borderRadius: 1 }}>
-                            <QuestionWithRating
-                                label={field.label}
-                                tooltip={field.tooltip}
-                                fieldName={field.fieldName}
-                                required={field.required}
-                                type={field.type}
-                                options={field.type === 'radio' ? field.options : undefined}
-                                orientation={field.type === 'radio' ? field.orientation : 'horizontal'}
-                                control={control}
-                                errors={errors}
-                            >
-                            </QuestionWithRating>
-
-                            {/* Display the description for the currently selected level */}
-                            {field.fieldName === 'formalityCasualityLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('formality', formValues.formalityCasualityLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'enthusiasmLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('enthusiasm', formValues.enthusiasmLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'emotionalExpressivenessLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('emotionalExpressiveness', formValues.emotionalExpressivenessLevel)}
-                                </Typography>
-                            )}
-                        </Paper>
+                        <QuestionWithRating
+                            key={field.fieldName}
+                            label={field.label}
+                            tooltip={field.tooltip}
+                            fieldName={field.fieldName}
+                            required={field.required}
+                            type={field.type}
+                            options={field.type === 'radio' ? field.options : undefined}
+                            orientation={field.type === 'radio' ? field.orientation : 'horizontal'}
+                            control={control}
+                            errors={errors}
+                            descriptions={getDescriptionsForField(field.fieldName)}
+                        />
                     ))}
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>

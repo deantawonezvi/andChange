@@ -82,10 +82,8 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         mode: 'onChange'
     });
 
-    
     useEffect(() => {
         if (isEditMode && existingSponsor && open) {
-            
             const nameParts = existingSponsor.anagraphicDataDTO.entityName.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
@@ -105,7 +103,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 specialTactics: existingSponsor.anagraphicDataDTO.uniqueGroupConsiderations || ''
             });
         } else if (!isEditMode && open) {
-            
             reset({
                 firstName: '',
                 lastName: '',
@@ -133,9 +130,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             const impactedGroupService = ImpactedGroupService.getInstance();
 
             if (isEditMode && existingSponsor) {
-                
-
-                
+                // Update existing sponsor
                 await sponsorService.updateAnagraphicData({
                     entityId: existingSponsor.id!,
                     entityName: data.entityName,
@@ -150,7 +145,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     individualsToRemove: []
                 });
 
-                
                 await sponsorService.updateProjectABSUP({
                     entityId: existingSponsor.id!,
                     absupAwareness: data.absupAwareness,
@@ -161,16 +155,13 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 });
 
             } else {
-                
-
-                
+                // Create new sponsor
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,
                     lastName: data.lastName
                 });
 
-                
                 const sponsor = await sponsorService.createSponsor({
                     projectId,
                     entityName: data.entityName,
@@ -184,7 +175,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     individualIds: [individual.id!]
                 });
 
-                
                 await sponsorService.updateProjectABSUP({
                     entityId: sponsor.id!,
                     absupAwareness: data.absupAwareness,
@@ -194,7 +184,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     absupProficiency: data.absupProficiency
                 });
 
-                
                 await impactedGroupService.updateEntities({
                     impactGroupId: impactedGroupId,
                     sponsorEntitiesToAdd: [sponsor.id!],
@@ -206,7 +195,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 });
             }
 
-            
             queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
             queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
 
@@ -227,20 +215,76 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         onClose();
     };
 
-    const absupMarks = [
-        { value: 1, label: 'Very Low' },
-        { value: 2, label: 'Low' },
-        { value: 3, label: 'Moderate' },
-        { value: 4, label: 'High' },
-        { value: 5, label: 'Very High' }
+    // Question configurations for sponsor assessment
+    const questionConfigs = [
+        {
+            fieldName: 'absupAwareness' as const,
+            label: 'Awareness of the role of leadership in change',
+            tooltip: 'How aware is this executive of their role in leading change?',
+            marks: [
+                { value: 1, label: 'Unaware' },
+                { value: 3, label: 'Partial' },
+                { value: 5, label: 'Clear' }
+            ]
+        },
+        {
+            fieldName: 'absupBuyin' as const,
+            label: 'Buy-in to the process of change management',
+            tooltip: 'How committed is this executive to the change management process?',
+            marks: [
+                { value: 1, label: 'Limited' },
+                { value: 3, label: 'Some' },
+                { value: 5, label: 'Full' }
+            ]
+        },
+        {
+            fieldName: 'absupSkill' as const,
+            label: 'Skills formally developed in a leader\'s role in change',
+            tooltip: 'What level of change leadership skills does this executive have?',
+            marks: [
+                { value: 1, label: 'None' },
+                { value: 3, label: 'Basic' },
+                { value: 5, label: 'Advanced' }
+            ]
+        },
+        {
+            fieldName: 'absupUse' as const,
+            label: 'Usage of the skills in being visible and building a coalition for the change',
+            tooltip: 'How consistently does this executive use their change leadership skills?',
+            marks: [
+                { value: 1, label: 'Rare' },
+                { value: 3, label: 'Occasional' },
+                { value: 5, label: 'Consistent' }
+            ]
+        },
+        {
+            fieldName: 'absupProficiency' as const,
+            label: 'Proficiency in leading change',
+            tooltip: 'What is this executive\'s overall proficiency in leading change?',
+            marks: [
+                { value: 1, label: 'Novice' },
+                { value: 3, label: 'Competent' },
+                { value: 5, label: 'Expert' }
+            ]
+        },
+        {
+            fieldName: 'anticipatedResistanceLevel' as const,
+            label: 'What is the anticipated level of resistance for this executive?',
+            tooltip: 'Based on your assessment, what level of resistance do you expect from this executive?',
+            marks: [
+                { value: 1, label: 'Low' },
+                { value: 3, label: 'Medium' },
+                { value: 5, label: 'High' }
+            ]
+        }
     ];
 
     const resistanceDriverOptions = [
-        { value: 'AWARENESS', label: 'Awareness' },
-        { value: 'BUYIN', label: 'Buy-in' },
-        { value: 'SKILL', label: 'Skill' },
-        { value: 'USE', label: 'Use' },
-        { value: 'PROFICIENCY', label: 'Proficiency' }
+        { value: 'AWARENESS', label: 'Awareness of the role of leadership in change' },
+        { value: 'BUYIN', label: 'Buy-in to the process of change management' },
+        { value: 'SKILL', label: 'Skills formally developed in a leader\'s role in change' },
+        { value: 'USE', label: 'Usage of the skills in being visible and building a coalition for the change' },
+        { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
     ];
 
     return (
@@ -273,7 +317,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     )}
 
                     <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
-                        {!isEditMode && (
                             <>
                                 <QuestionWithRating
                                     label="First Name"
@@ -295,17 +338,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                                     errors={errors}
                                 />
                             </>
-                        )}
-
-                        <QuestionWithRating
-                            label="Entity Name"
-                            tooltip="Enter the sponsor's full entity name as it will appear in the system"
-                            control={control}
-                            fieldName="entityName"
-                            required
-                            type="text"
-                            errors={errors}
-                        />
 
                         <QuestionWithRating
                             label="Sponsor Title"
@@ -318,83 +350,26 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     </Box>
 
                     <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                        <QuestionWithRating
-                            label="Awareness Level"
-                            tooltip="How aware is this sponsor of the change initiative?"
-                            control={control}
-                            fieldName="absupAwareness"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Buy-in Level"
-                            tooltip="How committed is this sponsor to the change?"
-                            control={control}
-                            fieldName="absupBuyin"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Skill Level"
-                            tooltip="What is this sponsor's skill level for supporting the change?"
-                            control={control}
-                            fieldName="absupSkill"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Use Level"
-                            tooltip="How actively will this sponsor use/support the new processes?"
-                            control={control}
-                            fieldName="absupUse"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
-                            label="Proficiency Level"
-                            tooltip="What is this sponsor's expected proficiency with the change?"
-                            control={control}
-                            fieldName="absupProficiency"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
+                        {questionConfigs.map((config) => (
+                            <QuestionWithRating
+                                key={config.fieldName}
+                                label={config.label}
+                                tooltip={config.tooltip}
+                                control={control}
+                                fieldName={config.fieldName}
+                                type="slider"
+                                min={1}
+                                max={5}
+                                marks={config.marks}
+                                errors={errors}
+                            />
+                        ))}
                     </Box>
 
                     <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
                         <QuestionWithRating
-                            label="Anticipated Resistance Level"
-                            tooltip="How much resistance do you expect from this sponsor?"
-                            control={control}
-                            fieldName="anticipatedResistanceLevel"
-                            type="slider"
-                            min={1}
-                            max={5}
-                            marks={absupMarks}
-                            errors={errors}
-                        />
-
-                        <QuestionWithRating
                             label="Primary Resistance Driver"
-                            tooltip="What aspect is most likely to drive resistance?"
+                            tooltip="What aspect is most likely to drive resistance from this executive?"
                             control={control}
                             fieldName="anticipatedResistanceDriver"
                             type="select"

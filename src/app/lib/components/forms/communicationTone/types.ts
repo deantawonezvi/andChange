@@ -22,7 +22,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'Casual' },
             { value: 5, label: 'Highly Casual' }
         ],
-        orientation: 'horizontal',
+        orientation: 'vertical',
         required: true,
         order: 1
     },
@@ -38,7 +38,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'High Enthusiasm' },
             { value: 5, label: 'Extreme Enthusiasm' }
         ],
-        orientation: 'horizontal',
+        orientation: 'vertical',
         required: true,
         order: 2
     },
@@ -54,7 +54,7 @@ export const communicationToneFields: FormField[] = [
             { value: 4, label: 'Open Expressiveness' },
             { value: 5, label: 'Highly Expressive' }
         ],
-        orientation: 'horizontal',
+        orientation: 'vertical',
         required: true,
         order: 3
     }

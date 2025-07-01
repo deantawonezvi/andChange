@@ -155,6 +155,7 @@ export const BooleanToggle: React.FC<BooleanToggleProps> = ({
 export interface SelectOption {
     value: string | number;
     label: string;
+    description?: string; // Add description support
 }
 
 export interface QuestionWithRatingProps {
@@ -169,24 +170,27 @@ export interface QuestionWithRatingProps {
     options?: string[] | SelectOption[];
     optionLabelKey?: string;
     optionValueKey?: string;
+    optionDescriptionKey?: string; // Add description key support
     min?: number;
     max?: number;
     marks?: { value: number; label: string }[];
     errors: FieldErrors<any>;
     children?: React.ReactNode;
     orientation?: 'horizontal' | 'vertical';
+    descriptions?: string[]; // Add descriptions array support
 }
 
 export interface RadioButtonsProps {
     value: string | number;
     onChange: (value: string | number) => void;
-    options: { value: string | number; label: string }[];
+    options: { value: string | number; label: string; description?: string }[];
     orientation?: 'horizontal' | 'vertical';
     error?: string;
+    descriptions?: string[]; // Add descriptions array support
 }
 
 export const RadioButtons: React.FC<RadioButtonsProps> = ({
-                                                              value, onChange, options, orientation = 'horizontal', error
+                                                              value, onChange, options, orientation = 'horizontal', error, descriptions
                                                           }) => (
     <Box>
         <RadioGroup
@@ -199,21 +203,49 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
                 gap: orientation === 'vertical' ? 1 : 2
             }}
         >
-            {options.map((option) => (
-                <FormControlLabel
+            {options.map((option, index) => (
+                <Box
                     key={String(option.value)}
-                    value={option.value}
-                    control={<Radio size="medium" sx={{
-                        '&.Mui-checked': {
-                            color: theme.palette.secondary.main,
-                        },
-                    }} />}
-                    label={
-                        <Typography variant="body1">
-                            {option.label}
-                        </Typography>
-                    }
-                />
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        mb: orientation === 'vertical' ? 2 : 0,
+                        mr: orientation === 'horizontal' ? 2 : 0
+                    }}
+                >
+                    <FormControlLabel
+                        value={option.value}
+                        control={<Radio size="medium" sx={{
+                            '&.Mui-checked': {
+                                color: theme.palette.secondary.main,
+                            },
+                        }} />}
+                        label={
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                {option.label}
+                            </Typography>
+                        }
+                        sx={{
+                            alignItems: 'flex-start',
+                            mb: 0.5
+                        }}
+                    />
+                    {(option.description || (descriptions && descriptions[index])) && (
+                        <Box sx={{ ml: 4, mb: 1 }}>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontStyle: 'italic',
+                                    color: 'text.secondary',
+                                    lineHeight: 1.4,
+                                    maxWidth: orientation === 'horizontal' ? '200px' : '100%'
+                                }}
+                            >
+                                {option.description || descriptions?.[index]}
+                            </Typography>
+                        </Box>
+                    )}
+                </Box>
             ))}
         </RadioGroup>
         {error && <Typography variant="caption" color="error">{error}</Typography>}
@@ -223,7 +255,8 @@ export const RadioButtons: React.FC<RadioButtonsProps> = ({
 export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                                                           label, tooltip, control, fieldName, ratingFieldName, required,
                                                                           multiline, type, options, optionLabelKey = 'label', optionValueKey = 'value',
-                                                                          min, max, marks, errors, children, orientation
+                                                                          optionDescriptionKey = 'description', min, max, marks, errors, children,
+                                                                          orientation, descriptions
                                                                       }) => {
     const useMultiline = type !== 'select' && type !== 'slider' && type !== 'boolean' &&
         type !== 'date' && type !== 'radio' && multiline === true;
@@ -313,21 +346,27 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                             onChange={field.onChange}
                                             options={
                                                 Array.isArray(options)
-                                                    ? options.map((opt) => {
+                                                    ? options.map((opt, index) => {
                                                         if (typeof opt === 'string') {
-                                                            return { value: opt, label: opt };
+                                                            return {
+                                                                value: opt,
+                                                                label: opt,
+                                                                description: descriptions?.[index]
+                                                            };
                                                         } else if (typeof opt === 'object' && opt !== null) {
                                                             return {
                                                                 value: opt[optionValueKey as keyof typeof opt] as string | number,
-                                                                label: opt[optionLabelKey as keyof typeof opt] as string
+                                                                label: opt[optionLabelKey as keyof typeof opt] as string,
+                                                                description: opt[optionDescriptionKey as keyof typeof opt] as string || descriptions?.[index]
                                                             };
                                                         }
-                                                        return { value: '', label: '' };
+                                                        return { value: '', label: '', description: '' };
                                                     })
                                                     : []
                                             }
                                             orientation={orientation}
                                             error={errors[fieldName]?.message as string}
+                                            descriptions={descriptions}
                                         />
                                     )}
 

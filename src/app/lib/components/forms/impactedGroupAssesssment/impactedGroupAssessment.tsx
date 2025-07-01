@@ -373,7 +373,6 @@ const ImpactedGroupAssessment: React.FC = () => {
 
                             {isEditMode && (
                                 <Box sx={{ flexGrow: 1, ml: 4 }}>
-                                    {/* Radar Chart Integration */}
                                     <ImpactRadarChart watch={watch} />
                                 </Box>
                             )}
@@ -397,6 +396,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                                         min={field.type === 'slider' ? field.min : undefined}
                                         max={field.type === 'slider' ? field.max : undefined}
                                         marks={field.type === 'slider' ? field.marks : undefined}
+                                        multiline={field.multiline}
                                         control={control}
                                         errors={errors}
                                     />
@@ -426,6 +426,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                                                 min={field.type === 'slider' ? field.min : undefined}
                                                 max={field.type === 'slider' ? field.max : undefined}
                                                 marks={field.type === 'slider' ? field.marks : undefined}
+                                                multiline={field.multiline}
                                                 control={control}
                                                 errors={errors}
                                             />
@@ -452,6 +453,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                                         tooltip={field.tooltip}
                                         fieldName={field.fieldName}
                                         required={field.required}
+                                        multiline={field.multiline}
                                         type={field.type}
                                         control={control}
                                         errors={errors}
@@ -483,6 +485,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                                         min={field.type === 'slider' ? field.min : undefined}
                                         max={field.type === 'slider' ? field.max : undefined}
                                         marks={field.type === 'slider' ? field.marks : undefined}
+                                        multiline={field.multiline}
                                         control={control}
                                         errors={errors}
                                     />
@@ -512,6 +515,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                                         min={field.type === 'slider' ? field.min : undefined}
                                         max={field.type === 'slider' ? field.max : undefined}
                                         marks={field.type === 'slider' ? field.marks : undefined}
+                                        multiline={field.multiline}
                                         control={control}
                                         errors={errors}
                                     />
@@ -520,7 +524,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                         </Collapse>
                     </Paper>
 
-                    {/* Tags Section */}
                     <Paper sx={{ mb: 3 }}>
                         {renderSectionHeader('Tags', 'tags')}
                         <Collapse in={expandedSections.tags}>
@@ -529,11 +532,10 @@ const ImpactedGroupAssessment: React.FC = () => {
                                     Add tags to this group for easier sorting later.
                                 </Typography>
 
-                                {/* This would be a custom tag selection component */}
                                 <Button
                                     variant="outlined"
                                     startIcon={<Tag size={16} />}
-                                    onClick={() => {/* Open tag selection dialog */}}
+                                    onClick={() => {}}
                                 >
                                     Manage Tags
                                 </Button>
