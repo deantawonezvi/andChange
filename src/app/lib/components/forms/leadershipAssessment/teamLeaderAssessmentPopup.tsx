@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import {
     Alert,
     Box,
@@ -10,11 +10,10 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    TextField,
     Typography
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { MOPService } from '@/app/lib/api/services/mopService';
+import { EManagerOfPeopleDTO, MOPService } from '@/app/lib/api/services/mopService';
 import { IndividualService } from '@/app/lib/api/services/individualService';
 import { QuestionWithRating } from '@/app/lib/components/forms/formComponents';
 import ImpactedGroupService from "@/app/lib/api/services/impactedGroupService";
@@ -39,8 +38,10 @@ interface TeamLeaderAssessmentPopupProps {
     onClose: () => void;
     impactedGroupId: number;
     projectId: number;
-    organizationId: number
+    organizationId: number;
     onSuccess?: () => void;
+    existingTeamLeader?: EManagerOfPeopleDTO | null;
+    isEditMode?: boolean;
 }
 
 const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
@@ -49,195 +50,196 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                                                                                  impactedGroupId,
                                                                                  projectId,
                                                                                  organizationId,
-                                                                                 onSuccess
+                                                                                 onSuccess,
+                                                                                 existingTeamLeader,
+                                                                                 isEditMode = false
                                                                              }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const queryClient = useQueryClient();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-
-    const { control, handleSubmit, reset, formState: { errors } } = useForm<TeamLeaderAssessmentFormData>({
+    const {
+        control,
+        handleSubmit,
+        reset,
+        formState: { errors, isValid }
+    } = useForm<TeamLeaderAssessmentFormData>({
         defaultValues: {
             firstName: '',
             lastName: '',
             entityName: '',
-            absupAwareness: 3,
-            absupBuyin: 3,
-            absupSkill: 3,
-            absupUse: 3,
-            absupProficiency: 3,
-            anticipatedResistanceLevel: 3,
+            absupAwareness: 1,
+            absupBuyin: 1,
+            absupSkill: 1,
+            absupUse: 1,
+            absupProficiency: 1,
+            anticipatedResistanceLevel: 1,
             anticipatedResistanceDriver: 'AWARENESS',
             specialTactics: ''
-        }
+        },
+        mode: 'onChange'
     });
 
+    
     useEffect(() => {
-        if (open) {
+        if (isEditMode && existingTeamLeader && open) {
+            
+            const nameParts = existingTeamLeader.anagraphicDataDTO.entityName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            reset({
+                firstName,
+                lastName,
+                entityName: existingTeamLeader.anagraphicDataDTO.entityName,
+                absupAwareness: existingTeamLeader.groupProjectABSUPDTO?.absupAwareness || 1,
+                absupBuyin: existingTeamLeader.groupProjectABSUPDTO?.absupBuyin || 1,
+                absupSkill: existingTeamLeader.groupProjectABSUPDTO?.absupSkill || 1,
+                absupUse: existingTeamLeader.groupProjectABSUPDTO?.absupUse || 1,
+                absupProficiency: existingTeamLeader.groupProjectABSUPDTO?.absupProficiency || 1,
+                anticipatedResistanceLevel: existingTeamLeader.resistanceAssessment?.anticipatedResistanceLevel || 1,
+                anticipatedResistanceDriver: (existingTeamLeader.resistanceAssessment?.anticipatedResistanceDriver as any) || 'AWARENESS',
+                specialTactics: existingTeamLeader.anagraphicDataDTO.uniqueGroupConsiderations || ''
+            });
+        } else if (!isEditMode && open) {
+            
             reset({
                 firstName: '',
                 lastName: '',
                 entityName: '',
-                absupAwareness: 3,
-                absupBuyin: 3,
-                absupSkill: 3,
-                absupUse: 3,
-                absupProficiency: 3,
-                anticipatedResistanceLevel: 3,
+                absupAwareness: 1,
+                absupBuyin: 1,
+                absupSkill: 1,
+                absupUse: 1,
+                absupProficiency: 1,
+                anticipatedResistanceLevel: 1,
                 anticipatedResistanceDriver: 'AWARENESS',
                 specialTactics: ''
             });
         }
-    }, [open, reset]);
+    }, [isEditMode, existingTeamLeader, open, reset]);
 
     const onSubmit = async (data: TeamLeaderAssessmentFormData) => {
-        setIsSubmitting(true);
+        setLoading(true);
         setError(null);
 
-        let createdIndividualId: number | null = null;
-        let createdMOPId: number | null = null;
-
-
         try {
-            const individualService = IndividualService.getInstance();
             const mopService = MOPService.getInstance();
+            const individualService = IndividualService.getInstance();
             const impactedGroupService = ImpactedGroupService.getInstance();
 
-            const newIndividual = await individualService.createIndividual({
-                organizationId: organizationId,
-                firstName: data.firstName,
-                lastName: data.lastName
-            });
+            if (isEditMode && existingTeamLeader) {
+                
 
-            createdIndividualId = newIndividual.id!;
+                
+                await mopService.updateAnagraphicData({
+                    entityId: existingTeamLeader.id!,
+                    entityName: data.entityName,
+                    roleDefinition: 'Team Leader',
+                    definitionOfAdoption: '',
+                    uniqueGroupConsiderations: data.specialTactics,
+                    hasEmail: true,
+                    membersColocated: false,
+                    virtualPreference: 3,
+                    whatsInItForMe: '',
+                    individualsToAdd: [],
+                    individualsToRemove: []
+                });
 
-            const result = await mopService.createMOP({
-                projectId: projectId,
-                entityName: data.entityName || `${data.firstName} ${data.lastName}`,
-                roleDefinition: 'Team Leader',
-                definitionOfAdoption: 'Leading team through change process',
-                uniqueGroupConsiderations: data.specialTactics || '',
-                hasEmail: true,
-                membersColocated: true,
-                virtualPreference: 3,
-                whatsInItForMe: 'Leadership development and team success',
-                individualIds: [createdIndividualId]
-            });
+                
+                await mopService.updateProjectABSUP({
+                    entityId: existingTeamLeader.id!,
+                    absupAwareness: data.absupAwareness,
+                    absupBuyin: data.absupBuyin,
+                    absupSkill: data.absupSkill,
+                    absupUse: data.absupUse,
+                    absupProficiency: data.absupProficiency
+                });
 
-            createdMOPId = result.id!;
+                
+                
 
-            await mopService.updateProjectABSUP({
-                entityId: createdMOPId,
-                absupAwareness: data.absupAwareness,
-                absupBuyin: data.absupBuyin,
-                absupSkill: data.absupSkill,
-                absupUse: data.absupUse,
-                absupProficiency: data.absupProficiency
-            });
+            } else {
+                
 
-            await impactedGroupService.updateEntities({
-                impactGroupId: impactedGroupId,
-                sponsorEntitiesToAdd: [],
-                sponsorEntitiesToRemove: [],
-                momEntitiesToAdd: [],
-                momEntitiesToRemove: [],
-                mopEntitiesToAdd: [createdMOPId],
-                mopEntitiesToRemove: []
-            });
+                
+                const individual = await individualService.createIndividual({
+                    organizationId,
+                    firstName: data.firstName,
+                    lastName: data.lastName
+                });
 
-            await queryClient.invalidateQueries({queryKey: ['leadership-structure', projectId]});
+                
+                const teamLeader = await mopService.createMOP({
+                    projectId,
+                    entityName: data.entityName,
+                    roleDefinition: 'Team Leader',
+                    definitionOfAdoption: '',
+                    uniqueGroupConsiderations: data.specialTactics,
+                    hasEmail: true,
+                    membersColocated: false,
+                    virtualPreference: 3,
+                    whatsInItForMe: '',
+                    individualIds: [individual.id!]
+                });
 
-            location.reload();
+                
+                await mopService.updateProjectABSUP({
+                    entityId: teamLeader.id!,
+                    absupAwareness: data.absupAwareness,
+                    absupBuyin: data.absupBuyin,
+                    absupSkill: data.absupSkill,
+                    absupUse: data.absupUse,
+                    absupProficiency: data.absupProficiency
+                });
 
+                
+                await impactedGroupService.updateEntities({
+                    impactGroupId: impactedGroupId,
+                    sponsorEntitiesToAdd: [],
+                    sponsorEntitiesToRemove: [],
+                    momEntitiesToAdd: [],
+                    momEntitiesToRemove: [],
+                    mopEntitiesToAdd: [teamLeader.id!],
+                    mopEntitiesToRemove: []
+                });
+            }
+
+            
+            queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
+            queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
 
             onSuccess?.();
-            onClose();
+            handleClose();
 
         } catch (err) {
-            console.error('Error creating team leader:', err);
-            setError('Failed to create team leader. Please try again.');
+            console.error('Error saving team leader:', err);
+            setError(isEditMode ? 'Failed to update team leader. Please try again.' : 'Failed to create team leader. Please try again.');
         } finally {
-            setIsSubmitting(false);
+            setLoading(false);
         }
     };
 
     const handleClose = () => {
-        if (!isSubmitting) {
-            reset();
-            setError(null);
-            onClose();
-        }
+        setError(null);
+        reset();
+        onClose();
     };
 
-    const questionConfigs = [
-        {
-            fieldName: 'absupAwareness' as const,
-            label: 'Awareness of the role of leadership in change',
-            tooltip: 'How aware is the team leader of their role in leading change?',
-            marks: [
-                { value: 1, label: 'Unaware' },
-                { value: 3, label: 'Partial' },
-                { value: 5, label: 'Clear' }
-            ]
-        },
-        {
-            fieldName: 'absupBuyin' as const,
-            label: 'Buy-in to the process of change management',
-            tooltip: 'How committed is the team leader to the change management process?',
-            marks: [
-                { value: 1, label: 'Limited' },
-                { value: 3, label: 'Some' },
-                { value: 5, label: 'Full' }
-            ]
-        },
-        {
-            fieldName: 'absupSkill' as const,
-            label: 'Skills formally developed in the team leader\'s role in change',
-            tooltip: 'What level of formal change leadership skills does the team leader have?',
-            marks: [
-                { value: 1, label: 'None' },
-                { value: 3, label: 'Basic' },
-                { value: 5, label: 'Advanced' }
-            ]
-        },
-        {
-            fieldName: 'absupUse' as const,
-            label: 'Actively managing the change with their team',
-            tooltip: 'How actively is the team leader managing change with their team?',
-            marks: [
-                { value: 1, label: 'Rare' },
-                { value: 3, label: 'Occasional' },
-                { value: 5, label: 'Consistent' }
-            ]
-        },
-        {
-            fieldName: 'absupProficiency' as const,
-            label: 'Proficiency in leading change',
-            tooltip: 'How proficient is the team leader at leading change initiatives?',
-            marks: [
-                { value: 1, label: 'Novice' },
-                { value: 3, label: 'Competent' },
-                { value: 5, label: 'Expert' }
-            ]
-        },
-        {
-            fieldName: 'anticipatedResistanceLevel' as const,
-            label: 'What is the anticipated level of resistance for this group?',
-            tooltip: 'Based on your assessment, what level of resistance do you expect from this team?',
-            marks: [
-                { value: 1, label: 'Low' },
-                { value: 3, label: 'Medium' },
-                { value: 5, label: 'High' }
-            ]
-        }
+    const absupMarks = [
+        { value: 1, label: 'Very Low' },
+        { value: 2, label: 'Low' },
+        { value: 3, label: 'Moderate' },
+        { value: 4, label: 'High' },
+        { value: 5, label: 'Very High' }
     ];
 
     const resistanceDriverOptions = [
-        { value: 'AWARENESS', label: 'Awareness of the role of leadership in change' },
-        { value: 'BUYIN', label: 'Buy-in to the process of change management' },
-        { value: 'SKILL', label: 'Skills formally developed in the team leader\'s role in change' },
-        { value: 'USE', label: 'Actively managing the change with their team' },
-        { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
+        { value: 'AWARENESS', label: 'Awareness' },
+        { value: 'BUYIN', label: 'Buy-in' },
+        { value: 'SKILL', label: 'Skill' },
+        { value: 'USE', label: 'Use' },
+        { value: 'PROFICIENCY', label: 'Proficiency' }
     ];
 
     return (
@@ -247,152 +249,177 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
             maxWidth="md"
             fullWidth
             PaperProps={{
-                sx: {
-                    borderRadius: 2,
-                    maxHeight: '90vh'
-                }
+                sx: { minHeight: '70vh' }
             }}
         >
-            <DialogTitle sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '1px solid #e0e0e0',
-                pb: 2
-            }}>
-                <Typography variant="h6" component="div">
-                    Add New Team Leader Assessment
-                </Typography>
-                <IconButton
-                    onClick={handleClose}
-                    size="small"
-                    sx={{ color: 'grey.500' }}
-                    disabled={isSubmitting}
-                >
-                    <Close />
-                </IconButton>
+            <DialogTitle>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="h6">
+                        {isEditMode ? 'Edit Team Leader Assessment' : 'Team Leader Assessment'}
+                    </Typography>
+                    <IconButton onClick={handleClose} size="small">
+                        <Close />
+                    </IconButton>
+                </Box>
             </DialogTitle>
 
-            <DialogContent sx={{ pt: 3 }}>
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
-
+            <DialogContent dividers>
                 <Box component="form" noValidate>
-                    <Box sx={{ mb: 4, mt: 2 }}>
-                        <Controller
-                            name="firstName"
-                            control={control}
-                            rules={{ required: 'First name is required' }}
-                            render={({ field, fieldState }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+
+                    <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
+                        {!isEditMode && (
+                            <>
+                                <QuestionWithRating
                                     label="First Name"
-                                    placeholder="Enter the first name"
-                                    error={!!fieldState.error}
-                                    helperText={fieldState.error?.message}
-                                    variant="outlined"
-                                    disabled={isSubmitting}
+                                    tooltip="Enter the team leader's first name"
+                                    control={control}
+                                    fieldName="firstName"
+                                    required
+                                    type="text"
+                                    errors={errors}
                                 />
-                            )}
-                        />
-                    </Box>
-                    <Box sx={{ mb: 4 }}>
-                        <Controller
-                            name="lastName"
-                            control={control}
-                            rules={{ required: 'Last name is required' }}
-                            render={({ field, fieldState }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
+
+                                <QuestionWithRating
                                     label="Last Name"
-                                    placeholder="Enter the last name"
-                                    error={!!fieldState.error}
-                                    helperText={fieldState.error?.message}
-                                    variant="outlined"
-                                    disabled={isSubmitting}
+                                    tooltip="Enter the team leader's last name"
+                                    control={control}
+                                    fieldName="lastName"
+                                    required
+                                    type="text"
+                                    errors={errors}
                                 />
-                            )}
+                            </>
+                        )}
+
+                        <QuestionWithRating
+                            label="Team Leader Name"
+                            tooltip="Enter the team leader's full name as it will appear in the system"
+                            control={control}
+                            fieldName="entityName"
+                            required
+                            type="text"
+                            errors={errors}
                         />
                     </Box>
 
-                    {questionConfigs.map((config) => (
-                        <Box key={config.fieldName} sx={{ mb: 3 }}>
-                            <QuestionWithRating
-                                label={config.label}
-                                tooltip={config.tooltip}
-                                control={control}
-                                fieldName={config.fieldName}
-                                type="slider"
-                                min={1}
-                                max={5}
-                                marks={config.marks}
-                                errors={errors}
-                                required={true}
-                            />
-                        </Box>
-                    ))}
-
-                    {/* Resistance Driver Radio Group */}
-                    <Box sx={{ mb: 4 }}>
+                    <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
                         <QuestionWithRating
-                            label="Which area is likely to be the strongest driver of resistance?"
-                            tooltip="Select the ABSUP dimension that is most likely to cause resistance in this team."
+                            label="Awareness Level"
+                            tooltip="How aware is this team leader of the change initiative?"
+                            control={control}
+                            fieldName="absupAwareness"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+
+                        <QuestionWithRating
+                            label="Buy-in Level"
+                            tooltip="How committed is this team leader to the change?"
+                            control={control}
+                            fieldName="absupBuyin"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+
+                        <QuestionWithRating
+                            label="Skill Level"
+                            tooltip="What is this team leader's skill level for managing the change?"
+                            control={control}
+                            fieldName="absupSkill"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+
+                        <QuestionWithRating
+                            label="Use Level"
+                            tooltip="How actively will this team leader use/implement the new processes?"
+                            control={control}
+                            fieldName="absupUse"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+
+                        <QuestionWithRating
+                            label="Proficiency Level"
+                            tooltip="What is this team leader's expected proficiency with the change?"
+                            control={control}
+                            fieldName="absupProficiency"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+                    </Box>
+
+                    <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                        <QuestionWithRating
+                            label="Anticipated Resistance Level"
+                            tooltip="How much resistance do you expect from this team leader?"
+                            control={control}
+                            fieldName="anticipatedResistanceLevel"
+                            type="slider"
+                            min={1}
+                            max={5}
+                            marks={absupMarks}
+                            errors={errors}
+                        />
+
+                        <QuestionWithRating
+                            label="Primary Resistance Driver"
+                            tooltip="What aspect is most likely to drive resistance?"
                             control={control}
                             fieldName="anticipatedResistanceDriver"
-                            type="radio"
+                            type="select"
                             options={resistanceDriverOptions}
-                            optionValueKey="value"
-                            optionLabelKey="label"
-                            orientation="vertical"
                             errors={errors}
-                            required={true}
                         />
                     </Box>
 
-                    {/* Special Tactics Text Area */}
-                    <Box sx={{ mb: 2 }}>
-                        <QuestionWithRating
-                            label="What special tactics need to be considered?"
-                            tooltip="Enter any specific strategies, approaches, or considerations needed for this team leader or group."
-                            control={control}
-                            fieldName="specialTactics"
-                            type="text"
-                            multiline={true}
-                            errors={errors}
-                            required={false}
-                        />
-                    </Box>
+                    <QuestionWithRating
+                        label="Special Tactics / Notes"
+                        tooltip="Any special considerations or tactics for engaging this team leader"
+                        control={control}
+                        fieldName="specialTactics"
+                        type="text"
+                        multiline
+                        errors={errors}
+                    />
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{
-                px: 3,
-                py: 2,
-                borderTop: '1px solid #e0e0e0'
-            }}>
+            <DialogActions sx={{ p: 2, gap: 1 }}>
+                <Button
+                    onClick={handleClose}
+                    disabled={loading}
+                    variant="outlined"
+                >
+                    Cancel
+                </Button>
                 <Button
                     onClick={handleSubmit(onSubmit)}
+                    disabled={loading || !isValid}
                     variant="contained"
-                    fullWidth
-                    disabled={isSubmitting}
-                    sx={{
-                        py: 1.5,
-                        backgroundColor: '#000',
-                        '&:hover': {
-                            backgroundColor: '#333'
-                        },
-                        '&:disabled': {
-                            backgroundColor: '#ccc'
-                        }
-                    }}
-                    startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
+                    startIcon={loading ? <CircularProgress size={20} /> : null}
                 >
-                    {isSubmitting ? 'Creating Assessment...' : 'Create Team Leader'}
+                    {loading ? 'Saving...' : (isEditMode ? 'Update Team Leader' : 'Create Team Leader')}
                 </Button>
             </DialogActions>
         </Dialog>

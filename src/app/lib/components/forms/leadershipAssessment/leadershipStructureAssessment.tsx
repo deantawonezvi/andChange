@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Box, Button, Card, CardContent, Chip, Divider, Grid, Paper, Typography } from '@mui/material';
-import { Building2, User, Users } from 'lucide-react';
+import { Building2, User, Users, Edit } from 'lucide-react';
 import { EImpactedGroupDTO, ImpactedGroupService } from '@/app/lib/api/services/impactedGroupService';
 import { ESponsorDTO, SponsorService } from '@/app/lib/api/services/sponsorService';
 import { EManagerOfPeopleDTO, MOPService } from '@/app/lib/api/services/mopService';
@@ -25,7 +25,10 @@ const LeadershipStructureAssessment: React.FC = () => {
     const [popupOpen, setPopupOpen] = useState(false);
     const [sponsorPopup, setSponsorPopupOpen] = useState(false);
     const [selectedImpactedGroup, setSelectedImpactedGroup] = useState<EImpactedGroupDTO | null>(null);
+    const [selectedSponsor, setSelectedSponsor] = useState<ESponsorDTO | null>(null);
+    const [selectedTeamLeader, setSelectedTeamLeader] = useState<EManagerOfPeopleDTO | null>(null);
     const [organizationId, setOrganizationId] = useState<number | null>(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const {
         data: impactedGroups,
@@ -43,7 +46,6 @@ const LeadershipStructureAssessment: React.FC = () => {
         enabled: !!projectId
     });
 
-
     useEffect(() => {
         if (projectData?.organizationId) {
             setOrganizationId(projectData.organizationId);
@@ -60,7 +62,6 @@ const LeadershipStructureAssessment: React.FC = () => {
 
             return await Promise.all(
                 impactedGroups.map(async (group) => {
-
                     const sponsors = await Promise.all(
                         (group.sponsors || []).map(sponsorId =>
                             sponsorService.getSponsorById(sponsorId)
@@ -86,26 +87,49 @@ const LeadershipStructureAssessment: React.FC = () => {
 
     const handleCreateTeamLeader = (impactedGroup: EImpactedGroupDTO) => {
         setSelectedImpactedGroup(impactedGroup);
+        setSelectedTeamLeader(null);
+        setIsEditMode(false);
+        setPopupOpen(true);
+    };
+
+    const handleEditTeamLeader = (impactedGroup: EImpactedGroupDTO, teamLeader: EManagerOfPeopleDTO) => {
+        setSelectedImpactedGroup(impactedGroup);
+        setSelectedTeamLeader(teamLeader);
+        setIsEditMode(true);
         setPopupOpen(true);
     };
 
     const handleCreateSponsor = (impactedGroup: EImpactedGroupDTO) => {
         setSelectedImpactedGroup(impactedGroup);
+        setSelectedSponsor(null);
+        setIsEditMode(false);
+        setSponsorPopupOpen(true);
+    };
+
+    const handleEditSponsor = (impactedGroup: EImpactedGroupDTO, sponsor: ESponsorDTO) => {
+        setSelectedImpactedGroup(impactedGroup);
+        setSelectedSponsor(sponsor);
+        setIsEditMode(true);
         setSponsorPopupOpen(true);
     };
 
     const handleCloseTeamLeaderAssessment = () => {
         setPopupOpen(false);
         setSelectedImpactedGroup(null);
+        setSelectedTeamLeader(null);
+        setIsEditMode(false);
     };
 
     const handleCloseSponsorAssessment = () => {
         setSponsorPopupOpen(false);
         setSelectedImpactedGroup(null);
+        setSelectedSponsor(null);
+        setIsEditMode(false);
     };
 
     const handleAssessmentSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ['leadership-structure', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['impacted-groups', projectId] });
     };
 
     if (loadingGroups || leadershipQueries.isLoading) {
@@ -191,12 +215,24 @@ const LeadershipStructureAssessment: React.FC = () => {
                                     <Chip
                                         key={sponsor.id}
                                         icon={<User size={16} />}
-                                        label={sponsor.anagraphicDataDTO.entityName}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                {sponsor.anagraphicDataDTO.entityName}
+                                                <Edit size={12} />
+                                            </Box>
+                                        }
                                         size="small"
                                         variant="outlined"
+                                        clickable
+                                        onClick={() => handleEditSponsor(impactedGroup, sponsor)}
                                         sx={{
                                             backgroundColor: '#e3f2fd',
-                                            borderColor: '#2196f3'
+                                            borderColor: '#2196f3',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                                backgroundColor: '#bbdefb',
+                                                borderColor: '#1976d2'
+                                            }
                                         }}
                                     />
                                 ))
@@ -218,7 +254,7 @@ const LeadershipStructureAssessment: React.FC = () => {
 
                     <Divider sx={{ my: 2 }} />
 
-                    {/* Team Leaders Level - THIS IS WHERE THE POPUP IS TRIGGERED */}
+                    {/* Team Leaders Level */}
                     <Box sx={{ mb: 3 }}>
                         <Box sx={{
                             display: 'flex',
@@ -270,12 +306,24 @@ const LeadershipStructureAssessment: React.FC = () => {
                                         <Chip
                                             key={leader.id}
                                             icon={<Users size={16} />}
-                                            label={leader.anagraphicDataDTO.entityName}
+                                            label={
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                    {leader.anagraphicDataDTO.entityName}
+                                                    <Edit size={12} />
+                                                </Box>
+                                            }
                                             size="small"
                                             variant="outlined"
+                                            clickable
+                                            onClick={() => handleEditTeamLeader(impactedGroup, leader)}
                                             sx={{
                                                 backgroundColor: '#f3e5f5',
-                                                borderColor: '#9c27b0'
+                                                borderColor: '#9c27b0',
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    backgroundColor: '#e1bee7',
+                                                    borderColor: '#7b1fa2'
+                                                }
                                             }}
                                         />
                                     ))}
@@ -413,6 +461,8 @@ const LeadershipStructureAssessment: React.FC = () => {
                     projectId={projectId}
                     organizationId={organizationId}
                     onSuccess={handleAssessmentSuccess}
+                    existingTeamLeader={selectedTeamLeader}
+                    isEditMode={isEditMode}
                 />
             )}
 
@@ -424,6 +474,8 @@ const LeadershipStructureAssessment: React.FC = () => {
                     projectId={projectId}
                     organizationId={organizationId}
                     onSuccess={handleAssessmentSuccess}
+                    existingSponsor={selectedSponsor}
+                    isEditMode={isEditMode}
                 />
             )}
         </Box>
