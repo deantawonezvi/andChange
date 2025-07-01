@@ -90,21 +90,33 @@ export const SliderRating: React.FC<SliderRatingProps> = ({
                                                               value, onChange, min, max, marks, error
                                                           }) => (
     <Box sx={{ mt: 2, px: 2 }}>
-        {/* Display the marks as a legend above the slider for better readability */}
         <Box sx={{
             display: 'flex',
             justifyContent: 'space-between',
             mb: 1,
-            px: 2 // Add padding to align with the slider ends
+            px: 2
         }}>
-            {marks.filter(mark => [min, Math.floor((min+max)/2), max].includes(mark.value)).map((mark) => (
+            {(() => {
+                const sortedMarks = [...marks].sort((a, b) => a.value - b.value);
+
+                if (sortedMarks.length <= 3) {
+                    return sortedMarks;
+                }
+
+                const first = sortedMarks[0];
+                const last = sortedMarks[sortedMarks.length - 1];
+                const middleIndex = Math.floor((sortedMarks.length - 1) / 2);
+                const middle = sortedMarks[middleIndex];
+
+                return [first, middle, last];
+            })().map((mark, index, array) => (
                 <Typography
                     key={mark.value}
                     variant="caption"
                     sx={{
                         fontSize: '0.7rem',
-                        maxWidth: mark.value === min ? '33%' : mark.value === max ? '33%' : '34%',
-                        textAlign: mark.value === min ? 'left' : mark.value === max ? 'right' : 'center'
+                        maxWidth: '33%',
+                        textAlign: index === 0 ? 'left' : index === array.length - 1 ? 'right' : 'center'
                     }}
                 >
                     {mark.label}
@@ -113,14 +125,14 @@ export const SliderRating: React.FC<SliderRatingProps> = ({
         </Box>
 
         <Slider
-            value={value === null ? (min || 1) : value}
+            value={value === null || value === undefined ? (min ?? 1) : value}
             onChange={(_, newValue) => onChange(newValue as number)}
             min={min}
             max={max}
             step={1}
             marks={marks.map(mark => ({
                 ...mark,
-                label: '' // Remove labels from the actual slider component
+                label: ''
             }))}
             valueLabelDisplay="auto"
         />
@@ -372,10 +384,10 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
 
                                     {type === 'slider' && (
                                         <SliderRating
-                                            value={field.value === null ? (min || 1) : field.value}
+                                            value={field.value === null || field.value === undefined ? (min ?? 0) : field.value}
                                             onChange={field.onChange}
-                                            min={min || 1}
-                                            max={max || 5}
+                                            min={min ?? 0}
+                                            max={max ?? 5}
                                             marks={marks || []}
                                             error={errors[fieldName]?.message as string}
                                         />
