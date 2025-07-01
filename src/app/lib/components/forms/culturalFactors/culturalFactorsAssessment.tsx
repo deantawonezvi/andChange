@@ -40,7 +40,6 @@ const CulturalFactorsAssessment: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map from API model to form data
     const mapModelToFormData = (model: any): CulturalFactorsFormData => {
         return {
             emotionalExpressivenessLevel: model.culturalFactorsDTO?.emotionalExpressiveness || 3,
@@ -94,7 +93,6 @@ const CulturalFactorsAssessment: React.FC = () => {
         }
     };
 
-    // Helper to get description for a specific level of a dimension
     const getDescription = (dimension: keyof typeof culturalFactorsDescriptions, level: number): string => {
         return culturalFactorsDescriptions[dimension][level - 1] || '';
     };
@@ -111,10 +109,8 @@ const CulturalFactorsAssessment: React.FC = () => {
         return <Alert severity="error">Error loading cultural factors data</Alert>;
     }
 
-    // Current form values
     const formValues = watch();
 
-    // Sort fields by order property
     const sortedFields = [...culturalFactorsFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

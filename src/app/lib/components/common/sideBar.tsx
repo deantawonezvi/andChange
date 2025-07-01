@@ -1,4 +1,4 @@
-// src/app/lib/components/common/sideBar.tsx
+
 import React, { useState } from 'react';
 import {
     AppBar,
@@ -59,6 +59,12 @@ const Sidebar: React.FC = () => {
             return pathname === path || pathname.startsWith(`${path}/`);
         }
         if (path === '/organisations') {
+            return pathname === path || pathname.startsWith(`${path}/`);
+        }
+        if (path === '/portfolio') {
+            return pathname === path || pathname.startsWith(`${path}/`);
+        }
+        if (path === '/calendar') {
             return pathname === path || pathname.startsWith(`${path}/`);
         }
         return pathname === path;

@@ -32,7 +32,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         pathname.startsWith(item.path) && !excludedPaths.includes(item.path)
     );
 
-    // Use either the custom title or the menu item title
     const headerTitle = title || (currentMenuItem?.text || '');
 
     return (

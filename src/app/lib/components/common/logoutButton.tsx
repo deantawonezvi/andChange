@@ -26,21 +26,16 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
         try {
             setLoading(true);
 
-            // Small delay before showing full-screen loader
             setTimeout(() => {
                 if (loading) setShowLoader(true);
             }, 500);
 
-            // Call the auth service logout method
             await AuthService.getInstance().logout();
 
-            // Update the auth context
             authLogout();
 
-            // Show the full-screen loader for a moment
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Redirect to the login page
             router.push('/login');
         } catch (error) {
             console.error('Logout failed:', error);

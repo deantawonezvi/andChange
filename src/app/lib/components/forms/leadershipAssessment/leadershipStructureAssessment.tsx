@@ -22,13 +22,11 @@ const LeadershipStructureAssessment: React.FC = () => {
     const queryClient = useQueryClient();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
 
-    // State for popup management
     const [popupOpen, setPopupOpen] = useState(false);
     const [sponsorPopup, setSponsorPopupOpen] = useState(false);
     const [selectedImpactedGroup, setSelectedImpactedGroup] = useState<EImpactedGroupDTO | null>(null);
     const [organizationId, setOrganizationId] = useState<number | null>(null);
 
-    // Fetch impacted groups for the project
     const {
         data: impactedGroups,
         isLoading: loadingGroups,
@@ -45,14 +43,13 @@ const LeadershipStructureAssessment: React.FC = () => {
         enabled: !!projectId
     });
 
-// Set organization ID when project data is loaded
+
     useEffect(() => {
         if (projectData?.organizationId) {
             setOrganizationId(projectData.organizationId);
         }
     }, [projectData]);
 
-    // Fetch leadership details for each impacted group
     const leadershipQueries = useQuery({
         queryKey: ['leadership-structure', projectId, impactedGroups],
         queryFn: async (): Promise<LeadershipStructureData[]> => {
@@ -63,14 +60,13 @@ const LeadershipStructureAssessment: React.FC = () => {
 
             return await Promise.all(
                 impactedGroups.map(async (group) => {
-                    // Fetch sponsors
+
                     const sponsors = await Promise.all(
                         (group.sponsors || []).map(sponsorId =>
                             sponsorService.getSponsorById(sponsorId)
                         )
                     );
 
-                    // Fetch managers of people (team leaders)
                     const teamLeaders = await Promise.all(
                         (group.managersOfPeople || []).map(mopId =>
                             mopService.getMOPById(mopId)

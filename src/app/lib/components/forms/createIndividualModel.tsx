@@ -24,7 +24,7 @@ const CreateIndividualModal: React.FC<CreateIndividualModalProps> = ({
                                                                          organizationId,
                                                                          onSuccess,
                                                                      }) => {
-    // Setup form with react-hook-form
+
     const {
         control,
         handleSubmit,
@@ -37,7 +37,6 @@ const CreateIndividualModal: React.FC<CreateIndividualModalProps> = ({
         },
     });
 
-    // Mutation for creating an individual
     const createIndividualMutation = useMutation({
         mutationFn: (data: CreateIndividualRequestDTO) =>
             IndividualService.getInstance().createIndividual(data),
@@ -47,7 +46,6 @@ const CreateIndividualModal: React.FC<CreateIndividualModalProps> = ({
         },
     });
 
-    // Handle form submission
     const onSubmit = (data: FormInputs) => {
         createIndividualMutation.mutate({
             ...data,
@@ -55,9 +53,8 @@ const CreateIndividualModal: React.FC<CreateIndividualModalProps> = ({
         });
     };
 
-    // Handle modal close and reset
     const handleClose = () => {
-        // Reset form and errors
+
         reset();
         createIndividualMutation.reset();
         onClose();

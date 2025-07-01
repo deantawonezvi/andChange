@@ -8,7 +8,6 @@ declare global {
             NEXT_PUBLIC_AUTH_SCOPE: string;
             NEXT_PUBLIC_BASE_API_URL: string;
 
-            // Development environment variables
             NEXT_PUBLIC_DEV_EMAIL?: string;
             NEXT_PUBLIC_DEV_PASSWORD?: string;
             NEXT_PUBLIC_DEV_AUTO_LOGIN?: string;

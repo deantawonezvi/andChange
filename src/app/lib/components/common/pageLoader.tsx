@@ -116,7 +116,7 @@ export const FullPageLoader = () => {
     );
 };
 
-// Smart table loader that accepts column structure to create a realistic skeleton
+
 export interface TableColumn {
     name: string;
     width: string | number;
@@ -190,7 +190,7 @@ export const TableLoader: React.FC<{
     );
 };
 
-// Form loader that mirrors the actual form structure
+
 export const FormLoader: React.FC<{
     fieldCount?: number;
     includeTitle?: boolean;
@@ -233,7 +233,7 @@ export const FormLoader: React.FC<{
     );
 };
 
-// Card list loader that mimics the actual cards
+
 export const CardListLoader: React.FC<{
     cardCount?: number;
     cardHeight?: number;
@@ -288,14 +288,13 @@ export const CardListLoader: React.FC<{
     );
 };
 
-// Inline loaders for specific components
+
 export const InlineLoader: React.FC<{
     type?: 'text' | 'button' | 'icon';
     size?: 'small' | 'medium' | 'large';
 }> = ({ type = 'text', size = 'medium' }) => {
     const theme = useTheme();
 
-    // Size mappings
     const sizeMap = {
         small: { icon: 16, circle: 20, text: { width: 80, height: 16 } },
         medium: { icon: 24, circle: 28, text: { width: 120, height: 20 } },
@@ -334,7 +333,6 @@ export const InlineLoader: React.FC<{
         );
     }
 
-    // Default text loader
     return (
         <Skeleton
             animation="wave"
@@ -416,14 +414,13 @@ export const SectionLoader: React.FC<{
     );
 };
 
-// Chart placeholder loader
+
 export const ChartLoader: React.FC<{
     type?: 'bar' | 'line' | 'pie' | 'scatter';
     height?: number | string;
 }> = ({ type = 'bar', height = 300 }) => {
     const theme = useTheme();
 
-    // Different placeholder visualizations based on chart type
     const renderPlaceholder = () => {
         switch (type) {
             case 'line':
@@ -558,7 +555,6 @@ export const ChartLoader: React.FC<{
                     </Box>
                 );
 
-            // Default bar chart
             default:
                 return (
                     <Box sx={{ height: '70%', display: 'flex', alignItems: 'flex-end', mx: 2, gap: 2 }}>
@@ -620,7 +616,7 @@ export const ChartLoader: React.FC<{
     );
 };
 
-// For Nprogress-like top loading bar
+
 export const TopProgressBar: React.FC<{
     isAnimating?: boolean;
 }> = ({ isAnimating = true }) => {

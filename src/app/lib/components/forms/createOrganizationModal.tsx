@@ -32,7 +32,7 @@ interface FormInputs extends Omit<CreateOrganizationRequestDTO, 'ownerUserId'> {
     language: string;
 }
 
-// Common industries for the dropdown
+
 const INDUSTRIES = [
     'Technology',
     'Healthcare',
@@ -52,7 +52,7 @@ const INDUSTRIES = [
     'Other'
 ];
 
-// Common languages
+
 const LANGUAGES = [
     'English',
     'Spanish',
@@ -89,7 +89,6 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({
         }
     });
 
-    // Mutation for creating an organization
     const createMutation = useMutation({
         mutationFn: (data: CreateOrganizationRequestDTO) =>
             organizationService.createOrganization(data),
@@ -102,7 +101,6 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({
         }
     });
 
-    // Handle form submission
     const onSubmit = (data: FormInputs) => {
         const ownerUserId = '0';
 
@@ -112,7 +110,6 @@ const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = ({
         });
     };
 
-    // Handle modal close and reset
     const handleClose = () => {
         if (!createMutation.isPending) {
             onClose();

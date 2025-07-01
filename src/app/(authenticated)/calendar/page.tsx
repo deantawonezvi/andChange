@@ -21,16 +21,14 @@ import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 import { useToast } from "@/app/lib/hooks/useToast";
 
-// Helper to generate calendar data
+
 const generateCalendarDays = (year: number, month: number) => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
 
-    // Get Monday as first day (1) to Sunday (7)
     const firstDayOfWeek = firstDay.getDay() || 7;
 
-    // Previous month days
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = firstDayOfWeek - 1; i > 0; i--) {
         days.push({
@@ -39,7 +37,6 @@ const generateCalendarDays = (year: number, month: number) => {
         });
     }
 
-    // Current month days
     for (let day = 1; day <= lastDay.getDate(); day++) {
         days.push({
             day,
@@ -47,7 +44,6 @@ const generateCalendarDays = (year: number, month: number) => {
         });
     }
 
-    // Next month days
     const remainingDays = 42 - days.length; // 6 rows * 7 days = 42
     for (let day = 1; day <= remainingDays; day++) {
         days.push({

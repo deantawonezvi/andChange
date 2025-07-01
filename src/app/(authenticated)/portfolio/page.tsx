@@ -25,7 +25,6 @@ const PortfolioPage = () => {
     const { showToast } = useToast();
     const portfolioService = PortfolioService.getInstance();
 
-    // Fetch people ROI vs budget data
     const {
         data: peopleROIData = [],
         isLoading: isLoadingPeopleROI,
@@ -35,7 +34,6 @@ const PortfolioPage = () => {
         queryFn: () => portfolioService.getPeopleROIvsBudget(),
     });
 
-    // Fetch CM budget vs risk data
     const {
         data: cmBudgetData = [],
         isLoading: isLoadingCMBudget,
@@ -45,7 +43,6 @@ const PortfolioPage = () => {
         queryFn: () => portfolioService.getCMBudgetVsRisk(),
     });
 
-    // Show errors in toast if any
     React.useEffect(() => {
         if (peopleROIError) {
             showToast('Failed to load People ROI data: ' + (peopleROIError as Error).message, 'error');
@@ -55,7 +52,6 @@ const PortfolioPage = () => {
         }
     }, [peopleROIError, cmBudgetError, showToast]);
 
-    // Create ordered projects data for bar chart
     const orderedProjectsData = React.useMemo(() => {
         return [...peopleROIData]
             .sort((a, b) => b.peopleSideROI - a.peopleSideROI)
@@ -65,7 +61,6 @@ const PortfolioPage = () => {
             }));
     }, [peopleROIData]);
 
-    // Transform data for scatter plots
     const peopleROIScatterData = React.useMemo(() => {
         return peopleROIData.map(project => ({
             x: project.projectBudgetAmount,
@@ -87,7 +82,6 @@ const PortfolioPage = () => {
     const isLoading = isLoadingPeopleROI || isLoadingCMBudget;
     const hasError = peopleROIError || cmBudgetError;
 
-    // Custom tooltip for charts
 
 
     const renderCustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {

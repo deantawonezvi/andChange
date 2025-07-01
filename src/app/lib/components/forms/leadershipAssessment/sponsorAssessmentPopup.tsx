@@ -88,21 +88,18 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             const individualService = IndividualService.getInstance();
             const impactedGroupService = ImpactedGroupService.getInstance();
 
-            // STEP 1: Create individual
             const individual = await individualService.createIndividual({
                 organizationId,
                 firstName: data.firstName,
                 lastName: data.lastName
             });
 
-            // STEP 2: Create Sponsor
             const sponsor = await sponsorService.createSponsor({
                 projectId,
                 entityName: data.entityName,
                 individualIds: [individual.id!]
             });
 
-            // STEP 4: Update ABSUP Assessment
             await sponsorService.updateProjectABSUP({
                 entityId: sponsor.id!,
                 absupAwareness: data.absupAwareness,
@@ -112,7 +109,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 absupProficiency: data.absupProficiency
             });
 
-            // STEP 5: Update sponsor title (via anagraphic data)
             await sponsorService.updateAnagraphicData({
                 entityId: sponsor.id!,
                 entityName: data.entityName,
@@ -121,7 +117,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 individualsToRemove: []
             });
 
-            // STEP 6: Associate sponsor with impacted group
             await impactedGroupService.updateEntities({
                 impactGroupId: impactedGroupId,
                 sponsorEntitiesToAdd: [sponsor.id!],
@@ -132,7 +127,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 mopEntitiesToRemove: []
             });
 
-            // Invalidate relevant queries
             queryClient.invalidateQueries({
                 queryKey: ['impacted-groups', 'project', projectId]
             });
@@ -380,7 +374,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                         name="entityName"
                         control={control}
                         render={({ field }) => {
-                            // Auto-populate entity name based on first and last name
+
                             const firstName = watch('firstName');
                             const lastName = watch('lastName');
                             if (firstName && lastName && !field.value) {

@@ -1,13 +1,11 @@
 import { FormField } from "@/app/lib/api/formTypes";
 
 export interface CommunicationToneFormData {
-    // Formality vs Casualty dimension
+
     formalityCasualityLevel: number;
 
-    // Enthusiasm dimension
     enthusiasmLevel: number;
 
-    // Emotional Expressiveness dimension
     emotionalExpressivenessLevel: number;
 }
 
@@ -62,7 +60,7 @@ export const communicationToneFields: FormField[] = [
     }
 ];
 
-// Additional field data for detailed descriptions that can be used in tooltips or help text
+
 export const communicationToneDescriptions = {
     formality: [
         "This level is characterized by a strict adherence to formal rules of language. Communications are structured, use full titles and last names, and avoid contractions and slang. The language is precise and may include technical or legal jargon. Highly formal communication is typical in diplomatic correspondence, legal documents, and traditional business settings.",

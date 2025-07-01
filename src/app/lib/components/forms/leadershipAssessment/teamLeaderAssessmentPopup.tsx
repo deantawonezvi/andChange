@@ -103,7 +103,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
             const mopService = MOPService.getInstance();
             const impactedGroupService = ImpactedGroupService.getInstance();
 
-            // STEP 1: Create individual
             const newIndividual = await individualService.createIndividual({
                 organizationId: organizationId,
                 firstName: data.firstName,
@@ -112,7 +111,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
 
             createdIndividualId = newIndividual.id!;
 
-            // STEP 2: Create Manager of People
             const result = await mopService.createMOP({
                 projectId: projectId,
                 entityName: data.entityName || `${data.firstName} ${data.lastName}`,
@@ -128,7 +126,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
 
             createdMOPId = result.id!;
 
-            // STEP 3: Update ABSUP ratings
             await mopService.updateProjectABSUP({
                 entityId: createdMOPId,
                 absupAwareness: data.absupAwareness,

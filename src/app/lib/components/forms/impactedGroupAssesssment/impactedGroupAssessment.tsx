@@ -33,7 +33,6 @@ const ImpactedGroupAssessment: React.FC = () => {
     const impactedGroupService = ImpactedGroupService.getInstance();
     const { showToast } = useToast();
 
-    // Track expanded sections
     const [expandedSections, setExpandedSections] = React.useState({
         basicInfo: true,
         changeStatus: true,
@@ -43,10 +42,9 @@ const ImpactedGroupAssessment: React.FC = () => {
         tags: false
     });
 
-    // Form setup
     const { control, handleSubmit, reset, watch, formState: { errors, isDirty, isSubmitting } } = useForm<ImpactedGroupFormData>({
         defaultValues: {
-            // Basic info
+
             entityName: '',
             roleDefinition: '',
             definitionOfAdoption: '',
@@ -57,14 +55,12 @@ const ImpactedGroupAssessment: React.FC = () => {
             whatsInItForMe: '',
             individualsIds: [],
 
-            // ABSUP Ratings
             absupAwareness: 1,
             absupBuyin: 1,
             absupSkill: 1,
             absupUse: 1,
             absupProficiency: 1,
 
-            // Change Impact Assessment
             process: 0,
             processDescription: '',
             systems: 0,
@@ -89,27 +85,22 @@ const ImpactedGroupAssessment: React.FC = () => {
             retrenchmentDescription: '',
             clarityOfFutureState: 0,
 
-            // Resistance Assessment
             anticipatedResistanceLevel: 1,
             anticipatedResistanceDriver: 'AWARENESS',
             resistanceManagementTactics: [],
 
-            // Adoption Assessment
             adoptionAssessments: [],
 
-            // Tags
             tags: []
         }
     });
 
-    // Fetch impacted group data for edit mode
     const { data: impactedGroup, isLoading: isLoadingGroup, error: groupError } = useQuery({
         queryKey: ['impactedGroup', groupId],
         queryFn: () => impactedGroupService.getImpactedGroupById(groupId),
         enabled: isEditMode && !!groupId,
     });
 
-    // Map API data to form fields
     const mapApiToForm = React.useCallback((data: EImpactedGroupDTO): ImpactedGroupFormData => {
         return {
             managersOfManagers: [],
@@ -118,7 +109,7 @@ const ImpactedGroupAssessment: React.FC = () => {
             organizationalGrouping: "",
             preferredInteraction: 0,
             sponsors: [],
-            // Basic info
+
             entityName: data.anagraphicDataDTO?.entityName || '',
             roleDefinition: data.anagraphicDataDTO?.roleDefinition || '',
             definitionOfAdoption: data.anagraphicDataDTO?.definitionOfAdoption || '',
@@ -129,14 +120,12 @@ const ImpactedGroupAssessment: React.FC = () => {
             whatsInItForMe: data.anagraphicDataDTO?.whatsInItForMe || '',
             individualsIds: data.anagraphicDataDTO?.individuals || [],
 
-            // ABSUP Ratings
             absupAwareness: data.groupProjectABSUPDTO?.absupAwareness || 1,
             absupBuyin: data.groupProjectABSUPDTO?.absupBuyin || 1,
             absupSkill: data.groupProjectABSUPDTO?.absupSkill || 1,
             absupUse: data.groupProjectABSUPDTO?.absupUse || 1,
             absupProficiency: data.groupProjectABSUPDTO?.absupProficiency || 1,
 
-            // Change Impact Assessment
             process: data.changeImpactAssessment?.process || 0,
             processDescription: data.echangeImpactAssessmentDescriptionsDTO?.processDescription || '',
             systems: data.changeImpactAssessment?.systems || 0,
@@ -161,21 +150,17 @@ const ImpactedGroupAssessment: React.FC = () => {
             retrenchmentDescription: data.echangeImpactAssessmentDescriptionsDTO?.retrenchmentDescription || '',
             clarityOfFutureState: data.changeImpactAssessment?.clarityOfFutureState || 0,
 
-            // Resistance Assessment
             anticipatedResistanceLevel: data.resistanceAssessment?.anticipatedResistanceLevel || 1,
             anticipatedResistanceDriver: data.resistanceAssessment?.anticipatedResistanceDriver || 'AWARENESS',
             resistanceManagementTactics: data.resistanceAssessment?.resistanceManagementTactics || [],
 
-            // Adoption Assessment
             adoptionAssessments: data.adoptionAssessments || [],
 
-            // Tags
 
             tags: data.tagDTOs?.map(tag => tag.id).filter((id): id is number => id !== undefined) || []
         };
     }, []);
 
-    // Reset form when data is loaded
     React.useEffect(() => {
         if (impactedGroup) {
             const formData = mapApiToForm(impactedGroup);
@@ -183,13 +168,12 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     }, [impactedGroup, mapApiToForm, reset]);
 
-    // Mutations for creating or updating
     const createImpactedGroupMutation = useMutation({
         mutationFn: (data: CreateCommonEntityRequestDTO) => impactedGroupService.createImpactedGroup(data),
         onSuccess: (response) => {
             showToast('Impacted group created successfully', 'success');
             queryClient.invalidateQueries({ queryKey: ['impactedGroups'] });
-            // Navigate to edit mode for the newly created group
+
             if (response.id) {
                 window.location.href = `/projects/${projectId}/impacted-group/${response.id}`;
             }
@@ -199,7 +183,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Update ABSUP ratings
     const updateABSUPMutation = useMutation({
         mutationFn: (data: UpdateABSUPRequestDTO) => impactedGroupService.updateABSUP(data),
         onSuccess: () => {
@@ -211,7 +194,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Update anagraphic data
     const updateAnagraphicDataMutation = useMutation({
         mutationFn: (data: UpdateAnagraphicDataRequestDTO) => impactedGroupService.updateAnagraphicData(data),
         onSuccess: () => {
@@ -223,7 +205,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Update resistance assessment
     const updateResistanceAssessmentMutation = useMutation({
         mutationFn: (data: UpdateResistanceAssessmentRequestDTO) => impactedGroupService.updateResistanceAssessment(data),
         onSuccess: () => {
@@ -235,7 +216,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Update change impact assessment
     const updateChangeImpactAssessmentMutation = useMutation({
         mutationFn: (data: UpdateIGChangeImpactAssessmentRequestDTO) => impactedGroupService.updateChangeImpactAssessment(data),
         onSuccess: () => {
@@ -247,13 +227,11 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     });
 
-    // Handle form submission
     const onSubmit = async (formData: ImpactedGroupFormData) => {
         try {
             if (isEditMode && groupId) {
-                // Update existing group by submitting to multiple endpoints
 
-                // Update basic information
+
                 await updateAnagraphicDataMutation.mutateAsync({
                     entityId: groupId,
                     entityName: formData.entityName || '',
@@ -268,7 +246,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                     individualsToRemove: [] // Would need to calculate delta
                 });
 
-                // Update ABSUP ratings
                 await updateABSUPMutation.mutateAsync({
                     entityId: groupId,
                     absupAwareness: formData.absupAwareness || 1,
@@ -278,7 +255,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                     absupProficiency: formData.absupProficiency || 1
                 });
 
-                // Update resistance assessment
                 await updateResistanceAssessmentMutation.mutateAsync({
                     entityId: groupId,
                     anticipatedResistanceLevel: formData.anticipatedResistanceLevel || 1,
@@ -287,7 +263,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                     resistanceManagementTacticsToRemove: [] // Would need to calculate delta
                 });
 
-                // Update change impact assessment
                 await updateChangeImpactAssessmentMutation.mutateAsync({
                     impactGroupId: groupId,
                     process: formData.process || 0,
@@ -304,14 +279,13 @@ const ImpactedGroupAssessment: React.FC = () => {
                     clarityOfFutureState: formData.clarityOfFutureState || 0
                 });
 
-                // Note: We would need additional API calls for updating:
-                // - Change impact descriptions
-                // - Adoption assessments
-                // - Tags
+
+
+
 
                 showToast('Impacted group updated successfully', 'success');
             } else {
-                // Create new impacted group
+
                 await createImpactedGroupMutation.mutateAsync({
                     projectId: projectId,
                     entityName: formData.entityName,
@@ -325,7 +299,6 @@ const ImpactedGroupAssessment: React.FC = () => {
                     individualIds: formData.individualsIds
                 });
 
-                // Note: After creation, we would need to navigate to the new group
             }
         } catch (error) {
             console.log('Error submitting form:', error);
@@ -333,7 +306,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }
     };
 
-    // Toggle section expansion
     const toggleSection = (section: keyof typeof expandedSections) => {
         setExpandedSections(prev => ({
             ...prev,
@@ -341,7 +313,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         }));
     };
 
-    // Render section header
     const renderSectionHeader = (title: string, section: keyof typeof expandedSections) => (
         <Box
             sx={{
@@ -376,7 +347,6 @@ const ImpactedGroupAssessment: React.FC = () => {
         );
     }
 
-    // Get field groups for each section
     const basicInfoFields = impactedGroupFormFields.basicInfo || [];
     const absupFields = impactedGroupFormFields.absupFields || [];
     const adoptionFields = impactedGroupFormFields.adoptionAssessment || [];
@@ -590,4 +560,4 @@ const ImpactedGroupAssessment: React.FC = () => {
 
 export default ImpactedGroupAssessment;
 
-// Import Grid for layout
+

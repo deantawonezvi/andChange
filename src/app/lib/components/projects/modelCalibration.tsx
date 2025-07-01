@@ -1,4 +1,4 @@
-// src/app/lib/components/projects/modelCalibration.tsx
+
 import React from 'react';
 import { Box, Paper, Tab, Tabs, Typography, } from '@mui/material';
 import { Building2, CalendarDays, FolderKanban, Globe, MessageSquare, UserRound, Users } from 'lucide-react';
@@ -94,16 +94,15 @@ export default function ModelCalibration({ activeTabIndex = 0, onTabChange }: Mo
     const activeTab = onTabChange ? activeTabIndex : internalActiveTab;
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        // If parent component is controlling the tabs, call its handler
+
         if (onTabChange) {
             onTabChange(newValue);
         } else {
-            // Otherwise, just update internal state
+
             setInternalActiveTab(newValue);
         }
     };
 
-    // Keep internal state in sync with props if they change
     React.useEffect(() => {
         if (onTabChange && activeTabIndex !== internalActiveTab) {
             setInternalActiveTab(activeTabIndex);

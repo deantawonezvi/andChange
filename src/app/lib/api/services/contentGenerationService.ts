@@ -100,13 +100,11 @@ export class ContentGenerationService {
      */
     async rerollContentForActionPlanItem(slotId: number): Promise<ContentGenerationRequestDTO[]> {
         try {
-            // First generate the prompt
+
             await this.generatePromptForActionPlanItems([slotId]);
 
-            // Then generate AI content based on the prompt
             const result = await this.generateAIContentForActionPlanItems([slotId]);
 
-            // Return the first array since we're only processing one item
             return result[0] || [];
         } catch (error) {
             console.error('Error rerolling content for action plan item:', error);
@@ -121,10 +119,9 @@ export class ContentGenerationService {
      */
     async rerollContentForActionPlanItems(slotIds: number[]): Promise<ContentGenerationRequestDTO[][]> {
         try {
-            // First generate prompts for all items
+
             await this.generatePromptForActionPlanItems(slotIds);
 
-            // Then generate AI content for all items
             return await this.generateAIContentForActionPlanItems(slotIds);
         } catch (error) {
             console.error('Error rerolling content for action plan items:', error);

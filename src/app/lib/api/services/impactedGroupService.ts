@@ -106,7 +106,7 @@ export interface EImpactedGroupDTO {
     managersOfPeople?: number[];
 }
 
-// Request DTOs
+
 export interface CreateCommonEntityRequestDTO {
     projectId: number;
     entityName: string;

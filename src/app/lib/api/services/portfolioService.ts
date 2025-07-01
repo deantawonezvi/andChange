@@ -1,4 +1,4 @@
-// src/app/lib/api/services/portfolioService.ts
+
 import { AxiosInstance } from 'axios';
 import createAxiosClient from '@/app/lib/api/client';
 
@@ -90,21 +90,18 @@ export class PortfolioService {
         try {
             const queryParams = new URLSearchParams();
 
-            // Add project IDs if provided
             if (params.projectIds && params.projectIds.length > 0) {
                 params.projectIds.forEach(id => {
                     queryParams.append('projectIds', id.toString());
                 });
             }
 
-            // Add individual IDs if provided
             if (params.individualIds && params.individualIds.length > 0) {
                 params.individualIds.forEach(id => {
                     queryParams.append('individualIds', id.toString());
                 });
             }
 
-            // Add required date parameters
             queryParams.append('startDate', params.startDate);
             queryParams.append('endDate', params.endDate);
 

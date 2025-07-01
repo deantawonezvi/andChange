@@ -34,7 +34,6 @@ type ImpactRadarChartProps = {
 const ImpactRadarChart: React.FC<ImpactRadarChartProps> = ({ watch }) => {
     const theme = useTheme();
 
-    // Get the current form values from the watch function
     const formValues = watch();
 
     const chartData = useMemo(() =>

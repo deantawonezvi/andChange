@@ -28,13 +28,10 @@ interface OrganizationalFormData {
     projectAlignmentToOrgStrategyRating: number;
     isProjectAgile: boolean;
 
-    // Governance fields
     sponsorAccessEvaluation: number;
 
-    // ECM Assessment
     establishedCMO: boolean;
 
-    // OrganizationalReadiness fields
     changeSaturation: number;
     managementOfPastChanges: number;
     organizationSharedVisionAndStrategicDirection: number;
@@ -54,7 +51,7 @@ const OrganizationalAssessmentForm: React.FC = () => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<OrganizationalFormData>({
         defaultValues: {
-            // AnagraphicData fields
+
             organizationName: '',
             organizationNameRating: 1,
             industry: '',
@@ -73,13 +70,10 @@ const OrganizationalAssessmentForm: React.FC = () => {
             projectAlignmentToOrgStrategyRating: 1,
             isProjectAgile: false,
 
-            // Governance fields
             sponsorAccessEvaluation: 1,
 
-            // ECM Assessment
             establishedCMO: false,
 
-            // OrganizationalReadiness fields
             changeSaturation: 1,
             managementOfPastChanges: 1,
             organizationSharedVisionAndStrategicDirection: 1,
@@ -97,10 +91,9 @@ const OrganizationalAssessmentForm: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map from API model to form data
     const mapModelToFormData = (model: ModelVariablesDTO): OrganizationalFormData => {
         return {
-            // AnagraphicData fields
+
             organizationName: model.anagraphicData?.organizationName || '',
             organizationNameRating: model.anagraphicData?.organizationNameRating || 1,
             industry: model.anagraphicData?.industry || '',
@@ -119,13 +112,10 @@ const OrganizationalAssessmentForm: React.FC = () => {
             projectAlignmentToOrgStrategyRating: model.anagraphicData?.projectAlignmentToOrgStrategyRating || 1,
             isProjectAgile: model.anagraphicData?.isProjectAgile || false,
 
-            // Governance fields
             sponsorAccessEvaluation: model.governance?.sponsorAccessEvaluation || 1,
 
-            // ECM Assessment
             establishedCMO: model.ecmAssessment?.establishedCMO || false,
 
-            // OrganizationalReadiness fields
             changeSaturation: model.organizationalReadiness?.changeSaturation || 1,
             managementOfPastChanges: model.organizationalReadiness?.managementOfPastChanges || 1,
             organizationSharedVisionAndStrategicDirection: model.organizationalReadiness?.organizationSharedVisionAndStrategicDirection || 1,
@@ -137,7 +127,6 @@ const OrganizationalAssessmentForm: React.FC = () => {
         };
     };
 
-    // Map form data back to API model structure
     const mapFormDataToModel = (formData: OrganizationalFormData, existingModel: ModelVariablesDTO): Partial<ModelVariablesDTO> => {
         const model: Partial<ModelVariablesDTO> = {
             id: existingModel.id,
@@ -246,22 +235,18 @@ const OrganizationalAssessmentForm: React.FC = () => {
         try {
             const modelUpdates = mapFormDataToModel(formData, modelData);
 
-            // Update anagraphic data
             if (modelUpdates.anagraphicData) {
                 await updateAnagraphicDataMutation.mutateAsync(modelUpdates.anagraphicData);
             }
 
-            // Update organizational readiness
             if (modelUpdates.organizationalReadiness) {
                 await updateOrganizationalReadinessMutation.mutateAsync(modelUpdates.organizationalReadiness);
             }
 
-            // Update governance
             if (modelUpdates.governance) {
                 await updateGovernanceMutation.mutateAsync(modelUpdates.governance);
             }
 
-            // Update ECM assessment
             if (modelUpdates.ecmAssessment) {
                 await updateECMAssessmentMutation.mutateAsync(modelUpdates.ecmAssessment);
             }
@@ -282,7 +267,6 @@ const OrganizationalAssessmentForm: React.FC = () => {
         return <Alert severity="error">Error loading organization data</Alert>;
     }
 
-    // Sort fields by order property
     const sortedFields = [...organisationInfoFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

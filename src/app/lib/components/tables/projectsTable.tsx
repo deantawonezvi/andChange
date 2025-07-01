@@ -1,4 +1,4 @@
-// src/app/lib/components/tables/projectsTable.tsx
+
 import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
@@ -35,7 +35,6 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
     const projectService = ProjectService.getInstance();
     const organizationService = OrganizationService.getInstance();
 
-    // Query to fetch all projects if standalone mode
     const {
         data: fetchedProjects,
         isLoading: isLoadingFetchedProjects,
@@ -46,7 +45,6 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
         enabled: standalone // Only fetch if in standalone mode
     });
 
-    // Query to fetch organizations for names
     const {
         data: organizations,
         isLoading: isLoadingOrgs
@@ -60,24 +58,20 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
             return propData;
         }
 
-        // If we're fetching our own data
         if (standalone && fetchedProjects) {
             if (organizationId) {
                 return fetchedProjects.filter(project => project.organizationId === organizationId);
             }
 
-            // Otherwise return all projects
             return fetchedProjects;
         }
 
         return [];
     }, [standalone, propData, fetchedProjects, organizationId]);
 
-    // Derive loading and error states
     const isLoading = standalone ? isLoadingFetchedProjects : propIsLoading;
     const error = standalone ? fetchedProjectsError : propError;
 
-    // Handle view project details
     const handleViewProject = (id: number) => {
         router.push(`/projects/${id}?tab=model-calibration`);
     };

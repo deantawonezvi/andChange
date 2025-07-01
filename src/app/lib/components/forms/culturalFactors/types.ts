@@ -1,28 +1,21 @@
 import { FormField } from "@/app/lib/api/formTypes";
 
 export interface CulturalFactorsFormData {
-    // Emotional Expressiveness dimension
+
     emotionalExpressivenessLevel: number;
 
-    // Uncertainty Avoidance dimension
     uncertaintyAvoidanceLevel: number;
 
-    // Power Distance dimension
     powerDistanceLevel: number;
 
-    // Individualism vs Collectivism dimension
     individualismVsCollectivismLevel: number;
 
-    // Performance via Metrics vs Relationships dimension
     performanceViaMetricsVsRelationshipsLevel: number;
 
-    // Assertiveness dimension
     assertivenessLevel: number;
 
-    // Stability vs Innovation dimension
     stabilityVsInnovationLevel: number;
 
-    // Consultative Decision Making & Inclusivity dimension
     consultativeDecisionMakingLevel: number;
 }
 
@@ -161,7 +154,7 @@ export const culturalFactorsFields: FormField[] = [
     }
 ];
 
-// Detailed descriptions for each cultural factor level - updated to match the table
+
 export const culturalFactorsDescriptions = {
     emotionalExpressiveness: [
         "Non-Expressive: Individuals rarely show emotions. Stoic or distant.",

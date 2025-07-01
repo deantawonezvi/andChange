@@ -29,11 +29,10 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                                                                       error,
                                                                       label
                                                                   }) => {
-    // Convert the string value to a Date object for manipulation
+
     const parseDate = (dateStr: string) => {
         if (!dateStr) return new Date();
 
-        // Try to parse the date from ISO format (YYYY-MM-DD)
         const parsedDate = parse(dateStr, 'yyyy-MM-dd', new Date());
 
         return isValid(parsedDate) ? parsedDate : new Date();
@@ -47,7 +46,6 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         const newValue = e.target.value;
         setInputValue(newValue);
 
-        // Try to parse the input as MM/dd/yyyy
         const parsedDate = parse(newValue, 'MM/dd/yyyy', new Date());
 
         if (isValid(parsedDate)) {
@@ -93,34 +91,26 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
 
     const open = Boolean(anchorEl);
 
-    // Generate the days for the current month
     const currentMonthStart = startOfMonth(currentDate);
     const currentMonthEnd = endOfMonth(currentDate);
     const days = eachDayOfInterval({ start: currentMonthStart, end: currentMonthEnd });
 
-    // Get the start day of the month (0 = Sunday, 1 = Monday, etc.)
     const startDay = currentMonthStart.getDay();
 
-    // Create the grid, including empty slots for days from previous/next months
     const grid = [];
 
-    // Add empty cells for days before the start of the month
     for (let i = 0; i < startDay; i++) {
         grid.push(null);
     }
 
-    // Add the days of the current month
     grid.push(...days);
 
-    // Calculate rows needed (6 rows maximum for a monthly calendar)
     const rows = Math.ceil(grid.length / 7);
 
-    // Add empty cells to complete the last row if needed
     while (grid.length < rows * 7) {
         grid.push(null);
     }
 
-    // Convert the grid to rows for easier rendering
     const calendarRows = [];
     for (let i = 0; i < rows; i++) {
         calendarRows.push(grid.slice(i * 7, (i + 1) * 7));

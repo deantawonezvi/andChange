@@ -23,7 +23,7 @@ import { format, isValid } from 'date-fns';
 import { timelineFields } from "@/app/lib/components/forms/timelineAssessment/types";
 
 interface TimelineFormData {
-    // Timeline assessment fields from ModelTimelineAssessmentDTO
+
     kickoff: string;
     designDefined: string;
     develop: string;
@@ -33,11 +33,9 @@ interface TimelineFormData {
     releases: string;
     impactedGroupPeopleMilestones: string;
 
-    // Change characteristics fields
     entryPointOfCM: string;
     timeframeAdequacyForChange: number;
 
-    // Anagraphic data field
     isProjectAgile: boolean;
 }
 
@@ -70,20 +68,18 @@ const TimelineAssessment: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map API model to form data
     const mapModelToFormData = (model: ModelVariablesDTO): TimelineFormData => {
 
         const formatDateForForm = (dateString: string | null | undefined): string => {
             if (!dateString) return '';
 
-            // Try to parse the date and format it appropriately
             try {
                 const date = new Date(dateString);
                 if (isValid(date)) {
-                    // Format date to match what your form component expects
-                    // If your form expects ISO format:
+
+
                     return date.toISOString().split('T')[0]; // YYYY-MM-DD
-                    // If your form expects another format, adjust accordingly
+
                 }
             } catch (e) {
                 console.error('Error parsing date:', dateString, e);
@@ -92,7 +88,7 @@ const TimelineAssessment: React.FC = () => {
         };
 
         return {
-// Timeline assessment fields
+
             kickoff: formatDateForForm(model.timelineAssessment?.kickoff),
             designDefined: formatDateForForm(model.timelineAssessment?.designDefined),
             develop: formatDateForForm(model.timelineAssessment?.develop),
@@ -102,11 +98,9 @@ const TimelineAssessment: React.FC = () => {
             releases: formatDateForForm(model.timelineAssessment?.releases),
             impactedGroupPeopleMilestones: formatDateForForm(model.timelineAssessment?.impactedGroupPeopleMilestones),
 
-            // Change characteristics fields
             entryPointOfCM: formatDateForForm(model.changeCharacteristics?.entryPointOfCM),
             timeframeAdequacyForChange: model.changeCharacteristics?.timeframeAdequacyForChange || 3,
 
-            // Anagraphic data field
             isProjectAgile: model.anagraphicData?.isProjectAgile || false
         };
     };
@@ -119,7 +113,6 @@ const TimelineAssessment: React.FC = () => {
         }
     }, [modelData, reset]);
 
-    // Mutations for updating the different parts of the model
     const updateTimelineAssessmentMutation = useMutation({
         mutationFn: (data: ModelTimelineAssessmentDTO) => modelService.updateTimelineAssessment(data),
         onSuccess: () => {
@@ -151,7 +144,6 @@ const TimelineAssessment: React.FC = () => {
         }
     });
 
-    // Sort timeline dates and create timeline display data
     const timelineEvents = useMemo(() => {
         if (!modelData) return [];
 
@@ -181,12 +173,11 @@ const TimelineAssessment: React.FC = () => {
         return isValid(date) ? format(date, 'MMM d, yyyy') : '';
     };
 
-    // Add the onSubmit handler to process and submit the form data
     const onSubmit = async (formData: TimelineFormData) => {
         if (!modelData) return;
 
         try {
-            // Update timeline assessment
+
             const timelineData: ModelTimelineAssessmentDTO = {
                 modelId: projectId,
                 kickoff: formData.kickoff,
@@ -200,12 +191,11 @@ const TimelineAssessment: React.FC = () => {
             };
             await updateTimelineAssessmentMutation.mutateAsync(timelineData);
 
-            // Update change characteristics - only the fields we manage in this form
             const changeCharacteristicsData: ModelChangeCharacteristicsDTO = {
                 modelId: projectId,
                 entryPointOfCM: formData.entryPointOfCM,
                 timeframeAdequacyForChange: formData.timeframeAdequacyForChange,
-                // Preserve other fields from the existing model
+
                 scopeOfChange: modelData.changeCharacteristics?.scopeOfChange || 1,
                 amountOfOverallChange: modelData.changeCharacteristics?.amountOfOverallChange || 1,
                 degreeOfConfidentialityRequired: modelData.changeCharacteristics?.degreeOfConfidentialityRequired || 1,
@@ -213,7 +203,6 @@ const TimelineAssessment: React.FC = () => {
             };
             await updateChangeCharacteristicsMutation.mutateAsync(changeCharacteristicsData);
 
-            // Update anagraphic data - only the isProjectAgile field
             if (modelData.anagraphicData) {
                 const anagraphicData = {
                     ...modelData.anagraphicData, // Keep all existing data
@@ -242,7 +231,6 @@ const TimelineAssessment: React.FC = () => {
         return <Alert severity="error">Error loading timeline data</Alert>;
     }
 
-    // Sort fields by order property
     const sortedFields = [...timelineFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

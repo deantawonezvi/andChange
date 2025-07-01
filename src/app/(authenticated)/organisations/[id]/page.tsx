@@ -19,7 +19,7 @@ interface TabPanelProps {
     value: number;
 }
 
-// TabPanel component for tab content
+
 function TabPanel(props: TabPanelProps) {
     const { children, value, index, ...other } = props;
 
@@ -40,7 +40,7 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-// Organization Details Page component
+
 export default function OrganizationDetailsPage() {
     const params = useParams();
     const organizationId = typeof params.id === 'string' ? parseInt(params.id) : 0;
@@ -50,7 +50,6 @@ export default function OrganizationDetailsPage() {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
 
-    // Query to fetch organization details
     const {
         data: organization,
         isLoading: isLoadingOrganization,
@@ -61,7 +60,6 @@ export default function OrganizationDetailsPage() {
         enabled: !!organizationId
     });
 
-    // Query to fetch individuals for this organization
     const {
         data: individuals,
         isLoading: isLoadingIndividuals,
@@ -72,13 +70,10 @@ export default function OrganizationDetailsPage() {
         enabled: !!organizationId
     });
 
-
-    // Handle tab change
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
     };
 
-    // Handle opening the create individual modal
     const handleOpenCreateIndividualModal = () => {
         setIsCreateIndividualModalOpen(true);
     };
@@ -87,24 +82,20 @@ export default function OrganizationDetailsPage() {
         setIsCreateProjectModalOpen(true);
     };
 
-    // Handle closing the create individual modal
     const handleCloseCreateIndividualModal = () => {
         setIsCreateIndividualModalOpen(false);
     };
 
-    // Handle successful individual creation
     const handleIndividualCreated = () => {
         showToast('Individual created successfully', 'success');
         queryClient.invalidateQueries({ queryKey: ['individuals', organizationId] });
         setIsCreateIndividualModalOpen(false);
     };
 
-    // If loading, show loader
     if (isLoadingOrganization) {
         return <SectionLoader />;
     }
 
-    // If error, show error message
     if (organizationError) {
         return (
             <Alert severity="error">

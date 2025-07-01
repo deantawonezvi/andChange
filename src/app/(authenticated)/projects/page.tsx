@@ -1,4 +1,4 @@
-// Modified src/app/(authenticated)/projects/page.tsx
+
 'use client'
 import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
@@ -17,7 +17,6 @@ const ProjectsPage = () => {
     const organizationService = OrganizationService.getInstance();
     const { showToast } = useToast();
 
-    // Fetch all organizations
     const {
         data: organizations,
         isLoading: isLoadingOrgs,
@@ -27,7 +26,6 @@ const ProjectsPage = () => {
         queryFn: () => organizationService.getAllOrganizations()
     });
 
-    // Fetch projects, filtered by organization if selected
     const {
         data: projects,
         isLoading: isLoadingProjects,
@@ -43,7 +41,6 @@ const ProjectsPage = () => {
         }
     });
 
-    // Show errors in toast
     useEffect(() => {
         if (orgsError) {
             showToast(`Error loading organizations: ${orgsError instanceof Error ? orgsError.message : 'Unknown error'}`, 'error');

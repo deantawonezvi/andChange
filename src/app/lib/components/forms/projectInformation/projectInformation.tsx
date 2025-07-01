@@ -10,7 +10,7 @@ import { projectInfoFields } from "@/app/lib/components/forms/projectInformation
 import { useToast } from '@/app/lib/hooks/useToast';
 
 interface ProjectInformationFormData {
-    // AnagraphicData fields
+
     projectCharter?: string;
     changeProjectName: string;
     changeProjectNameRating: number;
@@ -22,7 +22,6 @@ interface ProjectInformationFormData {
     projectAlignmentToOrgStrategyRating: number;
     isProjectAgile: boolean;
 
-    // Budget fields
     prepareApproachBudget: number;
     manageChangeBudget: number;
     sustainOutcomesBudget: number;
@@ -30,7 +29,6 @@ interface ProjectInformationFormData {
     sufficiencyOfBudget: number;
     timingAndFlow: number;
 
-    // Value Statement fields
     whyValueStatement: string;
     whyValueStatementRating: number;
     whyNowValueStatement: string;
@@ -38,17 +36,14 @@ interface ProjectInformationFormData {
     ifNotValueStatement: string;
     ifNotValueStatementRating: number;
 
-    // Change Characteristics fields
     scopeOfChange: number;
     amountOfOverallChange: number;
     degreeOfConfidentialityRequired: number;
     degreeOfExternalStakeholderImpact: number;
 
-    // ECM Assessment fields
     isProjectPerceivedAsStrategic: boolean;
     changeCompetencyOfKeyRolesDeveloped: boolean;
 
-    // Organizational Readiness fields
     perceivedNeedToChangeAmongImpacted: number;
 }
 
@@ -61,7 +56,7 @@ const ProjectInformationAssessment: React.FC = () => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<ProjectInformationFormData>({
         defaultValues: {
-            // AnagraphicData fields
+
             projectCharter: '',
             changeProjectName: '',
             changeProjectNameRating: 1,
@@ -73,7 +68,6 @@ const ProjectInformationAssessment: React.FC = () => {
             projectAlignmentToOrgStrategyRating: 1,
             isProjectAgile: false,
 
-            // Budget fields
             prepareApproachBudget: 0,
             manageChangeBudget: 0,
             sustainOutcomesBudget: 0,
@@ -81,7 +75,6 @@ const ProjectInformationAssessment: React.FC = () => {
             sufficiencyOfBudget: 1,
             timingAndFlow: 1,
 
-            // Value Statement fields
             whyValueStatement: '',
             whyValueStatementRating: 1,
             whyNowValueStatement: '',
@@ -89,17 +82,14 @@ const ProjectInformationAssessment: React.FC = () => {
             ifNotValueStatement: '',
             ifNotValueStatementRating: 1,
 
-            // Change Characteristics fields
             scopeOfChange: 1,
             amountOfOverallChange: 1,
             degreeOfConfidentialityRequired: 1,
             degreeOfExternalStakeholderImpact: 1,
 
-            // ECM Assessment fields
             isProjectPerceivedAsStrategic: false,
             changeCompetencyOfKeyRolesDeveloped: false,
 
-            // Organizational Readiness fields
             perceivedNeedToChangeAmongImpacted: 1,
         }
     });
@@ -110,10 +100,9 @@ const ProjectInformationAssessment: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map from API model to form data
     const mapModelToFormData = (model: ModelVariablesDTO): ProjectInformationFormData => {
         return {
-            // AnagraphicData fields
+
             projectCharter: model.anagraphicData?.projectCharter || '',
             changeProjectName: model.anagraphicData?.changeProjectName || '',
             changeProjectNameRating: model.anagraphicData?.changeProjectNameRating || 1,
@@ -125,7 +114,6 @@ const ProjectInformationAssessment: React.FC = () => {
             projectAlignmentToOrgStrategyRating: model.anagraphicData?.projectAlignmentToOrgStrategyRating || 1,
             isProjectAgile: model.anagraphicData?.isProjectAgile || false,
 
-            // Budget fields
             prepareApproachBudget: model.budget?.prepareApproachBudget || 0,
             manageChangeBudget: model.budget?.manageChangeBudget || 0,
             sustainOutcomesBudget: model.budget?.sustainOutcomesBudget || 0,
@@ -133,7 +121,6 @@ const ProjectInformationAssessment: React.FC = () => {
             sufficiencyOfBudget: model.budget?.sufficiencyOfBudget || 1,
             timingAndFlow: model.budget?.timingAndFlow || 1,
 
-            // Value Statement fields
             whyValueStatement: model.valueStatement?.whyValueStatement || '',
             whyValueStatementRating: model.valueStatement?.whyValueStatementRating || 1,
             whyNowValueStatement: model.valueStatement?.whyNowValueStatement || '',
@@ -141,22 +128,18 @@ const ProjectInformationAssessment: React.FC = () => {
             ifNotValueStatement: model.valueStatement?.ifNotValueStatement || '',
             ifNotValueStatementRating: model.valueStatement?.ifNotValueStatementRating || 1,
 
-            // Change Characteristics fields
             scopeOfChange: model.changeCharacteristics?.scopeOfChange || 1,
             amountOfOverallChange: model.changeCharacteristics?.amountOfOverallChange || 1,
             degreeOfConfidentialityRequired: model.changeCharacteristics?.degreeOfConfidentialityRequired || 1,
             degreeOfExternalStakeholderImpact: model.changeCharacteristics?.degreeOfExternalStakeholderImpact || 1,
 
-            // ECM Assessment fields
             isProjectPerceivedAsStrategic: model.ecmAssessment?.isProjectPerceivedAsStrategic || false,
             changeCompetencyOfKeyRolesDeveloped: model.ecmAssessment?.changeCompetencyOfKeyRolesDeveloped || false,
 
-            // Organizational Readiness fields
             perceivedNeedToChangeAmongImpacted: model.organizationalReadiness?.perceivedNeedToChangeAmongImpacted || 1,
         };
     };
 
-    // Map form data back to API model structure
     const mapFormDataToModel = (formData: ProjectInformationFormData, existingModel: ModelVariablesDTO): Partial<ModelVariablesDTO> => {
         const model: Partial<ModelVariablesDTO> = {
             id: existingModel.id,
@@ -293,32 +276,26 @@ const ProjectInformationAssessment: React.FC = () => {
         try {
             const modelUpdates = mapFormDataToModel(formData, modelData);
 
-            // Update anagraphic data
             if (modelUpdates.anagraphicData) {
                 await updateAnagraphicDataMutation.mutateAsync(modelUpdates.anagraphicData);
             }
 
-            // Update budget
             if (modelUpdates.budget) {
                 await updateBudgetMutation.mutateAsync(modelUpdates.budget);
             }
 
-            // Update value statement
             if (modelUpdates.valueStatement) {
                 await updateValueStatementMutation.mutateAsync(modelUpdates.valueStatement);
             }
 
-            // Update change characteristics
             if (modelUpdates.changeCharacteristics) {
                 await updateChangeCharacteristicsMutation.mutateAsync(modelUpdates.changeCharacteristics);
             }
 
-            // Update ECM assessment
             if (modelUpdates.ecmAssessment) {
                 await updateECMAssessmentMutation.mutateAsync(modelUpdates.ecmAssessment);
             }
 
-            // Update organizational readiness
             if (modelUpdates.organizationalReadiness) {
                 await updateOrganizationalReadinessMutation.mutateAsync(modelUpdates.organizationalReadiness);
             }
@@ -339,7 +316,6 @@ const ProjectInformationAssessment: React.FC = () => {
         return <Alert severity="error">Error loading project data</Alert>;
     }
 
-    // Sort fields by order property
     const sortedFields = [...projectInfoFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

@@ -36,7 +36,7 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-// Primary tabs definition
+
 const primaryTabs = [
     { label: 'Dashboard', icon: <BarChart3 size={20} color="#e85d45" />, id: 'dashboard' },
     { label: 'Model Calibration', icon: <Settings size={20} color="#e85d45" />, id: 'model-calibration' },
@@ -44,7 +44,7 @@ const primaryTabs = [
     { label: 'Track Progress', icon: <LineChart size={20} color="#e85d45" />, id: 'track-progress' },
 ];
 
-// Model calibration subtabs
+
 const modelCalibrationTabs = [
     { label: 'Organisation Info', id: 'org-info' },
     { label: 'Project Info', id: 'project-info' },
@@ -55,7 +55,7 @@ const modelCalibrationTabs = [
     { label: 'Cultural Factors', id: 'cultural-factors' },
 ];
 
-// Plan actions subtabs - can be expanded as needed
+
 const planActionsTabs = [
     { label: 'Action List', id: 'action-list' },
     { label: 'New Action', id: 'new-action' },
@@ -68,18 +68,14 @@ export default function ProjectPage() {
     const params = useParams();
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
 
-    // Get URL parameters
     const tabParam = searchParams.get('tab');
     const subtabParam = searchParams.get('subtab');
 
-    // Track if we detected an invalid URL parameter
     const [invalidParam, setInvalidParam] = useState<string | null>(null);
 
-    // Initialize tabs with default values
     const [activeTab, setActiveTab] = useState(0);
     const [activeSubtab, setActiveSubtab] = useState(0);
 
-    // Determine which subtabs to use based on the primary tab
     const getSubtabsForPrimaryTab = (primaryTabId: string) => {
         switch (primaryTabId) {
             case 'model-calibration':
@@ -91,30 +87,25 @@ export default function ProjectPage() {
         }
     };
 
-    // Validate and process URL parameters
     useEffect(() => {
         setInvalidParam(null);
 
-        // Validate primary tab
         if (tabParam) {
             const tabIndex = primaryTabs.findIndex(tab => tab.id === tabParam);
             if (tabIndex >= 0) {
                 setActiveTab(tabIndex);
 
-                // Get appropriate subtabs for this primary tab
                 const currentSubtabs = getSubtabsForPrimaryTab(tabParam);
 
-                // Validate subtab if present
                 if (subtabParam && currentSubtabs.length > 0) {
                     const subtabIndex = currentSubtabs.findIndex(tab => tab.id === subtabParam);
                     if (subtabIndex >= 0) {
                         setActiveSubtab(subtabIndex);
                     } else {
-                        // Invalid subtab - show error and reset to first subtab
+
                         setInvalidParam(`Invalid subtab: "${subtabParam}"`);
                         setActiveSubtab(0);
 
-                        // Correct the URL
                         if (tabParam) {
                             const correctSubtabId = currentSubtabs[0].id;
                             router.replace(`/projects/${projectId}?tab=${tabParam}&subtab=${correctSubtabId}`);
@@ -127,7 +118,6 @@ export default function ProjectPage() {
                 setInvalidParam(`Invalid tab: "${tabParam}"`);
                 setActiveTab(0);
 
-                // Correct the URL
                 router.replace(`/projects/${projectId}`);
             }
         }
@@ -147,11 +137,9 @@ export default function ProjectPage() {
         }
     };
 
-    // Update URL when subtab changes
     const handleSubtabChange = (subtabIndex: number) => {
         setActiveSubtab(subtabIndex);
 
-        // Get current primary tab
         const primaryTabId = primaryTabs[activeTab].id;
         const subtabs = getSubtabsForPrimaryTab(primaryTabId);
 

@@ -28,7 +28,6 @@ const IndividualsTable: React.FC<IndividualsTableProps> = ({
 
     }));
 
-    // Define the columns for the DataTable
     const columns: MRT_ColumnDef<IndividualTableData>[] = [
         {
             accessorKey: 'id',

@@ -252,7 +252,7 @@ class ActionService {
      */
     async getActionPlansForProject(projectId: number): Promise<ActionPlanDTO[]> {
         try {
-            // Get action plan ID from local storage
+
             const actionPlanId = localStorage.getItem(`project_${projectId}_actionPlanId`);
             if (actionPlanId) {
                 const actionPlan = await this.getActionPlanById(parseInt(actionPlanId));

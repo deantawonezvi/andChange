@@ -17,17 +17,15 @@ import { leadershipFields } from "@/app/lib/components/forms/leadershipAssessmen
 
 
 interface LeadershipFormData {
-    // PCT Success fields
+
     sponsorshipConsensusOnDefinitionOfSuccess: string;
     sponsorshipConsensusOnDefinitionOfSuccessRating: number;
 
-    // PCT Sponsorship fields
     sponsorHasAuthority: string;
     sponsorHasAuthorityRating: number;
     sponsorIsResolvingIssues: string;
     sponsorIsResolvingIssuesRating: number;
 
-    // PCT Change Management fields
     strengthOfSponsorCoalitionAssessed: string;
     strengthOfSponsorCoalitionAssessedRating: number;
     changeStrategyWithSponsorshipCommitment: string;
@@ -64,17 +62,15 @@ const LeadershipAssessment: React.FC = () => {
 
     const mapModelToFormData = (model: ModelVariablesDTO): LeadershipFormData => {
         return {
-            // PCT Success field
+
             sponsorshipConsensusOnDefinitionOfSuccess: '',
             sponsorshipConsensusOnDefinitionOfSuccessRating: model.pctSuccess?.sponsorshipConsensusOnDefinitionOfSuccess || 1,
 
-            // PCT Sponsorship fields
             sponsorHasAuthority: '',
             sponsorHasAuthorityRating: model.pctSponsorship?.sponsorHasAuthority || 1,
             sponsorIsResolvingIssues: '',
             sponsorIsResolvingIssuesRating: model.pctSponsorship?.sponsorIsResolvingIssues || 1,
 
-            // PCT Change Management fields
             strengthOfSponsorCoalitionAssessed: '',
             strengthOfSponsorCoalitionAssessedRating: model.pctChangeManagement?.strengthOfSponsorCoalitionAssessed || 1,
             changeStrategyWithSponsorshipCommitment: '',
@@ -89,7 +85,6 @@ const LeadershipAssessment: React.FC = () => {
         }
     }, [modelData, reset]);
 
-    // Mutations for the three different endpoints
     const updatePCTSuccessMutation = useMutation({
         mutationFn: (data: ModelPCTSuccessDTO) => modelService.updatePCTSuccess(data),
         onSuccess: () => {
@@ -127,7 +122,7 @@ const LeadershipAssessment: React.FC = () => {
         if (!modelData) return;
 
         try {
-            // Prepare the data for each endpoint
+
             const pctSuccessData: ModelPCTSuccessDTO = {
                 modelId: projectId,
                 sponsorshipConsensusOnDefinitionOfSuccess: formData.sponsorshipConsensusOnDefinitionOfSuccessRating,
@@ -169,7 +164,6 @@ const LeadershipAssessment: React.FC = () => {
                 organizationReadyToOwnAndSustainChange: modelData.pctChangeManagement?.organizationReadyToOwnAndSustainChange
             };
 
-            // Submit each update to the appropriate endpoint
             await updatePCTSuccessMutation.mutateAsync(pctSuccessData);
             await updatePCTSponsorshipMutation.mutateAsync(pctSponsorshipData);
             await updatePCTChangeManagementMutation.mutateAsync(pctChangeManagementData);
@@ -193,7 +187,6 @@ const LeadershipAssessment: React.FC = () => {
         return <Alert severity="error">Error loading leadership data</Alert>;
     }
 
-    // Sort fields by order property
     const sortedFields = [...leadershipFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

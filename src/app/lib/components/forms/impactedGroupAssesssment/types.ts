@@ -1,7 +1,7 @@
 import { FormField } from "@/app/lib/api/formTypes";
 
 export interface ImpactedGroupFormData {
-    // Anagraphic Data
+
     entityName: string;
     roleDefinition: string;
     definitionOfAdoption: string;
@@ -17,14 +17,12 @@ export interface ImpactedGroupFormData {
     preferredInteraction: number;
     readyDate?: Date;
 
-    // ABSUP Ratings
     absupAwareness: number;
     absupBuyin: number;
     absupSkill: number;
     absupUse: number;
     absupProficiency: number;
 
-    // Change Impact Assessment
     process: number;
     processDescription: string;
     systems: number;
@@ -49,7 +47,6 @@ export interface ImpactedGroupFormData {
     retrenchmentDescription: string;
     clarityOfFutureState: number;
 
-    // Resistance Assessment
     anticipatedResistanceLevel: number;
     anticipatedResistanceDriver: string;
     resistanceManagementTactics: {
@@ -58,17 +55,14 @@ export interface ImpactedGroupFormData {
         tacticDescriptionRating: number;
     }[];
 
-    // Adoption Assessment
     adoptionAssessments: {
         id?: number;
         adoption_assessment: string;
         adoption_threshold: number;
     }[];
 
-    // Tags
     tags: number[];
 
-    // Leadership Structure
     sponsors: number[];
     managersOfManagers: number[];
     managersOfPeople: number[];
@@ -79,7 +73,7 @@ export interface ResistanceDriverOption {
     label: string;
 }
 
-// Add this new interface
+
 export interface LeaderDetails {
     name: string;
     title: string;
@@ -342,7 +336,7 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
             required: false,
             order: 2
         },
-        // Systems fields (similar pattern)
+
         {
             fieldName: 'systems',
             label: 'Systems',

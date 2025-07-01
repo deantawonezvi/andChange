@@ -38,7 +38,6 @@ const CommunicationToneAssessment: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    // Map from API model to form data
     const mapModelToFormData = (model: any): CommunicationToneFormData => {
         return {
             formalityCasualityLevel: model.toneFactorsDTO?.formalVsCasual || 3,
@@ -82,7 +81,6 @@ const CommunicationToneAssessment: React.FC = () => {
         }
     };
 
-    // Helper to get description for a specific level of a dimension
     const getDescription = (dimension: keyof typeof communicationToneDescriptions, level: number): string => {
         return communicationToneDescriptions[dimension][level - 1] || '';
     };
@@ -99,7 +97,6 @@ const CommunicationToneAssessment: React.FC = () => {
         return <Alert severity="error">Error loading communication tone data</Alert>;
     }
 
-    // Sort fields by order property
     const sortedFields = [...communicationToneFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
     );

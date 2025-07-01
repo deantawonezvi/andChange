@@ -26,7 +26,6 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
     const queryClient = useQueryClient();
     const { showToast } = useToast();
 
-    // Check if there's an existing action plan
     const { data: existingActionPlan } = useQuery({
         queryKey: ['actionPlan', projectId],
         queryFn: () => ActionService.getInstance().getActionPlanByProjectId(projectId),
@@ -53,11 +52,11 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
     });
 
     const handleGenerateActions = () => {
-        // If there's an existing action plan, show confirmation dialog
+
         if (existingActionPlan) {
             setShowConfirmDialog(true);
         } else {
-            // No existing plan, proceed directly
+
             executeGeneration();
         }
     };
@@ -65,7 +64,6 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
     const executeGeneration = () => {
         setIsLoading(true);
 
-        // Create the request payload with the specified format
         const requestData: CreateActionPlanRequestDTO = {
             projectId: projectId,
             additiveProcess: false,
@@ -89,7 +87,6 @@ const GenerateActionsButton: React.FC<GenerateActionsButtonProps> = ({ projectId
             }
         };
 
-        // Call the mutation
         generateActionsMutation.mutate(requestData);
     };
 

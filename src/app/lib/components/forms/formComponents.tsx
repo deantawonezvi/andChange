@@ -232,7 +232,7 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
         if (type === 'boolean' && required) {
             return {
                 validate: (value) => {
-                    // For boolean fields, both true and false are valid values
+
                     return value !== null && value !== undefined ? true : 'This field is required'
                 }
             };

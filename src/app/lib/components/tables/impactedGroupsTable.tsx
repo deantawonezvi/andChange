@@ -16,20 +16,17 @@ const ImpactedGroupsTable: React.FC = () => {
     const projectId = typeof params.id === 'string' ? parseInt(params.id) : 0;
     const impactedGroupService = ImpactedGroupService.getInstance();
 
-    // Fetch impacted groups for this project
     const { data, isLoading, error } = useQuery({
         queryKey: ['impactedGroups', projectId],
         queryFn: () => impactedGroupService.getImpactedGroupsByProject(projectId),
         enabled: !!projectId,
     });
 
-    // Calculate the overall impact percentage for each group
     const calculateImpactStrength = (group: any) => {
         if (!group.changeImpactAssessment) return 0;
         return impactedGroupService.calculateChangeImpactStrength(group.changeImpactAssessment);
     };
 
-    // Define columns for the table with the correct type
     const columns: MRT_ColumnDef<Record<string, unknown>>[] = [
         {
             accessorKey: 'name',
@@ -79,7 +76,6 @@ const ImpactedGroupsTable: React.FC = () => {
         },
     ];
 
-    // Helper to render color-coded metric cells
     const renderMetricCell = (value: number) => {
         const getMetricColor = (val: number) => {
             if (val >= 4) return 'rgb(74, 222, 128)'; // green
@@ -107,7 +103,6 @@ const ImpactedGroupsTable: React.FC = () => {
         );
     };
 
-    // Transform API data for the table
     const transformedData: Record<string, unknown>[] = React.useMemo(() => {
         if (!data) return [];
 

@@ -86,7 +86,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         enabled: !!projectId,
     });
 
-    // Reroll mutation for content generation
+    
     const rerollMutation = useMutation({
         mutationFn: async (slotId: number) => {
             return await contentService.rerollContentForActionPlanItem(slotId);
@@ -96,7 +96,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         },
         onSuccess: (data, slotId) => {
             showToast('Content regenerated successfully!', 'success');
-            // Invalidate and refetch relevant queries
+            
             queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
             queryClient.invalidateQueries({ queryKey: ['actionSlotDetails', slotId] });
         },
@@ -113,7 +113,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         }
     });
 
-    // Transform data into separate categories
+    
     const { groupActions, hygieneActions, healthActions } = React.useMemo(() => {
         if (!actionPlan) return { groupActions: [], hygieneActions: [], healthActions: [] };
 
@@ -121,7 +121,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         const hygieneActions: FlattenedAction[] = [];
         const healthActions: FlattenedAction[] = [];
 
-        // Process Impacted Group Actions
+        
         if (actionPlan.impactGroupActionPlanSlotManifest) {
             Object.entries(actionPlan.impactGroupActionPlanSlotManifest).forEach(([groupId, absupCategories]) => {
                 Object.entries(absupCategories).forEach(([category, slots]) => {
@@ -147,7 +147,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-        // Process Manager of People Actions
+
         if (actionPlan.mopActionPlanSlotManifest) {
             Object.entries(actionPlan.mopActionPlanSlotManifest).forEach(([mopId, absupCategories]) => {
                 Object.entries(absupCategories).forEach(([category, slots]) => {
@@ -173,7 +173,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-        // Process Sponsor Actions
+        
         if (actionPlan.sponsorActionPlanSlotManifest) {
             Object.entries(actionPlan.sponsorActionPlanSlotManifest).forEach(([sponsorId, absupCategories]) => {
                 Object.entries(absupCategories).forEach(([category, slots]) => {
@@ -199,7 +199,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-        // Process PCT Health Actions
+        
         if (actionPlan.pctHealthActionPlanSlotManifest) {
             Object.entries(actionPlan.pctHealthActionPlanSlotManifest).forEach(([category, slots]) => {
                 slots.forEach(slot => {
@@ -220,7 +220,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-        // Process Hygiene Actions
+        
         if (actionPlan.hygieneActions) {
             actionPlan.hygieneActions.forEach(slot => {
                 hygieneActions.push({
@@ -239,7 +239,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-        // Sort all arrays by date
+        
         const sortByDate = (a: FlattenedAction, b: FlattenedAction) =>
             new Date(a.date).getTime() - new Date(b.date).getTime();
 
@@ -250,7 +250,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         };
     }, [actionPlan, actionService]);
 
-    // Fetch action slot details for group actions
+    
     const groupActionSlotQueries = useQueries({
         queries: groupActions.map(action => ({
             queryKey: ['actionSlotDetails', action.slotId],
@@ -260,7 +260,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    // Fetch action details for group actions
+    
     const groupActionQueries = useQueries({
         queries: groupActions.map(action => ({
             queryKey: ['actionDetails', action.actionId],
@@ -270,7 +270,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    // Fetch entity details for group actions
+    
     const groupEntityQueries = useQueries({
         queries: groupActions.map(action => ({
             queryKey: ['entityDetails', action.entityType, action.entityId],
@@ -319,7 +319,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    // Enhanced group actions with fetched details
     const enhancedGroupActions = React.useMemo(() => {
         return groupActions.map((action, index) => {
             const slotDetails = groupActionSlotQueries[index]?.data;
@@ -352,7 +351,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         });
     }, [groupActions, groupActionSlotQueries, groupActionQueries, groupEntityQueries]);
 
-    // Fetch action details for hygiene actions
+    
     const hygieneActionQueries = useQueries({
         queries: hygieneActions.map(action => ({
             queryKey: ['actionDetails', action.actionId],
@@ -386,7 +385,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         }));
     }, [enhancedGroupActions])
 
-    // Handler for reroll button
+    
     const handleRerollContent = (slotId: number) => {
         if (!slotId) {
             showToast('Invalid slot ID', 'error');
@@ -395,7 +394,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         rerollMutation.mutate(slotId);
     };
 
-    // Render reroll button with loading state
+    
     const renderRerollButton = (slotId: number) => {
         const isRerolling = rerollingSlots.has(slotId);
 
@@ -484,16 +483,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             }
         },
         {
-            accessorKey: 'whoReceiver',
-            header: 'RECEIVER',
-            size: 100,
-            enableColumnFilter: true,
-            Cell: ({ row }) => {
-                const isLoading = groupActionSlotQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.whoReceiver || 'N/A');
-            }
-        },
-        {
             accessorKey: 'stateTarget',
             header: 'STATE TARGET',
             size: 120,
@@ -567,7 +556,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         },
     ];
 
-    // Column definitions for Health table
+    
     const healthColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'date',
@@ -611,7 +600,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         },
     ];
 
-    // Helper functions
+    
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return format(date, 'yyyy-MM-dd');
@@ -689,7 +678,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         console.log('View history for action', actionId);
     };
 
-    // Get counts for tab labels
+    
     const getTabCounts = () => ({
         groups: enhancedGroupActions.length,
         hygiene: hygieneActions.length,

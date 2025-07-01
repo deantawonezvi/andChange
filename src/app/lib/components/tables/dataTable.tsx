@@ -118,7 +118,7 @@ const DataTable = <T extends Record<string, unknown>>({
                                 transform: 'scale(1.05)',
                                 boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
                             },
-                            // When filter is active
+
                             '&[aria-pressed="true"]': {
                                 backgroundColor: '#4caf50',
                                 color: 'white',

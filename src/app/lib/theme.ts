@@ -22,7 +22,7 @@ declare module '@mui/material/styles' {
                 borderRadius: string;
                 border: string;
             };
-            // Add table specific styling
+
             table: {
                 header: {
                     background: string;
@@ -51,7 +51,7 @@ declare module '@mui/material/styles' {
             card: string;
             button: string;
             hover: string;
-            // Add table specific shadows
+
             tableRow: string;
             tableHeader: string;
         };
@@ -71,7 +71,7 @@ declare module '@mui/material/styles' {
                 borderRadius: string;
                 border: string;
             };
-            // Add table specific styling options
+
             table?: {
                 header?: {
                     background: string;
@@ -191,7 +191,7 @@ export const theme = createTheme({
             borderRadius: '16px',
             border: '1px solid rgba(0, 0, 0, 0.12)',
         },
-        // Add table styling
+
         table: {
             header: {
                 background: '#f5f7fa',
@@ -220,7 +220,7 @@ export const theme = createTheme({
         card: '0 4px 20px rgba(0, 0, 0, 0.1)',
         button: 'none',
         hover: '0 8px 25px rgba(0, 0, 0, 0.15)',
-        // Add table shadows
+
         tableRow: '0 2px 5px rgba(0, 0, 0, 0.05)',
         tableHeader: '0 3px 10px rgba(0, 0, 0, 0.08)',
     },
@@ -294,7 +294,7 @@ export const theme = createTheme({
                 },
             },
         },
-        // Add table component styling
+
         MuiTableContainer: {
             styleOverrides: {
                 root: {
