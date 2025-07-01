@@ -2,10 +2,22 @@
 
 import React, { useState } from 'react';
 import { useQueries, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, Chip, IconButton, Tab, Tabs, Tooltip, Typography, CircularProgress } from '@mui/material';
+import {
+    Box,
+    Button,
+    Chip,
+    IconButton,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography,
+    CircularProgress,
+    TextField,
+    Stack
+} from '@mui/material';
 import { Edit, Heart, RotateCcw, Shield, Trash2, Users, Shuffle } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
-import { format } from 'date-fns';
+import { format, isWithinInterval, parseISO, isValid } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ActionService from '@/app/lib/api/services/actionService';
@@ -48,6 +60,72 @@ interface TabPanelProps {
     value: number;
 }
 
+
+const DateRangeFilter: React.FC<{
+    column: any;
+    table: any;
+}> = ({ column }) => {
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
+
+    const handleFilter = () => {
+        if (startDate && endDate) {
+            
+            column.setFilterValue([startDate, endDate]);
+        } else {
+            column.setFilterValue(undefined);
+        }
+    };
+
+    const handleClear = () => {
+        setStartDate('');
+        setEndDate('');
+        column.setFilterValue(undefined);
+    };
+
+    return (
+        <Stack spacing={1} sx={{ minWidth: 200, p: 1 }}>
+            <TextField
+                label="Start Date"
+                type="date"
+                size="small"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <TextField
+                label="End Date"
+                type="date"
+                size="small"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
+            <Stack direction="row" spacing={1}>
+                <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleFilter}
+                    disabled={!startDate || !endDate}
+                >
+                    Apply
+                </Button>
+                <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={handleClear}
+                >
+                    Clear
+                </Button>
+            </Stack>
+        </Stack>
+    );
+};
+
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => {
     return (
         <div
@@ -86,7 +164,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         enabled: !!projectId,
     });
 
-    
     const rerollMutation = useMutation({
         mutationFn: async (slotId: number) => {
             return await contentService.rerollContentForActionPlanItem(slotId);
@@ -96,7 +173,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         },
         onSuccess: (data, slotId) => {
             showToast('Content regenerated successfully!', 'success');
-            
             queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
             queryClient.invalidateQueries({ queryKey: ['actionSlotDetails', slotId] });
         },
@@ -147,7 +223,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             });
         }
 
-
+        
         if (actionPlan.mopActionPlanSlotManifest) {
             Object.entries(actionPlan.mopActionPlanSlotManifest).forEach(([mopId, absupCategories]) => {
                 Object.entries(absupCategories).forEach(([category, slots]) => {
@@ -260,7 +336,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    
     const groupActionQueries = useQueries({
         queries: groupActions.map(action => ({
             queryKey: ['actionDetails', action.actionId],
@@ -270,7 +345,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         })),
     });
 
-    
     const groupEntityQueries = useQueries({
         queries: groupActions.map(action => ({
             queryKey: ['entityDetails', action.entityType, action.entityId],
@@ -415,6 +489,36 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         );
     };
 
+    
+    const dateRangeFilterFn = (row: any, id: string, filterValue: any) => {
+        if (!filterValue || !Array.isArray(filterValue) || filterValue.length !== 2) {
+            return true;
+        }
+
+        const [startDate, endDate] = filterValue;
+        const rowDate = row.getValue(id);
+
+        if (!rowDate || !startDate || !endDate) {
+            return true;
+        }
+
+        try {
+            const actionDate = parseISO(rowDate);
+            const start = parseISO(startDate);
+            const end = parseISO(endDate);
+
+            if (!isValid(actionDate) || !isValid(start) || !isValid(end)) {
+                return true;
+            }
+
+            return isWithinInterval(actionDate, { start, end });
+        } catch (error) {
+            console.error('Error filtering date:', error);
+            return true;
+        }
+    };
+
+    
     const groupColumns: MRT_ColumnDef<FlattenedAction>[] = [
         {
             accessorKey: 'entityName',
@@ -461,9 +565,11 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         {
             accessorKey: 'date',
             header: 'DATE',
-            size: 120,
+            size: 150,
             Cell: ({ cell }) => formatDate(cell.getValue<string>()),
             enableColumnFilter: true,
+            Filter: DateRangeFilter,
+            filterFn: dateRangeFilterFn,
         },
         {
             accessorKey: 'status',

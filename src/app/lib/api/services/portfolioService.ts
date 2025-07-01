@@ -84,8 +84,8 @@ export class PortfolioService {
     async getActivityCollisionHeatmap(params: {
         projectIds?: number[];
         individualIds?: number[];
-        startDate: string;  // Required
-        endDate: string;    // Required
+        startDate: string;  
+        endDate: string;    
     }): Promise<ActivityCollisionHeatmapResponse> {
         try {
             const queryParams = new URLSearchParams();
