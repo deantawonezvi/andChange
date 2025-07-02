@@ -175,21 +175,6 @@ export const impactedGroupFormFields: Record<string, FormField[]> = {
             order: 9
         },
         {
-            fieldName: 'preferredInteraction',
-            label: 'Preference for virtual or in-person events',
-            tooltip: 'To what degree does this group prefer virtual or in-person interactions and events?',
-            type: 'slider',
-            min: 1,
-            max: 5,
-            marks: [
-                { value: 1, label: 'Virtual' },
-                { value: 3, label: 'Neutral' },
-                { value: 5, label: 'In-person' }
-            ],
-            required: false,
-            order: 10
-        },
-        {
             fieldName: 'readyDate',
             label: 'Override for group adoption date',
             tooltip: 'If this group needs to adopt change earlier, specify the date',
