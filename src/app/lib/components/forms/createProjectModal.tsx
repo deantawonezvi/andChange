@@ -33,13 +33,13 @@ interface FormInputs extends CreateProjectRequestDTO {
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                                                    open,
                                                                    onClose,
-                                                                    preselectedOrganizationId,
+                                                                   preselectedOrganizationId,
                                                                    organisationSelectEnabled = true
                                                                }) => {
     const {
         control,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
         reset,
         setValue
     } = useForm<FormInputs>({
@@ -55,13 +55,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         }
     }, [preselectedOrganizationId, setValue]);
 
-
-
     const queryClient = useQueryClient();
     const projectService = ProjectService.getInstance();
     const organizationService = OrganizationService.getInstance();
 
-    const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
+    const {data: organizations, isLoading: isLoadingOrgs} = useQuery({
         queryKey: ['accessible-organizations'],
         queryFn: () => organizationService.getAccessibleOrganizations(),
     });
@@ -69,7 +67,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     const createProjectMutation = useMutation({
         mutationFn: (data: FormInputs) => projectService.createProject(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            queryClient.invalidateQueries({queryKey: ['projects']});
             reset();
             onClose();
         }
@@ -90,7 +88,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 <DialogTitle>Create New Project</DialogTitle>
                 <DialogContent>
                     {createProjectMutation.isError && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Alert severity="error" sx={{mb: 2}}>
                             {createProjectMutation.error instanceof Error
                                 ? createProjectMutation.error.message
                                 : 'Failed to create project'}
@@ -102,9 +100,9 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         control={control}
                         rules={{
                             required: 'Project name is required',
-                            minLength: { value: 3, message: 'Minimum length is 3 characters' }
+                            minLength: {value: 3, message: 'Minimum length is 3 characters'}
                         }}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <TextField
                                 {...field}
                                 autoFocus
@@ -114,7 +112,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                 variant="outlined"
                                 error={!!errors.projectName}
                                 helperText={errors.projectName?.message}
-                                sx={{ mt: 2 }}
+                                sx={{mt: 2}}
                             />
                         )}
                     />
@@ -122,18 +120,18 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     <Controller
                         name="organizationId"
                         control={control}
-                        rules={{ required: 'Please select an organization' }}
-                        disabled={!organisationSelectEnabled}
-                        render={({ field }) => (
+                        rules={{required: 'Please select an organization'}}
+                        render={({field}) => (
                             <FormControl
                                 fullWidth
                                 error={!!errors.organizationId}
-                                sx={{ mt: 2, mb: 2 }}
+                                sx={{mt: 2, mb: 2}}
                             >
                                 <InputLabel>Organization</InputLabel>
                                 <Select
                                     {...field}
                                     label="Organization"
+                                    disabled={!organisationSelectEnabled}
                                 >
                                     {organizations?.map((org) => (
                                         <MenuItem
@@ -154,7 +152,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     />
                 </DialogContent>
 
-                <DialogActions sx={{ p: 2 }}>
+                <DialogActions sx={{p: 2}}>
                     <Button
                         onClick={handleClose}
                         disabled={createProjectMutation.isPending}
