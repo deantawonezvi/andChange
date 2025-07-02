@@ -38,11 +38,6 @@ const OrganizationsTable: React.FC<OrganizationTableProps> = ({ data, isLoading,
             size: 250,
             Cell: ({ row }) => (
                 <span
-                    style={{
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        textDecoration: 'underline'
-                    }}
                     onClick={() => handleViewOrganization(row.original.id)}
                 >
                     {row.original.organizationName}

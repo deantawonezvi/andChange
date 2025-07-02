@@ -372,7 +372,8 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                             tooltip="What aspect is most likely to drive resistance from this executive?"
                             control={control}
                             fieldName="anticipatedResistanceDriver"
-                            type="select"
+                            type="radio"
+                            orientation="vertical"
                             options={resistanceDriverOptions}
                             errors={errors}
                         />

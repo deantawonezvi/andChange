@@ -275,13 +275,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
         }
     ];
 
-    const resistanceDriverOptions = [
-        { value: 'AWARENESS', label: 'Awareness of the role of leadership in change' },
-        { value: 'BUYIN', label: 'Buy-in to the process of change management' },
-        { value: 'SKILL', label: 'Skills formally developed in the team leader\'s role in change' },
-        { value: 'USE', label: 'Actively managing the change with their team' },
-        { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
-    ];
 
     return (
         <Dialog
@@ -353,17 +346,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                         ))}
                     </Box>
 
-                    <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                        <QuestionWithRating
-                            label="Primary Resistance Driver"
-                            tooltip="What aspect is most likely to drive resistance from this team leader?"
-                            control={control}
-                            fieldName="anticipatedResistanceDriver"
-                            type="select"
-                            options={resistanceDriverOptions}
-                            errors={errors}
-                        />
-                    </Box>
 
                     <QuestionWithRating
                         label="Special Tactics / Notes"
