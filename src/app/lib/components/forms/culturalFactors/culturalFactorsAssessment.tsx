@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import { Save } from 'lucide-react';
 import { ModelService } from "@/app/lib/api/services/modelService";
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
@@ -21,7 +21,7 @@ const CulturalFactorsAssessment: React.FC = () => {
     const modelService = ModelService.getInstance();
     const { showToast } = useToast();
 
-    const { control, handleSubmit, reset, watch, formState: { errors, isDirty } } = useForm<CulturalFactorsFormData>({
+    const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<CulturalFactorsFormData>({
         defaultValues: {
             emotionalExpressivenessLevel: 3,
             uncertaintyAvoidanceLevel: 3,
