@@ -93,8 +93,27 @@ const CulturalFactorsAssessment: React.FC = () => {
         }
     };
 
-    const getDescription = (dimension: keyof typeof culturalFactorsDescriptions, level: number): string => {
-        return culturalFactorsDescriptions[dimension][level - 1] || '';
+    const getDescriptionsForField = (fieldName: string): string[] => {
+        switch (fieldName) {
+            case 'emotionalExpressivenessLevel':
+                return culturalFactorsDescriptions.emotionalExpressiveness;
+            case 'uncertaintyAvoidanceLevel':
+                return culturalFactorsDescriptions.uncertaintyAvoidance;
+            case 'powerDistanceLevel':
+                return culturalFactorsDescriptions.powerDistance;
+            case 'individualismVsCollectivismLevel':
+                return culturalFactorsDescriptions.individualismVsCollectivism;
+            case 'performanceViaMetricsVsRelationshipsLevel':
+                return culturalFactorsDescriptions.performanceViaMetricsVsRelationships;
+            case 'assertivenessLevel':
+                return culturalFactorsDescriptions.assertiveness;
+            case 'stabilityVsInnovationLevel':
+                return culturalFactorsDescriptions.stabilityVsInnovation;
+            case 'consultativeDecisionMakingLevel':
+                return culturalFactorsDescriptions.consultativeDecisionMaking;
+            default:
+                return [];
+        }
     };
 
     if (projectId === 0) {
@@ -108,8 +127,6 @@ const CulturalFactorsAssessment: React.FC = () => {
     if (error) {
         return <Alert severity="error">Error loading cultural factors data</Alert>;
     }
-
-    const formValues = watch();
 
     const sortedFields = [...culturalFactorsFields].sort((a, b) =>
         (a.order || 100) - (b.order || 100)
@@ -131,66 +148,19 @@ const CulturalFactorsAssessment: React.FC = () => {
                     </Typography>
 
                     {sortedFields.map((field) => (
-                        <Paper key={field.fieldName} elevation={0} sx={{ py: 3, mb: 2, borderRadius: 1 }}>
-                            <QuestionWithRating
-                                label={field.label}
-                                tooltip={field.tooltip}
-                                fieldName={field.fieldName}
-                                required={field.required}
-                                type={field.type}
-                                options={field.type === 'radio' ? field.options : undefined}
-                                orientation={field.type === 'radio' ? field.orientation : 'vertical'}
-                                min={field.type === 'slider' ? field.min : undefined}
-                                max={field.type === 'slider' ? field.max : undefined}
-                                marks={field.type === 'slider' ? field.marks : undefined}
-                                control={control}
-                                errors={errors}
-                            >
-                                {/* We could add field-specific elements here if needed */}
-                            </QuestionWithRating>
-
-                            {/* Display the description for the currently selected level */}
-                            {field.fieldName === 'emotionalExpressivenessLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('emotionalExpressiveness', formValues.emotionalExpressivenessLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'uncertaintyAvoidanceLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('uncertaintyAvoidance', formValues.uncertaintyAvoidanceLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'powerDistanceLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('powerDistance', formValues.powerDistanceLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'individualismVsCollectivismLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('individualismVsCollectivism', formValues.individualismVsCollectivismLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'performanceViaMetricsVsRelationshipsLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('performanceViaMetricsVsRelationships', formValues.performanceViaMetricsVsRelationshipsLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'assertivenessLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('assertiveness', formValues.assertivenessLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'stabilityVsInnovationLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('stabilityVsInnovation', formValues.stabilityVsInnovationLevel)}
-                                </Typography>
-                            )}
-                            {field.fieldName === 'consultativeDecisionMakingLevel' && (
-                                <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', color: 'text.secondary' }}>
-                                    {getDescription('consultativeDecisionMaking', formValues.consultativeDecisionMakingLevel)}
-                                </Typography>
-                            )}
-                        </Paper>
+                        <QuestionWithRating
+                            key={field.fieldName}
+                            label={field.label}
+                            tooltip={field.tooltip}
+                            fieldName={field.fieldName}
+                            required={field.required}
+                            type={field.type}
+                            options={field.type === 'radio' ? field.options : undefined}
+                            orientation={field.type === 'radio' ? field.orientation : 'vertical'}
+                            control={control}
+                            errors={errors}
+                            descriptions={getDescriptionsForField(field.fieldName)}
+                        />
                     ))}
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>

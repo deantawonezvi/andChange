@@ -44,6 +44,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 4, label: 'Open Expressiveness' },
             { value: 5, label: 'Highly Expressive' }
         ],
+        orientation: 'vertical',
         required: true,
         order: 1
     },
@@ -59,6 +60,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 4, label: 'Moderately concerned about change' },
             { value: 5, label: 'Avoids change where possible' }
         ],
+        orientation: 'vertical',
         required: true,
         order: 2
     },
@@ -75,6 +77,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'Low leader access, hierarchy defines access' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 3
     },
     {
@@ -90,6 +93,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'High team/group orientation' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 4
     },
     {
@@ -105,6 +109,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'Metrics are the only focus' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 5
     },
     {
@@ -120,6 +125,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'High assertiveness' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 6
     },
     {
@@ -135,6 +141,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'High innovation, disruption accepted' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 7
     },
     {
@@ -150,6 +157,7 @@ export const culturalFactorsFields: FormField[] = [
             { value: 5, label: 'High consultation & inclusivity' }
         ],
         required: true,
+        orientation: 'vertical',
         order: 8
     }
 ];

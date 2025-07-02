@@ -329,7 +329,7 @@ export class ImpactedGroupService {
     async updateChangeImpactAssessment(data: UpdateIGChangeImpactAssessmentRequestDTO): Promise<EImpactedGroupDTO> {
         try {
             const response = await this.client.put<EImpactedGroupDTO>(
-                '/api/v1/people/ig/change-impact-assessment',
+                '/api/v1/people/ig/impact-assessment',
                 data
             );
             return response.data;
@@ -345,7 +345,7 @@ export class ImpactedGroupService {
     async updateChangeImpactAssessmentDescriptions(data: UpdateIGChangeImpactAssessmentDescriptionsRequestDTO): Promise<EImpactedGroupDTO> {
         try {
             const response = await this.client.put<EImpactedGroupDTO>(
-                '/api/v1/people/ig/change-impact-assessment-descriptions',
+                '/api/v1/people/ig/impact-assessment-descriptions',
                 data
             );
             return response.data;

@@ -120,9 +120,6 @@ export class MOPService {
     }
 
     async createMOP(mop: CreateCommonEntityRequestDTO): Promise<EManagerOfPeopleDTO> {
-        console.log('Creating MOP with data:', mop);
-        console.log('Base URL:', this.client.defaults.baseURL);
-
         try {
             const response = await this.client.post<EManagerOfPeopleDTO>('/api/v1/people/mop/', mop);
             return response.data;
