@@ -26,7 +26,6 @@ const OrganizationsTable: React.FC<OrganizationTableProps> = ({ data, isLoading,
         router.push(`/organisations/${id}`);
     };
 
-
     const columns: MRT_ColumnDef<OrganizationTableData>[] = [
         {
             accessorKey: 'id',
@@ -71,12 +70,14 @@ const OrganizationsTable: React.FC<OrganizationTableProps> = ({ data, isLoading,
         return <div>Error: {error}</div>;
     }
 
-    const transformedData: OrganizationTableData[] = data.map(org => ({
-        id: org.id ?? 0,
-        organizationName: org.organizationName,
-        industry: org.industry,
-        language: org.language,
-    }));
+    const transformedData: OrganizationTableData[] = data
+        .map(org => ({
+            id: org.id ?? 0,
+            organizationName: org.organizationName,
+            industry: org.industry,
+            language: org.language,
+        }))
+        .sort((a, b) => a.organizationName.localeCompare(b.organizationName));
 
     return (
         <Box sx={{ width: '100%' }}>

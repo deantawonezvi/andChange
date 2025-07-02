@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
 import { MRT_ColumnDef } from 'material-react-table';
@@ -42,7 +41,7 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
     } = useQuery({
         queryKey: ['projects'],
         queryFn: () => projectService.getAllProjects(),
-        enabled: standalone // Only fetch if in standalone mode
+        enabled: standalone
     });
 
     const {
@@ -102,15 +101,17 @@ const ProjectsTable: React.FC<ProjectTableProps> = ({
         return <div>Error: {error instanceof Error ? error.message : String(error)}</div>;
     }
 
-    const transformedData: ProjectTableData[] = projects.map(project => {
-        const organization = organizations?.find(org => org.id === project.organizationId);
-        return {
-            id: project.id ?? 0,
-            projectName: project.projectName,
-            organizationId: project.organizationId,
-            organizationName: organization?.organizationName ?? 'Unknown Organization'
-        };
-    });
+    const transformedData: ProjectTableData[] = projects
+        .map(project => {
+            const organization = organizations?.find(org => org.id === project.organizationId);
+            return {
+                id: project.id ?? 0,
+                projectName: project.projectName,
+                organizationId: project.organizationId,
+                organizationName: organization?.organizationName ?? 'Unknown Organization'
+            };
+        })
+        .sort((a, b) => a.projectName.localeCompare(b.projectName));
 
     return (
         <Box sx={{ width: '100%' }}>
