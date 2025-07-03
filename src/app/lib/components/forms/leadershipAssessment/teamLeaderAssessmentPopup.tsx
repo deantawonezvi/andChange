@@ -151,7 +151,6 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
                 });
 
             } else {
-                // Create new team leader
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,
@@ -160,7 +159,7 @@ const TeamLeaderAssessmentPopup: React.FC<TeamLeaderAssessmentPopupProps> = ({
 
                 const teamLeader = await mopService.createMOP({
                     projectId,
-                    entityName: data.entityName,
+                    entityName: data.entityName || `${data.firstName} ${data.lastName}`,
                     roleDefinition: 'Team Leader',
                     definitionOfAdoption: '',
                     uniqueGroupConsiderations: data.specialTactics,

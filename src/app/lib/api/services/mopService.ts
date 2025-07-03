@@ -121,7 +121,7 @@ export class MOPService {
 
     async createMOP(mop: CreateCommonEntityRequestDTO): Promise<EManagerOfPeopleDTO> {
         try {
-            const response = await this.client.post<EManagerOfPeopleDTO>('/api/v1/people/mop/', mop);
+            const response = await this.client.post<EManagerOfPeopleDTO>('/api/v1/people/mop', mop);
             return response.data;
         } catch (error) {
             console.error('MOP creation error:', error);

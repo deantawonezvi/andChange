@@ -4,11 +4,6 @@ const nextConfig: NextConfig = {
     async rewrites() {
         return [
             {
-                source: '/api/v1/people/mop/',
-                destination: 'http://35.177.78.241:9000/api/v1/people/mop/',
-                basePath: false,
-            },
-            {
                 source: '/api/:path*',
                 destination: 'http://35.177.78.241:9000/api/:path*',
                 basePath: false
