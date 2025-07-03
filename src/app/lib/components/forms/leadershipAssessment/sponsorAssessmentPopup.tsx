@@ -10,9 +10,10 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    Typography
+    Typography,
+    Stack
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { X as Close, Trash2, UserMinus } from 'lucide-react';
 import { ESponsorDTO, SponsorService } from '@/app/lib/api/services/sponsorService';
 import { IndividualService } from '@/app/lib/api/services/individualService';
 import { QuestionWithRating } from '@/app/lib/components/forms/formComponents';
@@ -41,8 +42,10 @@ interface SponsorAssessmentPopupProps {
     projectId: number;
     organizationId: number;
     onSuccess?: () => void;
+    onDelete?: () => void; 
     existingSponsor?: ESponsorDTO | null;
     isEditMode?: boolean;
+    allowDelete?: boolean; 
 }
 
 const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
@@ -52,12 +55,16 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                                                                            projectId,
                                                                            organizationId,
                                                                            onSuccess,
+                                                                           onDelete,
                                                                            existingSponsor,
-                                                                           isEditMode = false
+                                                                           isEditMode = false,
+                                                                           allowDelete = true
                                                                        }) => {
     const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
     const {
         control,
@@ -130,7 +137,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             const impactedGroupService = ImpactedGroupService.getInstance();
 
             if (isEditMode && existingSponsor) {
-                // Update existing sponsor
+                
                 await sponsorService.updateAnagraphicData({
                     entityId: existingSponsor.id!,
                     entityName: data.entityName,
@@ -155,7 +162,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 });
 
             } else {
-                // Create new sponsor
+                
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,
@@ -209,13 +216,58 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         }
     };
 
+    const handleDelete = async () => {
+        if (!existingSponsor?.id) return;
+
+        setDeleteLoading(true);
+        setError(null);
+
+        try {
+            
+            const impactedGroupService = ImpactedGroupService.getInstance();
+            await impactedGroupService.updateEntities({
+                impactGroupId: impactedGroupId,
+                sponsorEntitiesToAdd: [],
+                sponsorEntitiesToRemove: [existingSponsor.id],
+                momEntitiesToAdd: [],
+                momEntitiesToRemove: [],
+                mopEntitiesToAdd: [],
+                mopEntitiesToRemove: []
+            });
+
+            
+            
+
+            queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
+            queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
+
+            onDelete?.();
+            handleClose();
+        } catch (err) {
+            console.error('Error removing sponsor:', err);
+            setError('Failed to remove sponsor. Please try again.');
+        } finally {
+            setDeleteLoading(false);
+            setShowDeleteConfirmation(false);
+        }
+    };
+
     const handleClose = () => {
         setError(null);
+        setShowDeleteConfirmation(false);
         reset();
         onClose();
     };
 
-    // Question configurations for sponsor assessment
+    const handleDeleteClick = () => {
+        setShowDeleteConfirmation(true);
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteConfirmation(false);
+    };
+
+    
     const questionConfigs = [
         {
             fieldName: 'absupAwareness' as const,
@@ -288,127 +340,196 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
     ];
 
     return (
-        <Dialog
-            open={open}
-            onClose={handleClose}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{
-                sx: { minHeight: '70vh' }
-            }}
-        >
-            <DialogTitle>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">
-                        {isEditMode ? 'Edit Sponsor Assessment' : 'Sponsor Assessment'}
-                    </Typography>
-                    <IconButton onClick={handleClose} size="small">
-                        <Close />
-                    </IconButton>
-                </Box>
-            </DialogTitle>
-
-            <DialogContent dividers>
-                <Box component="form" noValidate>
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-
-                    <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
-                            <>
-                                <QuestionWithRating
-                                    label="First Name"
-                                    tooltip="Enter the sponsor's first name"
-                                    control={control}
-                                    fieldName="firstName"
-                                    required
-                                    type="text"
-                                    errors={errors}
-                                />
-
-                                <QuestionWithRating
-                                    label="Last Name"
-                                    tooltip="Enter the sponsor's last name"
-                                    control={control}
-                                    fieldName="lastName"
-                                    required
-                                    type="text"
-                                    errors={errors}
-                                />
-                            </>
-
-                        <QuestionWithRating
-                            label="Sponsor Title"
-                            tooltip="Enter the sponsor's job title or position"
-                            control={control}
-                            fieldName="sponsorTitle"
-                            type="text"
-                            errors={errors}
-                        />
+        <>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { minHeight: '70vh' }
+                }}
+            >
+                <DialogTitle>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6">
+                            {isEditMode ? 'Edit Sponsor Assessment' : 'Sponsor Assessment'}
+                        </Typography>
+                        <IconButton onClick={handleClose} size="small">
+                            <Close />
+                        </IconButton>
                     </Box>
+                </DialogTitle>
 
-                    <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                        {questionConfigs.map((config) => (
+                <DialogContent dividers>
+                    <Box component="form" noValidate>
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
+
+                        <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
+                            {!isEditMode && (
+                                <>
+                                    <QuestionWithRating
+                                        label="First Name"
+                                        tooltip="Enter the sponsor's first name"
+                                        control={control}
+                                        fieldName="firstName"
+                                        required
+                                        type="text"
+                                        errors={errors}
+                                    />
+
+                                    <QuestionWithRating
+                                        label="Last Name"
+                                        tooltip="Enter the sponsor's last name"
+                                        control={control}
+                                        fieldName="lastName"
+                                        required
+                                        type="text"
+                                        errors={errors}
+                                    />
+                                </>
+                            )}
+
                             <QuestionWithRating
-                                key={config.fieldName}
-                                label={config.label}
-                                tooltip={config.tooltip}
+                                label="Entity Name"
+                                tooltip="Enter the sponsor's name or title"
                                 control={control}
-                                fieldName={config.fieldName}
-                                type="slider"
-                                min={1}
-                                max={5}
-                                marks={config.marks}
+                                fieldName="entityName"
+                                required
+                                type="text"
                                 errors={errors}
                             />
-                        ))}
-                    </Box>
 
-                    <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                            <QuestionWithRating
+                                label="Sponsor Title"
+                                tooltip="Enter the sponsor's job title or position"
+                                control={control}
+                                fieldName="sponsorTitle"
+                                type="text"
+                                errors={errors}
+                            />
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                            {questionConfigs.map((config) => (
+                                <QuestionWithRating
+                                    key={config.fieldName}
+                                    label={config.label}
+                                    tooltip={config.tooltip}
+                                    control={control}
+                                    fieldName={config.fieldName}
+                                    type="slider"
+                                    min={1}
+                                    max={5}
+                                    marks={config.marks}
+                                    errors={errors}
+                                />
+                            ))}
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                            <QuestionWithRating
+                                label="Primary Resistance Driver"
+                                tooltip="What aspect is most likely to drive resistance from this executive?"
+                                control={control}
+                                fieldName="anticipatedResistanceDriver"
+                                type="radio"
+                                orientation="vertical"
+                                options={resistanceDriverOptions}
+                                errors={errors}
+                            />
+                        </Box>
+
                         <QuestionWithRating
-                            label="Primary Resistance Driver"
-                            tooltip="What aspect is most likely to drive resistance from this executive?"
+                            label="Special Tactics / Notes"
+                            tooltip="Any special considerations or tactics for engaging this sponsor"
                             control={control}
-                            fieldName="anticipatedResistanceDriver"
-                            type="radio"
-                            orientation="vertical"
-                            options={resistanceDriverOptions}
+                            fieldName="specialTactics"
+                            type="text"
+                            multiline
                             errors={errors}
                         />
                     </Box>
+                </DialogContent>
 
-                    <QuestionWithRating
-                        label="Special Tactics / Notes"
-                        tooltip="Any special considerations or tactics for engaging this sponsor"
-                        control={control}
-                        fieldName="specialTactics"
-                        type="text"
-                        multiline
-                        errors={errors}
-                    />
-                </Box>
-            </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Stack direction="row" spacing={2} width="100%" justifyContent="space-between">
+                        <Box>
+                            {isEditMode && allowDelete && (
+                                <Button
+                                    onClick={handleDeleteClick}
+                                    variant="outlined"
+                                    color="error"
+                                    startIcon={<UserMinus />}
+                                    disabled={loading || deleteLoading}
+                                >
+                                    Remove Sponsor
+                                </Button>
+                            )}
+                        </Box>
 
-            <DialogActions sx={{ p: 2, gap: 1 }}>
-                <Button
-                    onClick={handleClose}
-                    disabled={loading}
-                    variant="outlined"
-                >
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleSubmit(onSubmit)}
-                    disabled={loading || !isValid}
-                    variant="contained"
-                    startIcon={loading ? <CircularProgress size={20} /> : null}
-                >
-                    {loading ? 'Saving...' : (isEditMode ? 'Update Sponsor' : 'Create Sponsor')}
-                </Button>
-            </DialogActions>
-        </Dialog>
+                        <Stack direction="row" spacing={2}>
+                            <Button
+                                onClick={handleClose}
+                                disabled={loading || deleteLoading}
+                                variant="outlined"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSubmit(onSubmit)}
+                                disabled={loading || deleteLoading || !isValid}
+                                variant="contained"
+                                startIcon={loading ? <CircularProgress size={20} /> : null}
+                            >
+                                {loading ? 'Saving...' : (isEditMode ? 'Update Sponsor' : 'Create Sponsor')}
+                            </Button>
+                        </Stack>
+                    </Stack>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={showDeleteConfirmation}
+                onClose={handleCancelDelete}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Trash2 size={20} color="error" />
+                        Confirm Sponsor Removal
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to remove {existingSponsor?.anagraphicDataDTO?.entityName} as a sponsor for this impacted group?
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        This will disassociate the sponsor from this impacted group but will not delete their data completely. The sponsor can be reassigned to other groups if needed.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={handleCancelDelete} disabled={deleteLoading}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleDelete}
+                        variant="contained"
+                        color="error"
+                        disabled={deleteLoading}
+                        startIcon={deleteLoading ? <CircularProgress size={20} /> : <Trash2 />}
+                    >
+                        {deleteLoading ? 'Removing...' : 'Remove Sponsor'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 
