@@ -8,6 +8,8 @@ import { ModelService, ModelVariablesDTO } from "@/app/lib/api/services/modelSer
 import { QuestionWithRating } from "@/app/lib/components/forms/formComponents";
 import { organisationInfoFields } from "@/app/lib/components/forms/organisationInfo/types";
 import { useToast } from '@/app/lib/hooks/useToast';
+import { OrganizationService } from "@/app/lib/api/services/organisationService";
+import { ProjectService } from "@/app/lib/api/services/projectService";
 
 interface OrganizationalFormData {
     organizationName: string;
@@ -27,11 +29,8 @@ interface OrganizationalFormData {
     projectAlignmentToOrgStrategy: string;
     projectAlignmentToOrgStrategyRating: number;
     isProjectAgile: boolean;
-
     sponsorAccessEvaluation: number;
-
     establishedCMO: boolean;
-
     changeSaturation: number;
     managementOfPastChanges: number;
     organizationSharedVisionAndStrategicDirection: number;
@@ -51,7 +50,6 @@ const OrganizationalAssessmentForm: React.FC = () => {
 
     const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<OrganizationalFormData>({
         defaultValues: {
-
             organizationName: '',
             organizationNameRating: 1,
             industry: '',
@@ -69,11 +67,8 @@ const OrganizationalAssessmentForm: React.FC = () => {
             projectAlignmentToOrgStrategy: '',
             projectAlignmentToOrgStrategyRating: 1,
             isProjectAgile: false,
-
             sponsorAccessEvaluation: 1,
-
             establishedCMO: false,
-
             changeSaturation: 1,
             managementOfPastChanges: 1,
             organizationSharedVisionAndStrategicDirection: 1,
@@ -91,13 +86,24 @@ const OrganizationalAssessmentForm: React.FC = () => {
         enabled: projectId > 0,
     });
 
-    const mapModelToFormData = (model: ModelVariablesDTO): OrganizationalFormData => {
-        return {
+    const { data: projectData } = useQuery({
+        queryKey: ['project', projectId],
+        queryFn: () => ProjectService.getInstance().getProjectById(projectId),
+        enabled: !!projectId
+    });
 
-            organizationName: model.anagraphicData?.organizationName || '',
-            organizationNameRating: model.anagraphicData?.organizationNameRating || 1,
-            industry: model.anagraphicData?.industry || '',
-            industryRating: model.anagraphicData?.industryRating || 1,
+    const { data: organizationData } = useQuery({
+        queryKey: ['organization', projectData?.organizationId],
+        queryFn: () => OrganizationService.getInstance().getOrganizationById(projectData!.organizationId),
+        enabled: !!projectData?.organizationId
+    });
+
+    const mapModelToFormData = (model: ModelVariablesDTO, orgData?: any): OrganizationalFormData => {
+        return {
+            organizationName: model.anagraphicData?.organizationName || orgData?.organizationName || '',
+            organizationNameRating: model.anagraphicData?.organizationNameRating || (orgData?.organizationName ? 2 : 1),
+            industry: model.anagraphicData?.industry || orgData?.industry || '',
+            industryRating: model.anagraphicData?.industryRating || (orgData?.industry ? 2 : 1),
             organizationValues: model.anagraphicData?.organizationValues || '',
             organizationValuesRating: model.anagraphicData?.organizationValuesRating || 1,
             definitionOfSuccess: model.anagraphicData?.definitionOfSuccess || '',
@@ -111,11 +117,8 @@ const OrganizationalAssessmentForm: React.FC = () => {
             projectAlignmentToOrgStrategy: model.anagraphicData?.projectAlignmentToOrgStrategy || '',
             projectAlignmentToOrgStrategyRating: model.anagraphicData?.projectAlignmentToOrgStrategyRating || 1,
             isProjectAgile: model.anagraphicData?.isProjectAgile || false,
-
             sponsorAccessEvaluation: model.governance?.sponsorAccessEvaluation || 1,
-
             establishedCMO: model.ecmAssessment?.establishedCMO || false,
-
             changeSaturation: model.organizationalReadiness?.changeSaturation || 1,
             managementOfPastChanges: model.organizationalReadiness?.managementOfPastChanges || 1,
             organizationSharedVisionAndStrategicDirection: model.organizationalReadiness?.organizationSharedVisionAndStrategicDirection || 1,
@@ -128,7 +131,7 @@ const OrganizationalAssessmentForm: React.FC = () => {
     };
 
     const mapFormDataToModel = (formData: OrganizationalFormData, existingModel: ModelVariablesDTO): Partial<ModelVariablesDTO> => {
-        const model: Partial<ModelVariablesDTO> = {
+        return {
             id: existingModel.id,
             projectId: existingModel.projectId,
             anagraphicData: {
@@ -175,16 +178,14 @@ const OrganizationalAssessmentForm: React.FC = () => {
                 projectManagementMaturity: formData.projectManagementMaturity,
             }
         };
-
-        return model;
     };
 
     React.useEffect(() => {
         if (modelData) {
-            const formData = mapModelToFormData(modelData);
+            const formData = mapModelToFormData(modelData, organizationData);
             reset(formData);
         }
-    }, [modelData, reset]);
+    }, [modelData, organizationData, reset]);
 
     const updateAnagraphicDataMutation = useMutation({
         mutationFn: (data: any) => modelService.updateAnagraphicData(data),
@@ -228,8 +229,6 @@ const OrganizationalAssessmentForm: React.FC = () => {
     });
 
     const onSubmit = async (formData: OrganizationalFormData) => {
-
-        console.log(modelData)
         if (!modelData) return;
 
         try {
