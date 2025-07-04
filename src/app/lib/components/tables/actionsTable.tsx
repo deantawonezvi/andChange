@@ -28,6 +28,7 @@ import SponsorService from "@/app/lib/api/services/sponsorService";
 import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
 import { useToast } from '@/app/lib/hooks/useToast';
 import EditActionDateDialog from "@/app/lib/components/forms/editActionDateDialog";
+import ActionContentDialog from "@/app/lib/components/forms/actionContentDialog";
 
 interface ActionsTableProps {
     projectId: number;
@@ -162,8 +163,21 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         entityName?: string;
     } | null>(null);
 
+    const [contentDialogOpen, setContentDialogOpen] = useState(false);
+    const [selectedActionForContent, setSelectedActionForContent] = useState<{
+        id: number;
+        slotId?: number;
+        name: string;
+        actionName?: string;
+        date: string;
+        entityName?: string;
+        entityType?: string;
+        stateTarget?: string;
+        status?: string;
+    } | null>(null);
+
+
     const handleEditAction = (actionId: number) => {
-        // Find the action in the enhanced group actions
         const actionToEdit = enhancedGroupActions.find(action => action.id === actionId);
 
         if (!actionToEdit) {
@@ -190,6 +204,33 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const handleCloseEditDialog = () => {
         setEditDialogOpen(false);
         setSelectedActionForEdit(null);
+    };
+
+    const handleActionClick = (actionId: number) => {
+        const actionToView = enhancedGroupActions.find(action => action.id === actionId);
+
+        if (!actionToView) {
+            showToast('Action not found', 'error');
+            return;
+        }
+
+        setSelectedActionForContent({
+            id: actionToView.id,
+            slotId: actionToView.slotId,
+            name: actionToView.name,
+            actionName: actionToView.actionName,
+            date: actionToView.date,
+            entityName: actionToView.entityName,
+            entityType: actionToView.entityType,
+            stateTarget: actionToView.stateTarget,
+            status: actionToView.status
+        });
+        setContentDialogOpen(true);
+    };
+
+    const handleCloseContentDialog = () => {
+        setContentDialogOpen(false);
+        setSelectedActionForContent(null);
     };
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
@@ -599,7 +640,23 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             enableColumnFilter: true,
             Cell: ({ row }) => {
                 const isLoading = groupActionQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.actionName || row.original.name);
+                const actionName = row.original.actionName || row.original.name;
+
+                return isLoading ? 'Loading...' : (
+                    <Box
+                        sx={{
+                            cursor: 'pointer',
+                            color: 'primary.main',
+                            textDecoration: 'underline',
+                            '&:hover': {
+                                color: 'primary.dark'
+                            }
+                        }}
+                        onClick={() => handleActionClick(row.original.id)}
+                    >
+                        {actionName}
+                    </Box>
+                );
             }
         },
         {
@@ -942,6 +999,12 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     onClose={handleCloseEditDialog}
                     action={selectedActionForEdit}
                     projectId={projectId}
+                />
+
+                <ActionContentDialog
+                    open={contentDialogOpen}
+                    onClose={handleCloseContentDialog}
+                    action={selectedActionForContent}
                 />
             </TabPanel>
 
