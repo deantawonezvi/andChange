@@ -17,9 +17,9 @@ export const timelineFields: FormField[] = [
         min: 1,
         max: 5,
         marks: [
-            { value: 1, label: 'There is lots of time' },
-            { value: 3, label: 'Timeframe is tight but trade-offs possible' },
-            { value: 5, label: 'Timeframe is tight and little option to trade-off' }
+            { value: 1, label: 'Timeframe is ample' },
+            { value: 3, label: 'Timeframe is limited' },
+            { value: 5, label: 'Timeframe is very short' }
         ],
         required: true,
         order: 2

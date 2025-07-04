@@ -301,6 +301,7 @@ const TimelineAssessment: React.FC = () => {
                                         type={field.type}
                                         control={control}
                                         errors={errors}
+                                        marks={field.type === 'slider' ? field.marks : undefined}
                                     />
                                 </Grid>
                             ))}
