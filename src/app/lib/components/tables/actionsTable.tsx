@@ -27,6 +27,7 @@ import MOPService from "@/app/lib/api/services/mopService";
 import SponsorService from "@/app/lib/api/services/sponsorService";
 import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
 import { useToast } from '@/app/lib/hooks/useToast';
+import EditActionDateDialog from "@/app/lib/components/forms/editActionDateDialog";
 
 interface ActionsTableProps {
     projectId: number;
@@ -151,6 +152,45 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const contentService = ContentGenerationService.getInstance();
     const { showToast } = useToast();
     const queryClient = useQueryClient();
+
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [selectedActionForEdit, setSelectedActionForEdit] = useState<{
+        id: number;
+        slotId?: number;
+        date: string;
+        name: string;
+        entityName?: string;
+    } | null>(null);
+
+    const handleEditAction = (actionId: number) => {
+        // Find the action in the enhanced group actions
+        const actionToEdit = enhancedGroupActions.find(action => action.id === actionId);
+
+        if (!actionToEdit) {
+            showToast('Action not found', 'error');
+            return;
+        }
+
+        // Check if this action has a slot ID (required for editing)
+        if (!actionToEdit.slotId) {
+            showToast('This action cannot be edited - no slot ID available', 'warning');
+            return;
+        }
+
+        setSelectedActionForEdit({
+            id: actionToEdit.id,
+            slotId: actionToEdit.slotId,
+            date: actionToEdit.date,
+            name: actionToEdit.actionName || actionToEdit.name,
+            entityName: actionToEdit.entityName
+        });
+        setEditDialogOpen(true);
+    };
+
+    const handleCloseEditDialog = () => {
+        setEditDialogOpen(false);
+        setSelectedActionForEdit(null);
+    };
 
     const { data: actionPlan, isLoading, error, refetch } = useQuery({
         queryKey: ['actionPlan', projectId],
@@ -772,9 +812,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         setActiveTab(newValue);
     };
 
-    const handleEditAction = (actionId: number) => {
-        console.log('Edit action', actionId);
-    };
+
 
     const handleDeleteAction = (actionId: number) => {
         console.log('Delete action', actionId);
@@ -897,6 +935,13 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     title="Group Actions"
                     subtitle="Actions targeting impacted groups, managers, and sponsors"
                     enablePagination={true}
+                />
+
+                <EditActionDateDialog
+                    open={editDialogOpen}
+                    onClose={handleCloseEditDialog}
+                    action={selectedActionForEdit}
+                    projectId={projectId}
                 />
             </TabPanel>
 
