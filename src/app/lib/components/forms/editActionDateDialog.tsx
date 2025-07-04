@@ -45,14 +45,14 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
     useEffect(() => {
         if (action && open) {
             try {
-                // Check if the date is valid before formatting
+                
                 const dateObj = new Date(action.date);
                 if (isNaN(dateObj.getTime())) {
                     console.error('Invalid date:', action.date);
                     setError('Invalid date format in action data');
                     setSelectedDate('');
                 } else {
-                    // Format the date for the input field (YYYY-MM-DD)
+                    
                     const formattedDate = format(dateObj, 'yyyy-MM-dd');
                     setSelectedDate(formattedDate);
                     setError(null);
@@ -67,10 +67,10 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
 
     const updateActionDateMutation = useMutation({
         mutationFn: async (data: { slotId: number; newDate: string }) => {
-            // First get the current slot details
+            
             const currentSlot = await actionService.getActionPlanSlotById(data.slotId);
 
-            // Update the slot with the new date
+            
             const updatedSlot = {
                 ...currentSlot,
                 slotDate: data.newDate
@@ -117,7 +117,7 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
 
     if (!action) return null;
 
-    // Safe date formatting with error handling
+    
     const formatSafeDate = (dateString: string) => {
         try {
             const dateObj = new Date(dateString);
