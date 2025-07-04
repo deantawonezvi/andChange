@@ -22,6 +22,8 @@ import {
 import { useToast } from '@/app/lib/hooks/useToast';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ImpactRadarChart from '../../common/impactAssessmentRadarChart';
+import IndividualService from "@/app/lib/api/services/individualService";
+import { ProjectService } from "@/app/lib/api/services/projectService";
 
 const ImpactedGroupAssessment: React.FC = () => {
     const params = useParams();
@@ -41,6 +43,21 @@ const ImpactedGroupAssessment: React.FC = () => {
         resistanceAssessment: false,
         tags: false
     });
+
+    const { data: project } = useQuery({
+        queryKey: ['project', projectId],
+        queryFn: () => ProjectService.getInstance().getProjectById(projectId),
+        enabled: !!projectId
+    });
+
+
+    const { data: availableIndividuals = [] } = useQuery({
+        queryKey: ['individuals', project?.organizationId],
+        queryFn: () => IndividualService.getInstance().getIndividualsByOrganization(project!.organizationId),
+        enabled: !!project?.organizationId
+    });
+
+    const firstIndividualId = availableIndividuals.length > 0 ? availableIndividuals[0].id : undefined;
 
     const { control, handleSubmit, reset, watch, formState: { errors, isDirty, isSubmitting } } = useForm<ImpactedGroupFormData>({
         defaultValues: {
@@ -175,7 +192,7 @@ const ImpactedGroupAssessment: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['impactedGroups'] });
 
             if (response.id) {
-                window.location.href = `/projects/${projectId}/impacted-group/${response.id}`;
+                window.location.href = `/projects/${projectId}?tab=model-calibration&subtab=impacted-groups`;
             }
         },
         onError: (error) => {
@@ -296,7 +313,7 @@ const ImpactedGroupAssessment: React.FC = () => {
                     membersColocated: formData.membersColocated,
                     virtualPreference: formData.virtualPreference,
                     whatsInItForMe: formData.whatsInItForMe,
-                    individualIds: formData.individualsIds
+                    individualIds: firstIndividualId ? [firstIndividualId] : []
                 });
 
             }
