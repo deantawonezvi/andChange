@@ -9,7 +9,11 @@ import {
     Typography,
     Box,
     CircularProgress,
-    Alert
+    Alert,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import { Calendar, Save } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,9 +30,20 @@ interface EditActionDateDialogProps {
         date: string;
         name: string;
         entityName?: string;
+        status?: string;
+        rawStatus?: string;
     } | null;
     projectId: number;
 }
+
+const SLOT_STATE_OPTIONS = [
+    { value: 'VACANT', label: 'VACANT' },
+    { value: 'MOOTED', label: 'MOOTED' },
+    { value: 'ACCEPTED', label: 'ACCEPTED' },
+    { value: 'CONTENT_GENERATED', label: 'CONTENT GENERATED' },
+    { value: 'COMPLETED', label: 'COMPLETED' },
+    { value: 'DELETED', label: 'DELETED' }
+];
 
 const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
                                                                        open,
@@ -37,6 +52,7 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
                                                                        projectId
                                                                    }) => {
     const [selectedDate, setSelectedDate] = useState('');
+    const [selectedState, setSelectedState] = useState('');
     const [error, setError] = useState<string | null>(null);
     const queryClient = useQueryClient();
     const { showToast } = useToast();
@@ -45,18 +61,19 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
     useEffect(() => {
         if (action && open) {
             try {
-                
                 const dateObj = new Date(action.date);
                 if (isNaN(dateObj.getTime())) {
                     console.error('Invalid date:', action.date);
                     setError('Invalid date format in action data');
                     setSelectedDate('');
                 } else {
-                    
                     const formattedDate = format(dateObj, 'yyyy-MM-dd');
                     setSelectedDate(formattedDate);
                     setError(null);
                 }
+
+                // Set initial slot state
+                setSelectedState(action.rawStatus || action.status || 'MOOTED');
             } catch (error) {
                 console.error('Error formatting date:', error);
                 setError('Error formatting date');
@@ -66,28 +83,27 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
     }, [action, open]);
 
     const updateActionDateMutation = useMutation({
-        mutationFn: async (data: { slotId: number; newDate: string }) => {
-            
+        mutationFn: async (data: { slotId: number; newDate: string; newState: string }) => {
             const currentSlot = await actionService.getActionPlanSlotById(data.slotId);
 
-            
             const updatedSlot = {
                 ...currentSlot,
-                slotDate: data.newDate
+                slotDate: data.newDate,
+                slotState: data.newState as any
             };
 
             return await actionService.updateActionPlanEntitySlot(updatedSlot);
         },
         onSuccess: () => {
-            showToast('Action date updated successfully', 'success');
+            showToast('Action updated successfully', 'success');
             queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
             queryClient.invalidateQueries({ queryKey: ['actionSlotDetails'] });
             onClose();
         },
         onError: (error) => {
-            console.error('Error updating action date:', error);
-            setError('Failed to update action date. Please try again.');
-            showToast('Failed to update action date', 'error');
+            console.error('Error updating action:', error);
+            setError('Failed to update action. Please try again.');
+            showToast('Failed to update action', 'error');
         }
     });
 
@@ -102,22 +118,28 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
             return;
         }
 
+        if (!selectedState) {
+            setError('Please select a status');
+            return;
+        }
+
         setError(null);
         updateActionDateMutation.mutate({
             slotId: action.slotId,
-            newDate: selectedDate
+            newDate: selectedDate,
+            newState: selectedState
         });
     };
 
     const handleClose = () => {
         setError(null);
         setSelectedDate('');
+        setSelectedState('');
         onClose();
     };
 
     if (!action) return null;
 
-    
     const formatSafeDate = (dateString: string) => {
         try {
             const dateObj = new Date(dateString);
@@ -145,7 +167,10 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
     };
 
     const originalDate = formatSafeDate(action.date);
-    const hasChanges = selectedDate !== originalDate && selectedDate !== '';
+    const originalState = action.rawStatus || action.status || 'MOOTED';
+    const hasDateChanges = selectedDate !== originalDate && selectedDate !== '';
+    const hasStateChanges = selectedState !== originalState && selectedState !== '';
+    const hasChanges = hasDateChanges || hasStateChanges;
 
     return (
         <Dialog
@@ -157,7 +182,7 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
             <DialogTitle>
                 <Box display="flex" alignItems="center" gap={1}>
                     <Calendar size={20} />
-                    Edit Action Date
+                    Edit Action
                 </Box>
             </DialogTitle>
 
@@ -179,22 +204,48 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
                     </Alert>
                 )}
 
-                <TextField
-                    label="Action Date"
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    fullWidth
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    helperText={`Original date: ${formatDisplayDate(action.date)}`}
-                />
+                <Box sx={{ mb: 3 }}>
+                    <TextField
+                        label="Action Date"
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        fullWidth
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        helperText={`Original date: ${formatDisplayDate(action.date)}`}
+                        disabled={updateActionDateMutation.isPending}
+                    />
+                </Box>
 
-                {hasChanges && selectedDate && (
+                <Box sx={{ mb: 2 }}>
+                    <FormControl fullWidth disabled={updateActionDateMutation.isPending}>
+                        <InputLabel>Action Status</InputLabel>
+                        <Select
+                            value={selectedState}
+                            onChange={(e) => setSelectedState(e.target.value)}
+                            label="Action Status"
+                        >
+                            {SLOT_STATE_OPTIONS.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+
+                {hasChanges && (
                     <Box sx={{ mt: 2, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
                         <Typography variant="body2" color="info.contrastText">
-                            Date will be changed from <strong>{formatDisplayDate(action.date)}</strong> to <strong>{formatDisplayDate(selectedDate)}</strong>
+                            {hasDateChanges && (
+                                <>Date will be changed from <strong>{formatDisplayDate(action.date)}</strong> to <strong>{formatDisplayDate(selectedDate)}</strong></>
+                            )}
+                            {hasDateChanges && hasStateChanges && <br />}
+                            {hasStateChanges && (
+                                <>Status will be changed from <strong>{SLOT_STATE_OPTIONS.find(opt => opt.value === originalState)?.label || originalState}</strong> to <strong>{SLOT_STATE_OPTIONS.find(opt => opt.value === selectedState)?.label}</strong></>
+                            )}
                         </Typography>
                     </Box>
                 )}
@@ -213,7 +264,7 @@ const EditActionDateDialog: React.FC<EditActionDateDialogProps> = ({
                     disabled={!hasChanges || updateActionDateMutation.isPending || !action.slotId}
                     startIcon={updateActionDateMutation.isPending ? <CircularProgress size={20} /> : <Save />}
                 >
-                    {updateActionDateMutation.isPending ? 'Saving...' : 'Save Date'}
+                    {updateActionDateMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
             </DialogActions>
         </Dialog>
