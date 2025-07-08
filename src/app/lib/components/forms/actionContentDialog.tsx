@@ -35,6 +35,22 @@ interface ActionContentDialogProps {
     } | null;
 }
 
+export const parseGeneratedResult = (generatedResult: string): string => {
+    try {
+        const parsed = JSON.parse(generatedResult);
+        return parsed.choices?.[0]?.message?.content || 'No content available';
+    } catch (error) {
+        console.error('Error parsing generated result:', error);
+        return 'Error parsing content';
+    }
+};
+
+export const formatContentParagraphs = (content: string): string[] => {
+    return content.split('\\n\\n')
+        .filter(p => p.trim())
+        .map(p => p.replace(/\\n/g, ' ').trim());
+};
+
 const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                                                      open,
                                                                      onClose,
@@ -197,24 +213,6 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                 <Box key={arrayIndex} sx={{ mb: 3 }}>
                                     {contentArray.map((content, contentIndex) => (
                                         <Box key={content.id || contentIndex} sx={{ mb: 3 }}>
-                                            {content.submittedRequest && (
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Typography variant="subtitle2" color="primary" gutterBottom>
-                                                        Generated Prompt:
-                                                    </Typography>
-                                                    <Box sx={{
-                                                        p: 2,
-                                                        bgcolor: 'blue.50',
-                                                        borderRadius: 1,
-                                                        border: '1px solid',
-                                                        borderColor: 'blue.200'
-                                                    }}>
-                                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                                            {content.submittedRequest}
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            )}
 
                                             {content.generatedResult && (
                                                 <Box sx={{ mb: 2 }}>
@@ -229,7 +227,7 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                                         borderColor: 'green.200'
                                                     }}>
                                                         <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                                            {content.generatedResult}
+                                                            {parseGeneratedResult(content.generatedResult)}
                                                         </Typography>
                                                     </Box>
                                                 </Box>

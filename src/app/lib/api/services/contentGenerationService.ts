@@ -3,7 +3,7 @@ import createAxiosClient from '@/app/lib/api/client';
 
 export interface ContentGenerationRequestDTO {
     id?: number;
-    associatedActionPlanEntitySlotDTO: any; // ActionPlanEntitySlotDTO
+    associatedActionPlanEntitySlotDTO: any;
     submittedRequest: string;
     generatedResult: string;
 }

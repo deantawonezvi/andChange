@@ -245,11 +245,7 @@ class ActionService {
         }
     }
 
-    /**
-     * Get all action plans for a project (helper method, not a direct API endpoint)
-     * This would normally be implemented with a dedicated API endpoint, but since that
-     * doesn't exist, we'll use the local storage to track action plan IDs per project
-     */
+
     async getActionPlansForProject(projectId: number): Promise<ActionPlanDTO[]> {
         try {
 
