@@ -58,7 +58,9 @@ export interface ActionPlanEntitySlotDTO {
     actionId?: number;
     aoID: string;
     whoReceiver: string;
+    whoReceiverName: string;
     whoSender: string;
+    whoSenderName: string;
     slotState: 'VACANT' | 'MOOTED' | 'ACCEPTED' | 'CONTENT_GENERATED' | 'COMPLETED' | 'DELETED';
     absuptargeted: 'AWARENESS' | 'BUYIN' | 'SKILL' | 'USE' | 'PROFICIENCY';
 }

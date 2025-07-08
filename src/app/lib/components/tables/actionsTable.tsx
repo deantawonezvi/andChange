@@ -499,7 +499,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 entityName: entityDetails?.data?.anagraphicDataDTO?.entityName || action.entityName,
                 actionName: `${verb} ${actionDetails?.actionCore?.actionName || action.name}`,
                 whoReceiver: slotDetails ? mapWhoCode(slotDetails.whoReceiver) : action.receiver,
-                whoSender: slotDetails ? mapWhoCode(slotDetails.whoSender) : action.sender,
+                whoSender: slotDetails ? slotDetails.whoSenderName : action.sender,
                 stateTarget: slotDetails?.absuptargeted || action.absupCategory,
                 entityType: entityDetails?.type || action.entityType
             };
