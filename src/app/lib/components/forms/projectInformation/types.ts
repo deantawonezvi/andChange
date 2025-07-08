@@ -9,13 +9,13 @@ export const projectInfoFields: FormField[] = [
         required: true,
         order: 1
     },
-    {
+/*    {
         fieldName: 'projectCharter',
         label: 'Project Charter or Business Case',
         tooltip: "If there is a a project charter or similar documentation, upload it here and the system will attempt to answer some of the questions for you?",
         type: 'text',
         order: 0
-    },
+    },*/
     {
         fieldName: 'changeProjectObjectives',
         ratingFieldName: 'changeProjectObjectivesRating',
