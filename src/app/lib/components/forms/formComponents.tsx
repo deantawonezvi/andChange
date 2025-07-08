@@ -167,7 +167,7 @@ export const BooleanToggle: React.FC<BooleanToggleProps> = ({
 export interface SelectOption {
     value: string | number;
     label: string;
-    description?: string; // Add description support
+    description?: string; 
 }
 
 export interface QuestionWithRatingProps {
@@ -182,14 +182,15 @@ export interface QuestionWithRatingProps {
     options?: string[] | SelectOption[];
     optionLabelKey?: string;
     optionValueKey?: string;
-    optionDescriptionKey?: string; // Add description key support
+    optionDescriptionKey?: string; 
     min?: number;
     max?: number;
     marks?: { value: number; label: string }[];
     errors: FieldErrors<any>;
     children?: React.ReactNode;
     orientation?: 'horizontal' | 'vertical';
-    descriptions?: string[]; // Add descriptions array support
+    descriptions?: string[];
+    validationRules?: any;
 }
 
 export interface RadioButtonsProps {
@@ -198,7 +199,7 @@ export interface RadioButtonsProps {
     options: { value: string | number; label: string; description?: string }[];
     orientation?: 'horizontal' | 'vertical';
     error?: string;
-    descriptions?: string[]; // Add descriptions array support
+    descriptions?: string[]; 
 }
 
 export const RadioButtons: React.FC<RadioButtonsProps> = ({
@@ -268,7 +269,7 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                                                                           label, tooltip, control, fieldName, ratingFieldName, required,
                                                                           multiline, type, options, optionLabelKey = 'label', optionValueKey = 'value',
                                                                           optionDescriptionKey = 'description', min, max, marks, errors, children,
-                                                                          orientation, descriptions
+                                                                          orientation, descriptions, validationRules
                                                                       }) => {
     const useMultiline = type !== 'select' && type !== 'slider' && type !== 'boolean' &&
         type !== 'date' && type !== 'radio' && multiline === true;
@@ -291,7 +292,7 @@ export const QuestionWithRating: React.FC<QuestionWithRatingProps> = ({
                 <Controller
                     name={fieldName}
                     control={control}
-                    rules={getValidationRules()}
+                    rules={validationRules || getValidationRules()}
                     render={({ field }) => (
                         <QuestionWithTooltip
                             label={label}

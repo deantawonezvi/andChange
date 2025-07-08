@@ -19,11 +19,10 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
-import { format, isValid } from 'date-fns';
+import { format, isValid, isAfter, parseISO } from 'date-fns';
 import { timelineFields } from "@/app/lib/components/forms/timelineAssessment/types";
 
 interface TimelineFormData {
-
     kickoff: string;
     designDefined: string;
     develop: string;
@@ -32,12 +31,21 @@ interface TimelineFormData {
     outcomes: string;
     releases: string;
     impactedGroupPeopleMilestones: string;
-
     entryPointOfCM: string;
     timeframeAdequacyForChange: number;
-
     isProjectAgile: boolean;
 }
+
+
+const CHRONOLOGICAL_ORDER = [
+    'kickoff',
+    'designDefined',
+    'develop',
+    'test',
+    'deploy',
+    'outcomes',
+    'releases'
+];
 
 const TimelineAssessment: React.FC = () => {
     const params = useParams();
@@ -46,7 +54,7 @@ const TimelineAssessment: React.FC = () => {
     const modelService = ModelService.getInstance();
     const { showToast } = useToast();
 
-    const { control, handleSubmit, reset, formState: { errors, isDirty } } = useForm<TimelineFormData>({
+    const { control, handleSubmit, reset, watch, formState: { errors, isDirty } } = useForm<TimelineFormData>({
         defaultValues: {
             kickoff: '',
             designDefined: '',
@@ -62,24 +70,71 @@ const TimelineAssessment: React.FC = () => {
         }
     });
 
+    
+    const watchedValues = watch();
+
     const { data: modelData, isLoading, error } = useQuery({
         queryKey: ['model', projectId],
         queryFn: () => modelService.getModelVariables(projectId),
         enabled: projectId > 0,
     });
 
-    const mapModelToFormData = (model: ModelVariablesDTO): TimelineFormData => {
+    
+    const getDateValidationRules = (fieldName: string) => {
+        return {
+            required: timelineFields.find(f => f.fieldName === fieldName)?.required ?
+                `${timelineFields.find(f => f.fieldName === fieldName)?.label} is required` : false,
+            validate: (value: string) => {
+                if (!value) return true; 
 
+                
+                const currentDate = parseISO(value);
+                if (!isValid(currentDate)) {
+                    return 'Please enter a valid date';
+                }
+
+                
+                const currentIndex = CHRONOLOGICAL_ORDER.indexOf(fieldName);
+
+                
+                if (currentIndex > 0) {
+                    const previousField = CHRONOLOGICAL_ORDER[currentIndex - 1];
+                    const previousValue = watchedValues[previousField as keyof TimelineFormData] as string;
+
+                    if (previousValue) {
+                        const previousDate = parseISO(previousValue);
+                        if (isValid(previousDate) && isAfter(previousDate, currentDate)) {
+                            const previousLabel = timelineFields.find(f => f.fieldName === previousField)?.label || previousField;
+                            const currentLabel = timelineFields.find(f => f.fieldName === fieldName)?.label || fieldName;
+                            return `${currentLabel} cannot be before ${previousLabel}`;
+                        }
+                    }
+                }
+
+                
+                if (fieldName === 'entryPointOfCM') {
+                    const kickoffValue = watchedValues.kickoff;
+                    if (kickoffValue) {
+                        const kickoffDate = parseISO(kickoffValue);
+                        if (isValid(kickoffDate) && isAfter(currentDate, kickoffDate)) {
+                            return 'Change Management entry point should be before or at the same time as project kickoff';
+                        }
+                    }
+                }
+
+                return true;
+            }
+        };
+    };
+
+    const mapModelToFormData = (model: ModelVariablesDTO): TimelineFormData => {
         const formatDateForForm = (dateString: string | null | undefined): string => {
             if (!dateString) return '';
 
             try {
                 const date = new Date(dateString);
                 if (isValid(date)) {
-
-
-                    return date.toISOString().split('T')[0]; // YYYY-MM-DD
-
+                    return date.toISOString().split('T')[0]; 
                 }
             } catch (e) {
                 console.error('Error parsing date:', dateString, e);
@@ -88,7 +143,6 @@ const TimelineAssessment: React.FC = () => {
         };
 
         return {
-
             kickoff: formatDateForForm(model.timelineAssessment?.kickoff),
             designDefined: formatDateForForm(model.timelineAssessment?.designDefined),
             develop: formatDateForForm(model.timelineAssessment?.develop),
@@ -97,10 +151,8 @@ const TimelineAssessment: React.FC = () => {
             outcomes: formatDateForForm(model.timelineAssessment?.outcomes),
             releases: formatDateForForm(model.timelineAssessment?.releases),
             impactedGroupPeopleMilestones: formatDateForForm(model.timelineAssessment?.impactedGroupPeopleMilestones),
-
             entryPointOfCM: formatDateForForm(model.changeCharacteristics?.entryPointOfCM),
             timeframeAdequacyForChange: model.changeCharacteristics?.timeframeAdequacyForChange || 3,
-
             isProjectAgile: model.anagraphicData?.isProjectAgile || false
         };
     };
@@ -177,7 +229,6 @@ const TimelineAssessment: React.FC = () => {
         if (!modelData) return;
 
         try {
-
             const timelineData: ModelTimelineAssessmentDTO = {
                 modelId: projectId,
                 kickoff: formData.kickoff,
@@ -195,7 +246,6 @@ const TimelineAssessment: React.FC = () => {
                 modelId: projectId,
                 entryPointOfCM: formData.entryPointOfCM,
                 timeframeAdequacyForChange: formData.timeframeAdequacyForChange,
-
                 scopeOfChange: modelData.changeCharacteristics?.scopeOfChange || 1,
                 amountOfOverallChange: modelData.changeCharacteristics?.amountOfOverallChange || 1,
                 degreeOfConfidentialityRequired: modelData.changeCharacteristics?.degreeOfConfidentialityRequired || 1,
@@ -205,7 +255,7 @@ const TimelineAssessment: React.FC = () => {
 
             if (modelData.anagraphicData) {
                 const anagraphicData = {
-                    ...modelData.anagraphicData, // Keep all existing data
+                    ...modelData.anagraphicData,
                     modelId: projectId,
                     isProjectAgile: formData.isProjectAgile
                 };
@@ -235,8 +285,11 @@ const TimelineAssessment: React.FC = () => {
         (a.order || 100) - (b.order || 100)
     );
 
+    
+    const hasValidationErrors = Object.keys(errors).length > 0;
+
     return (
-        <Box sx={{ mx: 'auto', }}>
+        <Box sx={{ mx: 'auto' }}>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
                     {(updateTimelineAssessmentMutation.isError ||
@@ -244,6 +297,12 @@ const TimelineAssessment: React.FC = () => {
                         updateAnagraphicDataMutation.isError) && (
                         <Alert severity="error">
                             Error updating timeline information. Please try again.
+                        </Alert>
+                    )}
+
+                    {hasValidationErrors && (
+                        <Alert severity="warning">
+                            Please ensure all dates follow the correct chronological order.
                         </Alert>
                     )}
 
@@ -302,6 +361,7 @@ const TimelineAssessment: React.FC = () => {
                                         control={control}
                                         errors={errors}
                                         marks={field.type === 'slider' ? field.marks : undefined}
+                                        validationRules={field.type === 'date' ? getDateValidationRules(field.fieldName) : undefined}
                                     />
                                 </Grid>
                             ))}
@@ -313,6 +373,7 @@ const TimelineAssessment: React.FC = () => {
                             type="submit"
                             variant="contained"
                             disabled={!isDirty ||
+                                hasValidationErrors ||
                                 updateTimelineAssessmentMutation.isPending ||
                                 updateChangeCharacteristicsMutation.isPending ||
                                 updateAnagraphicDataMutation.isPending}
