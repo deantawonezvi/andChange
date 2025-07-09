@@ -30,6 +30,10 @@ interface SponsorAssessmentFormData {
     absupSkill: number;
     absupUse: number;
     absupProficiency: number;
+    supportLevel: number;
+    influenceLevel: number;
+    availabilityLevel: number;
+    isPrimary: boolean;
     anticipatedResistanceLevel: number;
     anticipatedResistanceDriver: 'AWARENESS' | 'BUYIN' | 'SKILL' | 'USE' | 'PROFICIENCY';
     specialTactics: string;
@@ -83,8 +87,12 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             absupUse: 1,
             absupProficiency: 1,
             anticipatedResistanceLevel: 1,
+            supportLevel: 1,
+            influenceLevel: 1,
+            availabilityLevel: 1,
+            isPrimary: false,
             anticipatedResistanceDriver: 'AWARENESS',
-            specialTactics: ''
+            specialTactics: '',
         },
         mode: 'onChange'
     });
@@ -105,6 +113,10 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 absupSkill: existingSponsor.groupProjectABSUPDTO?.absupSkill || 1,
                 absupUse: existingSponsor.groupProjectABSUPDTO?.absupUse || 1,
                 absupProficiency: existingSponsor.groupProjectABSUPDTO?.absupProficiency || 1,
+                availabilityLevel: existingSponsor.groupUnityAssessmentDTO?.availabilityLevel || 1,
+                supportLevel: existingSponsor.groupUnityAssessmentDTO?.supportLevel || 1,
+                influenceLevel: existingSponsor.groupUnityAssessmentDTO?.influenceLevel || 1,
+                isPrimary: existingSponsor.groupUnityAssessmentDTO?.primary || false,
                 anticipatedResistanceLevel: 1,
                 anticipatedResistanceDriver: 'AWARENESS',
                 specialTactics: existingSponsor.anagraphicDataDTO.uniqueGroupConsiderations || ''
@@ -121,6 +133,10 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 absupUse: 1,
                 absupProficiency: 1,
                 anticipatedResistanceLevel: 1,
+                availabilityLevel: 1,
+                supportLevel: 1,
+                influenceLevel: 1,
+                isPrimary: false,
                 anticipatedResistanceDriver: 'AWARENESS',
                 specialTactics: ''
             });
@@ -161,6 +177,14 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     absupProficiency: data.absupProficiency
                 });
 
+                await sponsorService.updateUnityAssessment({
+                    entityId: existingSponsor.id!,
+                    availabilityLevel: data.availabilityLevel,
+                    influenceLevel: data.influenceLevel,
+                    supportLevel: data.supportLevel,
+                    isPrimary: data.isPrimary,
+                })
+
             } else {
                 
                 const individual = await individualService.createIndividual({
@@ -190,6 +214,14 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     absupUse: data.absupUse,
                     absupProficiency: data.absupProficiency
                 });
+
+                await sponsorService.updateUnityAssessment({
+                    entityId: sponsor.id!,
+                    availabilityLevel: data.availabilityLevel,
+                    influenceLevel: data.influenceLevel,
+                    supportLevel: data.supportLevel,
+                    isPrimary: data.isPrimary,
+                })
 
                 await impactedGroupService.updateEntities({
                     impactGroupId: impactedGroupId,
@@ -234,9 +266,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 mopEntitiesToAdd: [],
                 mopEntitiesToRemove: []
             });
-
-            
-            
 
             queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
             queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
@@ -319,6 +348,37 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 { value: 5, label: 'Expert' }
             ]
         },
+
+        {
+            fieldName: 'availabilityLevel' as const,
+            label: 'Availability',
+            tooltip: 'How available is the leader to perform change management actions. ',
+            marks: [
+                { value: 1, label: 'Often' },
+                { value: 3, label: 'Somewhat' },
+                { value: 5, label: 'Rarely' }
+            ]
+        },
+        {
+            fieldName: 'influenceLevel' as const,
+            label: 'The level of influence and visbility of the leader.',
+            tooltip: 'To what extent does this leader have influence over and is visible to the impacted group.',
+            marks: [
+                { value: 1, label: 'Often' },
+                { value: 3, label: 'Somewhat' },
+                { value: 5, label: 'Rarely' }
+            ]
+        },
+        {
+            fieldName: 'supportLevel' as const,
+            label: 'The level of support expressed for the change.',
+            tooltip: 'To what extent is the leader supportive of the change. If this information is not available, default to low.',
+            marks: [
+                { value: 1, label: 'Often' },
+                { value: 3, label: 'Somewhat' },
+                { value: 5, label: 'Rarely' }
+            ]
+        },
         {
             fieldName: 'anticipatedResistanceLevel' as const,
             label: 'What is the anticipated level of resistance for this executive?',
@@ -328,7 +388,13 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 { value: 3, label: 'Medium' },
                 { value: 5, label: 'High' }
             ]
-        }
+        },
+        {
+            fieldName: 'isPrimary' as const,
+            label: 'Is Primary?',
+            tooltip: 'Is this the primary sponsor of the project?',
+            type: 'boolean'
+        },
     ];
 
     const resistanceDriverOptions = [
@@ -422,7 +488,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                                     tooltip={config.tooltip}
                                     control={control}
                                     fieldName={config.fieldName}
-                                    type="slider"
+                                    type={config.type || "slider"}
                                     min={1}
                                     max={5}
                                     marks={config.marks}
