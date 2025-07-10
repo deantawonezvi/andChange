@@ -13,7 +13,8 @@ import {
     Typography,
     CircularProgress,
     TextField,
-    Stack
+    Stack,
+    Skeleton
 } from '@mui/material';
 import { Edit, Heart, RotateCcw, Shield, Trash2, Users, Shuffle } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
@@ -610,7 +611,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             filterSelectOptions: entityNameOptions,
             Cell: ({ row }) => {
                 const isLoading = groupEntityQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.entityName || 'N/A');
+                return isLoading ? <Skeleton width={150} animation="wave" /> : (row.original.entityName || 'N/A');
             }
         },
         {
@@ -642,12 +643,12 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 const isLoading = groupActionQueries.some(query => query.isLoading);
                 const actionName = row.original.actionName || row.original.name;
 
-                return isLoading ? 'Loading...' : (
+                return isLoading ? <Skeleton width={150} animation="wave" /> : (
                     <Box
                         sx={{
                             cursor: 'pointer',
                             color: 'primary.main',
-                            textDecoration: 'underline',
+                            fontWeight:'bold',
                             '&:hover': {
                                 color: 'primary.dark'
                             }
@@ -682,7 +683,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             enableColumnFilter: true,
             Cell: ({ row }) => {
                 const isLoading = groupActionSlotQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.whoSender || 'N/A');
+                return isLoading ? <Skeleton width={150} animation="wave" /> : (row.original.whoSender || 'N/A');
             }
         },
         {
