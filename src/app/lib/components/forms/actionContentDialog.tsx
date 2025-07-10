@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
     Alert,
@@ -11,13 +10,15 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    Grid,
     IconButton,
     Typography
 } from '@mui/material';
-import { Calendar, FileText, Target, User, X as Close } from 'lucide-react';
+import { Calendar, FileText, Target, User, X as Close, Copy } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
 import { format } from 'date-fns';
+import MarkDownContentRenderer from "@/app/lib/components/forms/markDownContentRenderer";
 
 interface ActionContentDialogProps {
     open: boolean;
@@ -38,17 +39,12 @@ interface ActionContentDialogProps {
 export const parseGeneratedResult = (generatedResult: string): string => {
     try {
         const parsed = JSON.parse(generatedResult);
+        console.log(parsed.choices?.[0]?.message?.content);
         return parsed.choices?.[0]?.message?.content || 'No content available';
     } catch (error) {
-        console.error('Error parsing generated result:', error);
+        console.log('Error parsing generated result:', error);
         return 'Error parsing content';
     }
-};
-
-export const formatContentParagraphs = (content: string): string[] => {
-    return content.split('\\n\\n')
-        .filter(p => p.trim())
-        .map(p => p.replace(/\\n/g, ' ').trim());
 };
 
 const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
@@ -67,7 +63,7 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
             return await contentService.getAIContentForActionPlanItems([action.slotId]);
         },
         enabled: open && !!action?.slotId,
-        staleTime: 5 * 60 * 1000, 
+        staleTime: 5 * 60 * 1000,
         retry: 2
     });
 
@@ -99,18 +95,46 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
         return colors[target || ''] || '#9e9e9e';
     };
 
+    // Get all content items flattened
+    const getAllContentItems = () => {
+        if (!contentData || contentData.length === 0) return [];
+
+        const allItems: any[] = [];
+        contentData.forEach((contentArray) => {
+            contentArray.forEach((content) => {
+                if (content.generatedResult) {
+                    allItems.push(content);
+                }
+            });
+        });
+        return allItems;
+    };
+
+    const handleCopyContent = async (content: string, assetNumber: number) => {
+        try {
+            await navigator.clipboard.writeText(content);
+            console.log(`Asset ${assetNumber} content copied to clipboard`);
+        } catch (err) {
+            console.error('Failed to copy content:', err);
+        }
+    };
+
+    const contentItems = getAllContentItems();
+    const hasMultipleItems = contentItems.length > 1;
+
     if (!action) return null;
 
     return (
         <Dialog
             open={open}
             onClose={onClose}
-            maxWidth="md"
+            maxWidth={hasMultipleItems ? "xl" : "lg"}
             fullWidth
             PaperProps={{
                 sx: {
                     minHeight: '60vh',
-                    maxHeight: '90vh'
+                    maxHeight: '90vh',
+                    width: hasMultipleItems ? '95vw' : undefined,
                 }
             }}
         >
@@ -121,6 +145,14 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                         <Typography variant="h6">
                             Action Content
                         </Typography>
+                        {hasMultipleItems && (
+                            <Chip
+                                label={`${contentItems.length} items`}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                            />
+                        )}
                     </Box>
                     <IconButton onClick={onClose} size="small">
                         <Close />
@@ -204,42 +236,102 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
 
                 {!isLoading && !error && contentData && (
                     <Box>
-                        {contentData.length === 0 ? (
+                        {contentItems.length === 0 ? (
                             <Alert severity="info">
                                 No generated content available for this action.
                             </Alert>
-                        ) : (
-                            contentData.map((contentArray, arrayIndex) => (
-                                <Box key={arrayIndex} sx={{ mb: 3 }}>
-                                    {contentArray.map((content, contentIndex) => (
-                                        <Box key={content.id || contentIndex} sx={{ mb: 3 }}>
-
-                                            {content.generatedResult && (
-                                                <Box sx={{ mb: 2 }}>
-                                                    <Typography variant="subtitle2" color="success.main" gutterBottom>
-                                                        Generated Content:
-                                                    </Typography>
-                                                    <Box sx={{
-                                                        p: 2,
-                                                        bgcolor: 'green.50',
-                                                        borderRadius: 1,
-                                                        border: '1px solid',
-                                                        borderColor: 'green.200'
-                                                    }}>
-                                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                                                            {parseGeneratedResult(content.generatedResult)}
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            )}
-
-                                            {contentIndex < contentArray.length - 1 && (
-                                                <Divider sx={{ my: 2 }} />
-                                            )}
+                        ) : hasMultipleItems ? (
+                            <Grid container spacing={3}>
+                                {contentItems.map((content, index) => (
+                                    <Grid item xs={12} md={6} key={content.id || index}>
+                                        <Box sx={{
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column'
+                                        }}>
+                                            <Typography
+                                                variant="subtitle1"
+                                                sx={{
+                                                    mb: 2,
+                                                    fontWeight: 600,
+                                                    color: 'primary.main',
+                                                    borderBottom: '2px solid',
+                                                    borderColor: 'primary.main',
+                                                    pb: 1
+                                                }}
+                                            >
+                                                Asset {index + 1}
+                                            </Typography>
+                                            <Button
+                                                size="small"
+                                                startIcon={<Copy size={14} />}
+                                                onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                variant="outlined"
+                                                sx={{
+                                                    minWidth: 'auto',
+                                                    px: 1,
+                                                    py: 0.5,
+                                                    fontSize: '0.75rem'
+                                                }}
+                                            >
+                                                Copy Content
+                                            </Button>
+                                            <br/>
+                                            <Box sx={{
+                                                flex: 1,
+                                                p: 2,
+                                                bgcolor: 'grey.50',
+                                                borderRadius: 1,
+                                                border: '1px solid',
+                                                borderColor: 'grey.300',
+                                                overflow: 'auto'
+                                            }}>
+                                                <MarkDownContentRenderer
+                                                    content={parseGeneratedResult(content.generatedResult)}
+                                                />
+                                            </Box>
                                         </Box>
-                                    ))}
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        ) : (
+                            <Box sx={{ mb: 2 }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2
+                                }}>
+                                    <Typography variant="subtitle2" color="success.main">
+                                        Generated Content:
+                                    </Typography>
+                                    <Button
+                                        size="small"
+                                        startIcon={<Copy size={14} />}
+                                        onClick={() => handleCopyContent(parseGeneratedResult(contentItems[0].generatedResult), 1)}
+                                        variant="outlined"
+                                        sx={{
+                                            minWidth: 'auto',
+                                            px: 1,
+                                            py: 0.5,
+                                            fontSize: '0.75rem'
+                                        }}
+                                    >
+                                        Copy Content
+                                    </Button>
                                 </Box>
-                            ))
+                                <Box sx={{
+                                    p: 2,
+                                    bgcolor: 'grey.50',
+                                    borderRadius: 1,
+                                    border: '1px solid',
+                                    borderColor: 'grey.300'
+                                }}>
+                                    <MarkDownContentRenderer
+                                        content={parseGeneratedResult(contentItems[0].generatedResult)}
+                                    />
+                                </Box>
+                            </Box>
                         )}
                     </Box>
                 )}
