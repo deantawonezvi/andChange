@@ -11,14 +11,23 @@ import {
     DialogTitle,
     IconButton,
     Typography,
-    Stack
+    Stack,
+    FormControl,
+    FormLabel,
+    RadioGroup,
+    FormControlLabel,
+    Radio,
+    Autocomplete,
+    TextField,
+    Divider,
+    Chip
 } from '@mui/material';
-import { X as Close, Trash2, UserMinus } from 'lucide-react';
+import { X as Close, Trash2, UserMinus, Plus, Search } from 'lucide-react';
 import { ESponsorDTO, SponsorService } from '@/app/lib/api/services/sponsorService';
 import { IndividualService } from '@/app/lib/api/services/individualService';
 import { QuestionWithRating } from '@/app/lib/components/forms/formComponents';
 import ImpactedGroupService from "@/app/lib/api/services/impactedGroupService";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface SponsorAssessmentFormData {
     firstName: string;
@@ -46,11 +55,13 @@ interface SponsorAssessmentPopupProps {
     projectId: number;
     organizationId: number;
     onSuccess?: () => void;
-    onDelete?: () => void; 
+    onDelete?: () => void;
     existingSponsor?: ESponsorDTO | null;
     isEditMode?: boolean;
-    allowDelete?: boolean; 
+    allowDelete?: boolean;
 }
+
+type SponsorMode = 'create' | 'select' | 'edit';
 
 const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                                                                            open,
@@ -69,6 +80,18 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [sponsorMode, setSponsorMode] = useState<SponsorMode>(isEditMode ? 'edit' : 'create');
+    const [selectedExistingSponsor, setSelectedExistingSponsor] = useState<ESponsorDTO | null>(null);
+
+    // Fetch existing sponsors for selection
+    const { data: existingSponsors = [], isLoading: loadingSponsors } = useQuery({
+        queryKey: ['unassigned-sponsors', projectId, organizationId, impactedGroupId],
+        queryFn: async () => {
+            const sponsorService = SponsorService.getInstance();
+            return await sponsorService.getUnassignedSponsors(projectId, organizationId, impactedGroupId);
+        },
+        enabled: open && sponsorMode === 'select'
+    });
 
     const {
         control,
@@ -99,6 +122,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
 
     useEffect(() => {
         if (isEditMode && existingSponsor && open) {
+            setSponsorMode('edit');
             const nameParts = existingSponsor.anagraphicDataDTO.entityName.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
@@ -122,6 +146,8 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 specialTactics: existingSponsor.anagraphicDataDTO.uniqueGroupConsiderations || ''
             });
         } else if (!isEditMode && open) {
+            setSponsorMode('create');
+            setSelectedExistingSponsor(null);
             reset({
                 firstName: '',
                 lastName: '',
@@ -143,6 +169,57 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         }
     }, [isEditMode, existingSponsor, open, reset]);
 
+    const handleModeChange = (mode: SponsorMode) => {
+        setSponsorMode(mode);
+        setSelectedExistingSponsor(null);
+        setError(null);
+
+        if (mode === 'create') {
+            reset({
+                firstName: '',
+                lastName: '',
+                entityName: '',
+                sponsorTitle: '',
+                absupAwareness: 1,
+                absupBuyin: 1,
+                absupSkill: 1,
+                absupUse: 1,
+                absupProficiency: 1,
+                anticipatedResistanceLevel: 1,
+                availabilityLevel: 1,
+                supportLevel: 1,
+                influenceLevel: 1,
+                isPrimary: false,
+                anticipatedResistanceDriver: 'AWARENESS',
+                specialTactics: ''
+            });
+        }
+    };
+
+    const handleExistingSponsorSelect = (sponsor: ESponsorDTO | null) => {
+        setSelectedExistingSponsor(sponsor);
+        if (sponsor) {
+            reset({
+                firstName: '',
+                lastName: '',
+                entityName: sponsor.anagraphicDataDTO.entityName,
+                sponsorTitle: sponsor.sponsorTitle || '',
+                absupAwareness: sponsor.groupProjectABSUPDTO?.absupAwareness || 1,
+                absupBuyin: sponsor.groupProjectABSUPDTO?.absupBuyin || 1,
+                absupSkill: sponsor.groupProjectABSUPDTO?.absupSkill || 1,
+                absupUse: sponsor.groupProjectABSUPDTO?.absupUse || 1,
+                absupProficiency: sponsor.groupProjectABSUPDTO?.absupProficiency || 1,
+                availabilityLevel: sponsor.groupUnityAssessmentDTO?.availabilityLevel || 1,
+                supportLevel: sponsor.groupUnityAssessmentDTO?.supportLevel || 1,
+                influenceLevel: sponsor.groupUnityAssessmentDTO?.influenceLevel || 1,
+                isPrimary: sponsor.groupUnityAssessmentDTO?.primary || false,
+                anticipatedResistanceLevel: 1,
+                anticipatedResistanceDriver: 'AWARENESS',
+                specialTactics: sponsor.anagraphicDataDTO.uniqueGroupConsiderations || ''
+            });
+        }
+    };
+
     const onSubmit = async (data: SponsorAssessmentFormData) => {
         setLoading(true);
         setError(null);
@@ -152,8 +229,8 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             const individualService = IndividualService.getInstance();
             const impactedGroupService = ImpactedGroupService.getInstance();
 
-            if (isEditMode && existingSponsor) {
-                
+            if (sponsorMode === 'edit' && existingSponsor) {
+                // Edit existing sponsor
                 await sponsorService.updateAnagraphicData({
                     entityId: existingSponsor.id!,
                     entityName: data.entityName,
@@ -183,10 +260,22 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     influenceLevel: data.influenceLevel,
                     supportLevel: data.supportLevel,
                     isPrimary: data.isPrimary,
-                })
+                });
 
-            } else {
-                
+            } else if (sponsorMode === 'select' && selectedExistingSponsor) {
+                // Assign existing sponsor to impacted group
+                await impactedGroupService.updateEntities({
+                    impactGroupId: impactedGroupId,
+                    sponsorEntitiesToAdd: [selectedExistingSponsor.id!],
+                    sponsorEntitiesToRemove: [],
+                    momEntitiesToAdd: [],
+                    momEntitiesToRemove: [],
+                    mopEntitiesToAdd: [],
+                    mopEntitiesToRemove: []
+                });
+
+            } else if (sponsorMode === 'create') {
+                // Create new sponsor
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,
@@ -221,7 +310,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                     influenceLevel: data.influenceLevel,
                     supportLevel: data.supportLevel,
                     isPrimary: data.isPrimary,
-                })
+                });
 
                 await impactedGroupService.updateEntities({
                     impactGroupId: impactedGroupId,
@@ -236,13 +325,14 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
 
             queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
             queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
+            queryClient.invalidateQueries({ queryKey: ['unassigned-sponsors'] });
 
             onSuccess?.();
             handleClose();
 
         } catch (err) {
             console.error('Error saving sponsor:', err);
-            setError(isEditMode ? 'Failed to update sponsor. Please try again.' : 'Failed to create sponsor. Please try again.');
+            setError('Failed to save sponsor. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -255,7 +345,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         setError(null);
 
         try {
-            
             const impactedGroupService = ImpactedGroupService.getInstance();
             await impactedGroupService.updateEntities({
                 impactGroupId: impactedGroupId,
@@ -269,6 +358,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
 
             queryClient.invalidateQueries({ queryKey: ['leadership-structure'] });
             queryClient.invalidateQueries({ queryKey: ['impacted-groups'] });
+            queryClient.invalidateQueries({ queryKey: ['unassigned-sponsors'] });
 
             onDelete?.();
             handleClose();
@@ -284,6 +374,8 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
     const handleClose = () => {
         setError(null);
         setShowDeleteConfirmation(false);
+        setSelectedExistingSponsor(null);
+        setSponsorMode(isEditMode ? 'edit' : 'create');
         reset();
         onClose();
     };
@@ -296,7 +388,6 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         setShowDeleteConfirmation(false);
     };
 
-    
     const questionConfigs = [
         {
             fieldName: 'absupAwareness' as const,
@@ -348,11 +439,10 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 { value: 5, label: 'Expert' }
             ]
         },
-
         {
             fieldName: 'availabilityLevel' as const,
             label: 'Availability',
-            tooltip: 'How available is the leader to perform change management actions. ',
+            tooltip: 'How available is the leader to perform change management actions.',
             marks: [
                 { value: 1, label: 'Often' },
                 { value: 3, label: 'Somewhat' },
@@ -361,7 +451,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         },
         {
             fieldName: 'influenceLevel' as const,
-            label: 'The level of influence and visbility of the leader.',
+            label: 'The level of influence and visibility of the leader.',
             tooltip: 'To what extent does this leader have influence over and is visible to the impacted group.',
             marks: [
                 { value: 1, label: 'Often' },
@@ -405,6 +495,35 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
         { value: 'PROFICIENCY', label: 'Proficiency in leading change' }
     ];
 
+    const getDialogTitle = () => {
+        switch (sponsorMode) {
+            case 'edit':
+                return 'Edit Sponsor Assessment';
+            case 'select':
+                return 'Assign Existing Sponsor';
+            case 'create':
+            default:
+                return 'Create New Sponsor';
+        }
+    };
+
+    const isFormValid = () => {
+        if (sponsorMode === 'select') {
+            return selectedExistingSponsor !== null;
+        }
+        return isValid;
+    };
+
+    const getABSUPAverage = (sponsor: ESponsorDTO): number => {
+        const sponsorService = SponsorService.getInstance();
+        return sponsorService.getABSUPAverage(sponsor);
+    };
+
+    const getInfluenceLevel = (sponsor: ESponsorDTO): string => {
+        const sponsorService = SponsorService.getInstance();
+        return sponsorService.getInfluenceLevel(sponsor);
+    };
+
     return (
         <>
             <Dialog
@@ -419,7 +538,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 <DialogTitle>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="h6">
-                            {isEditMode ? 'Edit Sponsor Assessment' : 'Sponsor Assessment'}
+                            {getDialogTitle()}
                         </Typography>
                         <IconButton onClick={handleClose} size="small">
                             <Close />
@@ -435,90 +554,227 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                             </Alert>
                         )}
 
-                        <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
-                            {!isEditMode && (
-                                <>
+                        {/* Mode Selection - Only show if not in edit mode */}
+                        {!isEditMode && (
+                            <>
+                                <FormControl component="fieldset" sx={{ mb: 3 }}>
+                                    <FormLabel component="legend">
+                                        <Typography variant="subtitle1" fontWeight="medium">
+                                            How would you like to add a sponsor?
+                                        </Typography>
+                                    </FormLabel>
+                                    <RadioGroup
+                                        row
+                                        value={sponsorMode}
+                                        onChange={(e) => handleModeChange(e.target.value as SponsorMode)}
+                                        sx={{ mt: 1 }}
+                                    >
+                                        <FormControlLabel
+                                            value="create"
+                                            control={<Radio />}
+                                            label={
+                                                <Box display="flex" alignItems="center" gap={1}>
+                                                    <Plus size={16} />
+                                                    Create New Sponsor
+                                                </Box>
+                                            }
+                                        />
+                                        <FormControlLabel
+                                            value="select"
+                                            control={<Radio />}
+                                            label={
+                                                <Box display="flex" alignItems="center" gap={1}>
+                                                    <Search size={16} />
+                                                    Select Existing Sponsor
+                                                </Box>
+                                            }
+                                        />
+                                    </RadioGroup>
+                                </FormControl>
+
+                                <Divider sx={{ mb: 3 }} />
+                            </>
+                        )}
+
+                        {/* Existing Sponsor Selection */}
+                        {sponsorMode === 'select' && (
+                            <Box sx={{ mb: 3 }}>
+                                <Autocomplete
+                                    options={existingSponsors}
+                                    getOptionLabel={(option) => option.anagraphicDataDTO.entityName}
+                                    value={selectedExistingSponsor}
+                                    onChange={(_, newValue) => handleExistingSponsorSelect(newValue)}
+                                    loading={loadingSponsors}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Select Existing Sponsor"
+                                            placeholder="Search for a sponsor..."
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                endAdornment: (
+                                                    <>
+                                                        {loadingSponsors ? <CircularProgress color="inherit" size={20} /> : null}
+                                                        {params.InputProps.endAdornment}
+                                                    </>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                    renderOption={(props, option) => (
+                                        <Box component="li" {...props}>
+                                            <Box sx={{ width: '100%' }}>
+                                                <Typography variant="body1">
+                                                    {option.anagraphicDataDTO.entityName}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {option.sponsorTitle || 'No title specified'}
+                                                </Typography>
+                                                <Box display="flex" gap={1} mt={0.5}>
+                                                    <Chip
+                                                        size="small"
+                                                        label={`ABSUP Avg: ${getABSUPAverage(option).toFixed(1)}`}
+                                                        variant="outlined"
+                                                        color="primary"
+                                                    />
+                                                    <Chip
+                                                        size="small"
+                                                        label={`Influence: ${getInfluenceLevel(option)}`}
+                                                        variant="outlined"
+                                                        color="secondary"
+                                                    />
+                                                    {option.groupUnityAssessmentDTO?.primary && (
+                                                        <Chip
+                                                            size="small"
+                                                            label="Primary"
+                                                            variant="filled"
+                                                            color="success"
+                                                        />
+                                                    )}
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    )}
+                                    noOptionsText={loadingSponsors ? "Loading..." : "No available sponsors found"}
+                                />
+
+                                {selectedExistingSponsor && (
+                                    <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                                        <Typography variant="subtitle2" gutterBottom>
+                                            Selected Sponsor Details:
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Name:</strong> {selectedExistingSponsor.anagraphicDataDTO.entityName}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Title:</strong> {selectedExistingSponsor.sponsorTitle || 'Not specified'}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>ABSUP Scores:</strong> A:{selectedExistingSponsor.groupProjectABSUPDTO?.absupAwareness},
+                                            B:{selectedExistingSponsor.groupProjectABSUPDTO?.absupBuyin},
+                                            S:{selectedExistingSponsor.groupProjectABSUPDTO?.absupSkill},
+                                            U:{selectedExistingSponsor.groupProjectABSUPDTO?.absupUse},
+                                            P:{selectedExistingSponsor.groupProjectABSUPDTO?.absupProficiency}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Unity Assessment:</strong> Support:{selectedExistingSponsor.groupUnityAssessmentDTO?.supportLevel},
+                                            Influence:{selectedExistingSponsor.groupUnityAssessmentDTO?.influenceLevel},
+                                            Availability:{selectedExistingSponsor.groupUnityAssessmentDTO?.availabilityLevel}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+
+                        {/* Form Fields - Show for create and edit modes */}
+                        {(sponsorMode === 'create' || sponsorMode === 'edit') && (
+                            <>
+                                <Box sx={{ display: 'grid', gap: 2, mb: 3 }}>
+                                    {sponsorMode === 'create' && (
+                                        <>
+                                            <QuestionWithRating
+                                                label="First Name"
+                                                tooltip="Enter the sponsor's first name"
+                                                control={control}
+                                                fieldName="firstName"
+                                                required
+                                                type="text"
+                                                errors={errors}
+                                            />
+
+                                            <QuestionWithRating
+                                                label="Last Name"
+                                                tooltip="Enter the sponsor's last name"
+                                                control={control}
+                                                fieldName="lastName"
+                                                required
+                                                type="text"
+                                                errors={errors}
+                                            />
+                                        </>
+                                    )}
+
                                     <QuestionWithRating
-                                        label="First Name"
-                                        tooltip="Enter the sponsor's first name"
+                                        label="Entity Name"
+                                        tooltip="Enter the sponsor's name or title"
                                         control={control}
-                                        fieldName="firstName"
+                                        fieldName="entityName"
                                         required
                                         type="text"
                                         errors={errors}
                                     />
 
                                     <QuestionWithRating
-                                        label="Last Name"
-                                        tooltip="Enter the sponsor's last name"
+                                        label="Sponsor Title"
+                                        tooltip="Enter the sponsor's job title or position"
                                         control={control}
-                                        fieldName="lastName"
-                                        required
+                                        fieldName="sponsorTitle"
                                         type="text"
                                         errors={errors}
                                     />
-                                </>
-                            )}
+                                </Box>
 
-                            <QuestionWithRating
-                                label="Entity Name"
-                                tooltip="Enter the sponsor's name or title"
-                                control={control}
-                                fieldName="entityName"
-                                required
-                                type="text"
-                                errors={errors}
-                            />
+                                <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                                    {questionConfigs.map((config) => (
+                                        <QuestionWithRating
+                                            key={config.fieldName}
+                                            label={config.label}
+                                            tooltip={config.tooltip}
+                                            control={control}
+                                            fieldName={config.fieldName}
+                                            type={config.type || "slider"}
+                                            min={1}
+                                            max={5}
+                                            marks={config.marks}
+                                            errors={errors}
+                                        />
+                                    ))}
+                                </Box>
 
-                            <QuestionWithRating
-                                label="Sponsor Title"
-                                tooltip="Enter the sponsor's job title or position"
-                                control={control}
-                                fieldName="sponsorTitle"
-                                type="text"
-                                errors={errors}
-                            />
-                        </Box>
+                                <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
+                                    <QuestionWithRating
+                                        label="Primary Resistance Driver"
+                                        tooltip="What aspect is most likely to drive resistance from this executive?"
+                                        control={control}
+                                        fieldName="anticipatedResistanceDriver"
+                                        type="radio"
+                                        orientation="vertical"
+                                        options={resistanceDriverOptions}
+                                        errors={errors}
+                                    />
+                                </Box>
 
-                        <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                            {questionConfigs.map((config) => (
                                 <QuestionWithRating
-                                    key={config.fieldName}
-                                    label={config.label}
-                                    tooltip={config.tooltip}
+                                    label="Special Tactics / Notes"
+                                    tooltip="Any special considerations or tactics for engaging this sponsor"
                                     control={control}
-                                    fieldName={config.fieldName}
-                                    type={config.type || "slider"}
-                                    min={1}
-                                    max={5}
-                                    marks={config.marks}
+                                    fieldName="specialTactics"
+                                    type="text"
+                                    multiline
                                     errors={errors}
                                 />
-                            ))}
-                        </Box>
-
-                        <Box sx={{ display: 'grid', gap: 3, mb: 3 }}>
-                            <QuestionWithRating
-                                label="Primary Resistance Driver"
-                                tooltip="What aspect is most likely to drive resistance from this executive?"
-                                control={control}
-                                fieldName="anticipatedResistanceDriver"
-                                type="radio"
-                                orientation="vertical"
-                                options={resistanceDriverOptions}
-                                errors={errors}
-                            />
-                        </Box>
-
-                        <QuestionWithRating
-                            label="Special Tactics / Notes"
-                            tooltip="Any special considerations or tactics for engaging this sponsor"
-                            control={control}
-                            fieldName="specialTactics"
-                            type="text"
-                            multiline
-                            errors={errors}
-                        />
+                            </>
+                        )}
                     </Box>
                 </DialogContent>
 
@@ -548,11 +804,15 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                             </Button>
                             <Button
                                 onClick={handleSubmit(onSubmit)}
-                                disabled={loading || deleteLoading || !isValid}
+                                disabled={loading || deleteLoading || !isFormValid()}
                                 variant="contained"
                                 startIcon={loading ? <CircularProgress size={20} /> : null}
                             >
-                                {loading ? 'Saving...' : (isEditMode ? 'Update Sponsor' : 'Create Sponsor')}
+                                {loading ? 'Saving...' :
+                                    sponsorMode === 'edit' ? 'Update Sponsor' :
+                                        sponsorMode === 'select' ? 'Assign Sponsor' :
+                                            'Create Sponsor'
+                                }
                             </Button>
                         </Stack>
                     </Stack>
