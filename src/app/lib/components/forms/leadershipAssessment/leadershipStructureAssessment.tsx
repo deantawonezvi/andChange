@@ -269,7 +269,7 @@ const LeadershipStructureAssessment: React.FC = () => {
                                     fontWeight: 600
                                 }}
                             >
-                                Team Leaders
+                                Team Leaders - {impactedGroup.anagraphicDataDTO.entityName}
                             </Typography>
                             <Button
                                 variant="outlined"
