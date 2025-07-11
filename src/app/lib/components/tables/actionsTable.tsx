@@ -727,7 +727,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             enableColumnFilter: true,
             Cell: ({ row }) => {
                 const isLoading = hygieneActionQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.verb || 'N/A');
+                return isLoading ? <Skeleton width={150} animation="wave" /> : (row.original.verb || 'N/A');
             }
         },
         {
@@ -737,7 +737,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             enableColumnFilter: true,
             Cell: ({ row }) => {
                 const isLoading = hygieneActionQueries.some(query => query.isLoading);
-                return isLoading ? 'Loading...' : (row.original.actionName || row.original.name);
+                return isLoading ? <Skeleton width={150} animation="wave" /> : (row.original.actionName || row.original.name);
             }
         },
         {
@@ -746,17 +746,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             size: 120,
             Cell: ({ cell }) => formatDate(cell.getValue<string>()),
             enableColumnFilter: true,
-        },
-        {
-            id: 'actions',
-            header: '',
-            size: 80,
-            enableColumnFilter: false,
-            Cell: () => (
-                <IconButton size="small">
-                    <RotateCcw size={16} />
-                </IconButton>
-            ),
         },
     ];
 
