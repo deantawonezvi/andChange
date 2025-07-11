@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Alert,
     Box,
@@ -11,10 +11,10 @@ import {
     DialogTitle,
     Divider,
     Grid,
-    IconButton,
+    IconButton, TextField,
     Typography
 } from '@mui/material';
-import { Calendar, FileText, Target, User, X as Close, Copy } from 'lucide-react';
+import { Calendar, FileText, Target, User, X as Close, Copy, Zap } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
 import { format } from 'date-fns';
@@ -53,6 +53,8 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                                                      action
                                                                  }) => {
     const contentService = ContentGenerationService.getInstance();
+    const [isGenerating, setIsGenerating] = useState(false);
+
 
     const { data: contentData, isLoading, error, refetch } = useQuery({
         queryKey: ['actionContent', action?.slotId],
@@ -66,6 +68,22 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
         staleTime: 5 * 60 * 1000,
         retry: 2
     });
+
+    const handleGenerateContent = async (slotId: number) => {
+        if (!slotId) return;
+
+        setIsGenerating(true);
+        try {
+            await contentService.generateAIContentForActionPlanItems([slotId]);
+            // Refetch the content to show the newly generated content
+            await refetch();
+        } catch (error) {
+            console.error('Failed to generate content:', error);
+            // Show error toast/notification
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const formatDate = (dateString: string) => {
         try {
@@ -262,20 +280,42 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                             >
                                                 Asset {index + 1}
                                             </Typography>
-                                            <Button
-                                                size="small"
-                                                startIcon={<Copy size={14} />}
-                                                onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
-                                                variant="outlined"
-                                                sx={{
-                                                    minWidth: 'auto',
-                                                    px: 1,
-                                                    py: 0.5,
-                                                    fontSize: '0.75rem'
-                                                }}
-                                            >
-                                                Copy Content
-                                            </Button>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={isGenerating ? <CircularProgress size={14} /> : <Zap size={14} />}
+                                                        onClick={() => handleGenerateContent(action.slotId!)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Generate Content
+                                                    </Button>
+                                                </Grid>
+
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Copy size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Copy Content
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+
                                             <br/>
                                             <Box sx={{
                                                 flex: 1,
@@ -290,6 +330,55 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                                     content={parseGeneratedResult(content.generatedResult)}
                                                 />
                                             </Box>
+                                            <br/>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Zap size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Regenerate Content
+                                                    </Button>
+                                                </Grid>
+
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Copy size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Copy Content
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                            <br/>
+                                            <Typography>
+                                                Additional Prompt
+                                            </Typography>
+                                            <br/>
+                                            <TextField
+                                                label="Additional Prompt"
+                                                multiline
+                                                rows={2}
+                                                variant="outlined"
+                                                fullWidth
+                                            />
+
                                         </Box>
                                     </Grid>
                                 ))}
