@@ -83,7 +83,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
     const [sponsorMode, setSponsorMode] = useState<SponsorMode>(isEditMode ? 'edit' : 'create');
     const [selectedExistingSponsor, setSelectedExistingSponsor] = useState<ESponsorDTO | null>(null);
 
-    // Fetch existing sponsors for selection
+    
     const { data: existingSponsors = [], isLoading: loadingSponsors } = useQuery({
         queryKey: ['unassigned-sponsors', projectId, organizationId, impactedGroupId],
         queryFn: async () => {
@@ -230,7 +230,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
             const impactedGroupService = ImpactedGroupService.getInstance();
 
             if (sponsorMode === 'edit' && existingSponsor) {
-                // Edit existing sponsor
+                
                 await sponsorService.updateAnagraphicData({
                     entityId: existingSponsor.id!,
                     entityName: data.entityName,
@@ -263,7 +263,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 });
 
             } else if (sponsorMode === 'select' && selectedExistingSponsor) {
-                // Assign existing sponsor to impacted group
+                
                 await impactedGroupService.updateEntities({
                     impactGroupId: impactedGroupId,
                     sponsorEntitiesToAdd: [selectedExistingSponsor.id!],
@@ -275,7 +275,7 @@ const SponsorAssessmentPopup: React.FC<SponsorAssessmentPopupProps> = ({
                 });
 
             } else if (sponsorMode === 'create') {
-                // Create new sponsor
+                
                 const individual = await individualService.createIndividual({
                     organizationId,
                     firstName: data.firstName,

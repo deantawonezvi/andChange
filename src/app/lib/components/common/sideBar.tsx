@@ -36,7 +36,7 @@ export interface MenuItem {
 
 export type MenuItems = MenuItem[];
 
-const drawerWidth = 300;
+const drawerWidth = 255;
 
 export const menuItems: MenuItem[] = [
     { text: 'Projects', icon: <FolderKanban />, path: '/projects' },
