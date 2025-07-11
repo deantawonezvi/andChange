@@ -384,43 +384,131 @@ const ActionContentDialog: React.FC<ActionContentDialogProps> = ({
                                 ))}
                             </Grid>
                         ) : (
-                            <Box sx={{ mb: 2 }}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    mb: 2
-                                }}>
-                                    <Typography variant="subtitle2" color="success.main">
-                                        Generated Content:
-                                    </Typography>
-                                    <Button
-                                        size="small"
-                                        startIcon={<Copy size={14} />}
-                                        onClick={() => handleCopyContent(parseGeneratedResult(contentItems[0].generatedResult), 1)}
-                                        variant="outlined"
-                                        sx={{
-                                            minWidth: 'auto',
-                                            px: 1,
-                                            py: 0.5,
-                                            fontSize: '0.75rem'
-                                        }}
-                                    >
-                                        Copy Content
-                                    </Button>
-                                </Box>
-                                <Box sx={{
-                                    p: 2,
-                                    bgcolor: 'grey.50',
-                                    borderRadius: 1,
-                                    border: '1px solid',
-                                    borderColor: 'grey.300'
-                                }}>
-                                    <MarkDownContentRenderer
-                                        content={parseGeneratedResult(contentItems[0].generatedResult)}
-                                    />
-                                </Box>
-                            </Box>
+                            <Grid container spacing={3}>
+                                {contentItems.map((content, index) => (
+                                    <Grid item xs={12} key={content.id || index}>
+                                        <Box sx={{
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column'
+                                        }}>
+                                            <Typography
+                                                variant="subtitle1"
+                                                sx={{
+                                                    mb: 2,
+                                                    fontWeight: 600,
+                                                    color: 'primary.main',
+                                                    borderBottom: '2px solid',
+                                                    borderColor: 'primary.main',
+                                                    pb: 1
+                                                }}
+                                            >
+                                                Asset {index + 1}
+                                            </Typography>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={isGenerating ? <CircularProgress size={14} /> : <Zap size={14} />}
+                                                        onClick={() => handleGenerateContent(action.slotId!)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Generate Content
+                                                    </Button>
+                                                </Grid>
+
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Copy size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Copy Content
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+
+                                            <br/>
+                                            <Box sx={{
+                                                flex: 1,
+                                                p: 2,
+                                                bgcolor: 'grey.50',
+                                                borderRadius: 1,
+                                                border: '1px solid',
+                                                borderColor: 'grey.300',
+                                                overflow: 'auto'
+                                            }}>
+                                                <MarkDownContentRenderer
+                                                    content={parseGeneratedResult(content.generatedResult)}
+                                                />
+                                            </Box>
+                                            <br/>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Zap size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Regenerate Content
+                                                    </Button>
+                                                </Grid>
+
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        fullWidth
+                                                        startIcon={<Copy size={14} />}
+                                                        onClick={() => handleCopyContent(parseGeneratedResult(content.generatedResult), index + 1)}
+                                                        variant="outlined"
+                                                        sx={{
+                                                            minWidth: 'auto',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            fontSize: '0.75rem',
+                                                        }}
+                                                    >
+                                                        Copy Content
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                            <br/>
+                                            <Typography>
+                                                Additional Prompt
+                                            </Typography>
+                                            <br/>
+                                            <TextField
+                                                label="Additional Prompt"
+                                                multiline
+                                                rows={2}
+                                                variant="outlined"
+                                                fullWidth
+                                            />
+
+                                        </Box>
+                                    </Grid>
+                                ))}
+                            </Grid>
+
                         )}
                     </Box>
                 )}
