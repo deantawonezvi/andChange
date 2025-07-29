@@ -1,24 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQueries, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import {
     Box,
     Button,
     Chip,
     IconButton,
+    Skeleton,
+    Stack,
     Tab,
     Tabs,
-    Tooltip,
-    Typography,
-    CircularProgress,
     TextField,
-    Stack,
-    Skeleton
+    Tooltip,
+    Typography
 } from '@mui/material';
-import { Edit, Heart, RotateCcw, Shield, Trash2, Users, Shuffle } from 'lucide-react';
+import { Edit, Heart, RotateCcw, Shield, Shuffle, Trash2, Users } from 'lucide-react';
 import { MRT_ColumnDef } from 'material-react-table';
-import { format, isWithinInterval, parseISO, isValid } from 'date-fns';
+import { format, isValid, isWithinInterval, parseISO } from 'date-fns';
 import DataTable from '@/app/lib/components/tables/dataTable';
 import { SectionLoader } from '@/app/lib/components/common/pageLoader';
 import ActionService from '@/app/lib/api/services/actionService';
@@ -26,10 +25,10 @@ import { ImpactedGroupService } from '@/app/lib/api/services/impactedGroupServic
 import GenerateActionsButton from '../forms/generateActionsButton';
 import MOPService from "@/app/lib/api/services/mopService";
 import SponsorService from "@/app/lib/api/services/sponsorService";
-import ContentGenerationService from '@/app/lib/api/services/contentGenerationService';
 import { useToast } from '@/app/lib/hooks/useToast';
 import EditActionDateDialog from "@/app/lib/components/forms/editActionDateDialog";
 import ActionContentDialog from "@/app/lib/components/forms/actionContentDialog";
+import AlternativeActionsModal from '../forms/alternativeActionsModal';
 
 interface ActionsTableProps {
     projectId: number;
@@ -149,11 +148,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
 
 const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const [rerollingSlots, setRerollingSlots] = useState<Set<number>>(new Set());
     const actionService = ActionService.getInstance();
-    const contentService = ContentGenerationService.getInstance();
     const { showToast } = useToast();
-    const queryClient = useQueryClient();
 
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedActionForEdit, setSelectedActionForEdit] = useState<{
@@ -175,6 +171,15 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         entityType?: string;
         stateTarget?: string;
         status?: string;
+    } | null>(null);
+
+    const [alternativeActionsOpen, setAlternativeActionsOpen] = useState(false);
+    const [selectedSlotForAlternatives, setSelectedSlotForAlternatives] = useState<{
+        slotId: number;
+        date: string;
+        absupCategory: string;
+        sender: string;
+        receiver: string;
     } | null>(null);
 
 
@@ -246,30 +251,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         enabled: !!projectId,
     });
 
-    const rerollMutation = useMutation({
-        mutationFn: async (slotId: number) => {
-            return await contentService.rerollContentForActionPlanItem(slotId);
-        },
-        onMutate: (slotId: number) => {
-            setRerollingSlots(prev => new Set([...prev, slotId]));
-        },
-        onSuccess: (data, slotId) => {
-            showToast('Content regenerated successfully!', 'success');
-            queryClient.invalidateQueries({ queryKey: ['actionPlan', projectId] });
-            queryClient.invalidateQueries({ queryKey: ['actionSlotDetails', slotId] });
-        },
-        onError: (error) => {
-            console.error('Error rerolling content:', error);
-            showToast('Failed to regenerate content. Please try again.', 'error');
-        },
-        onSettled: (data, error, slotId) => {
-            setRerollingSlots(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(slotId);
-                return newSet;
-            });
-        }
-    });
 
     
     const { groupActions, hygieneActions, healthActions } = React.useMemo(() => {
@@ -541,35 +522,42 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
         }));
     }, [enhancedGroupActions])
 
-    
-    const handleRerollContent = (slotId: number) => {
-        if (!slotId) {
+
+    const handleRerollContent = (action: FlattenedAction) => {
+        if (!action.slotId) {
             showToast('Invalid slot ID', 'error');
             return;
         }
-        rerollMutation.mutate(slotId);
+
+        setSelectedSlotForAlternatives({
+            slotId: action.slotId,
+            date: action.date,
+            absupCategory: action.stateTarget || action.absupCategory,
+            sender: action.whoSender || action.sender,
+            receiver: action.whoReceiver || action.receiver
+        });
+        setAlternativeActionsOpen(true);
     };
 
-    
-    const renderRerollButton = (slotId: number) => {
-        const isRerolling = rerollingSlots.has(slotId);
+    const handleCloseAlternativeActions = () => {
+        setAlternativeActionsOpen(false);
+        setSelectedSlotForAlternatives(null);
+    };
 
+
+    const renderRerollButton = (action: FlattenedAction) => {
         return (
-            <Tooltip title="Reroll Content">
+            <Tooltip title="View Alternative Actions">
                 <IconButton
-                    onClick={() => handleRerollContent(slotId)}
-                    disabled={isRerolling || !slotId}
+                    onClick={() => handleRerollContent(action)}
+                    disabled={!action.slotId}
                     size="small"
                 >
-                    {isRerolling ? (
-                        <CircularProgress size={16} />
-                    ) : (
-                        <Shuffle size={16} />
-                    )}
+                    <Shuffle size={16} />
                 </IconButton>
             </Tooltip>
         );
-    };
+    }
 
     
     const dateRangeFilterFn = (row: any, id: string, filterValue: any) => {
@@ -708,7 +696,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
             enableColumnFilter: false,
             Cell: ({ row }) => (
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {renderRerollButton(row.original.slotId || 0)}
+                    {renderRerollButton(row.original)}
                     <Tooltip title="Edit">
                         <IconButton onClick={() => handleEditAction(row.original.id)} size="small">
                             <Edit size={16} />
@@ -717,6 +705,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                 </Box>
             ),
         },
+
     ];
 
     const hygieneColumns: MRT_ColumnDef<FlattenedAction>[] = [
@@ -1017,7 +1006,20 @@ const ActionsTable: React.FC<ActionsTableProps> = ({ projectId }) => {
                     enablePagination={true}
                 />
             </TabPanel>
+            <AlternativeActionsModal
+                open={alternativeActionsOpen}
+                onClose={handleCloseAlternativeActions}
+                slotId={selectedSlotForAlternatives?.slotId || 0}
+                currentAction={selectedSlotForAlternatives ? {
+                    date: selectedSlotForAlternatives.date,
+                    absupCategory: selectedSlotForAlternatives.absupCategory,
+                    sender: selectedSlotForAlternatives.sender,
+                    receiver: selectedSlotForAlternatives.receiver
+                } : undefined}
+                projectId={projectId}
+            />
         </Box>
+
     );
 };
 

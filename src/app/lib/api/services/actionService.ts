@@ -5,8 +5,11 @@ export interface ActionCoreDTO {
     id?: number;
     externalActionIdentifier: string;
     actionName: string;
+    actionSource: ActionSourceDTO; 
     actionTarget: 'ABSUP' | 'HEALTH' | 'HYGIENE';
-    actionOrgPlanType: string;
+    actionOrgPlanType: string | null; 
+    actionVerb: ActionVerbDTO; 
+    actionWhat: ActionWhatDTO; 
     whoReceiver: string;
     whoSender: string;
     whoExecutor: string;
@@ -15,9 +18,6 @@ export interface ActionCoreDTO {
     actionPhase: 'P' | 'M' | 'S';
     actionMedium: 'N' | 'P' | 'D' | 'B';
     actionCooldownInDays: number;
-    actionVerb?: any;
-    actionWhat?: any;
-    actionSource?: any;
     stagingIncludeBeginning: boolean;
     stagingIncludeMiddle: boolean;
     stagingIncludeEnd: boolean;
@@ -27,7 +27,7 @@ export interface ActionSummaryDTO {
     id?: number;
     organizationId?: number;
     actionCore: ActionCoreDTO;
-    actionContentDTOList?: any[];
+    actionContentDTOList?: ActionContentDTO[];
 }
 
 export interface ActionPlanSlotSummaryDTO {
@@ -92,6 +92,36 @@ export interface ContentGenerationRequestDTO {
 
 export interface GenerateContentForActionPlanRequestDTO {
     associatedActionPlanEntitySlotDTO: number;
+}
+
+export interface ActionSourceDTO {
+    id: number;
+    sourceName: string;
+    sourceDescription: string;
+}
+
+export interface ActionVerbDTO {
+    id: number;
+    verbName: string;
+    verbDescription: string;
+}
+
+export interface ActionWhatDTO {
+    id: number;
+    actionWhat: string;
+    actionWhatDescription: string;
+    actionWhatContentLookupEligible: boolean;
+}
+
+export interface ActionContentDTO {
+    id: number;
+    aiGenerateAssetName: string;
+    contentSubFilter: {
+        id: number;
+        contentSubFilter: string;
+        contentSubFilterDescription: string;
+    } | null;
+    outputFormat: string;
 }
 
 class ActionService {
@@ -313,6 +343,7 @@ class ActionService {
 
         return categoryMap[category] || { color: '#9e9e9e', label: category };
     }
+
 }
 
 export default ActionService;
